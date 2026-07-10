@@ -143,7 +143,6 @@ describe('CustomerListComponent', () => {
     expect(routerMock.navigate).toHaveBeenCalledWith([], {
       relativeTo: routeMock,
       queryParams: {
-        search: 'Ada',
         kycStatus: 'VERIFIED',
         isActive: 'false',
         page: 4,
@@ -252,15 +251,35 @@ describe('CustomerListComponent', () => {
     // The fix: no merge handling, so a stale `?section=access` cannot be preserved.
     expect(extras.queryParamsHandling).toBeUndefined();
     expect(extras.replaceUrl).toBe(true);
-    // Its OWN params are still recomputed and present on every navigation.
+    // Its non-sensitive params are still recomputed and present on every navigation. Free-text
+    // search stays component-local because it may contain customer PII.
     expect(extras.queryParams).toEqual({
-      search: 'Elif',
       kycStatus: 'VERIFIED',
       isActive: 'true',
       page: 2,
     });
     // And it never re-emits a `section` key (foreign params are simply dropped).
     expect('section' in extras.queryParams).toBe(false);
+    expect('search' in extras.queryParams).toBe(false);
+  });
+
+  it('does not hydrate a legacy URL search value and removes it with replaceUrl', () => {
+    query$.next(convertToParamMap({ search: 'ada@example.com', kycStatus: 'VERIFIED' }));
+    const component = TestBed.runInInjectionContext(
+      () => new CustomerListComponent(routerMock as any, routeMock as any, i18nMock as any),
+    );
+    routerMock.navigate.mockClear();
+
+    component.ngOnInit();
+
+    expect(component.search.value).toBe('');
+    expect(routerMock.navigate).toHaveBeenCalledWith([], {
+      relativeTo: routeMock,
+      queryParams: { kycStatus: 'VERIFIED', isActive: null, page: null },
+      replaceUrl: true,
+    });
+    component.ngOnDestroy();
+    query$.next(convertToParamMap({}));
   });
 
   it('renders the active status as an accessible read-only badge (Aktif/Pasif label + variant + icon, not a switch)', () => {

@@ -101,9 +101,14 @@ export class MfaChallengeService {
    * caller that wins the `consumed_at IS NULL` race — a replayed or concurrent consume returns
    * `false`, so one challenge can upgrade a session at most once.
    */
-  async consume(challengeId: string): Promise<boolean> {
+  async consume(challengeId: string, maxAttempts: number): Promise<boolean> {
     const { count } = await this.prisma.mfaChallenge.updateMany({
-      where: { id: challengeId, consumedAt: null },
+      where: {
+        id: challengeId,
+        consumedAt: null,
+        expiresAt: { gt: new Date() },
+        attemptCount: { lt: maxAttempts },
+      },
       data: { consumedAt: new Date() },
     });
     return count === 1;
@@ -113,9 +118,14 @@ export class MfaChallengeService {
    * Count a failed code attempt. Only an un-consumed challenge is incremented; once `attempt_count`
    * reaches `max_attempts` the challenge fails closed in `loadOpen` (no per-account lockout).
    */
-  async registerFailedAttempt(challengeId: string): Promise<void> {
+  async registerFailedAttempt(challengeId: string, maxAttempts: number): Promise<void> {
     await this.prisma.mfaChallenge.updateMany({
-      where: { id: challengeId, consumedAt: null },
+      where: {
+        id: challengeId,
+        consumedAt: null,
+        expiresAt: { gt: new Date() },
+        attemptCount: { lt: maxAttempts },
+      },
       data: { attemptCount: { increment: 1 } },
     });
   }

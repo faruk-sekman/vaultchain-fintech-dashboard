@@ -218,24 +218,29 @@ export class CustomerListComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnInit(): void {
     this.route.queryParamMap.pipe(takeUntil(this.destroy$)).subscribe(params => {
-      const search = params.get('search') ?? '';
       const kyc = params.get('kycStatus') ?? '';
       const active = params.get('isActive') ?? '';
       const page = Number(params.get('page')) || 1;
 
-      this.search.setValue(search, { emitEvent: false });
       this.kycStatus.setValue(kyc, { emitEvent: false });
       this.isActive.setValue(active, { emitEvent: false });
       this.page = Math.max(1, page);
 
       this.load();
+      // Backward-compatible cleanup for old shared URLs: a free-text customer query can contain a
+      // name, email, phone, wallet number or national ID, so it must never persist in browser history.
+      if (params.has('search')) this.updateQueryParams({ page: this.page });
       // OnPush: `page` is bound to the table/pagination but was mutated outside a template event.
       this.cdr?.markForCheck();
     });
 
     this.search.valueChanges
       .pipe(debounceTime(300), distinctUntilChanged(), takeUntil(this.destroy$))
-      .subscribe(value => this.updateQueryParams({ search: value, page: 1 }));
+      .subscribe(() => {
+        this.page = 1;
+        this.updateQueryParams({ page: 1 });
+        this.load();
+      });
 
     this.kycStatus.valueChanges
       .pipe(distinctUntilChanged(), takeUntil(this.destroy$))
@@ -328,7 +333,10 @@ export class CustomerListComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   clearFilters() {
-    this.updateQueryParams({ search: '', kycStatus: '', isActive: '', page: 1 });
+    this.search.setValue('', { emitEvent: false });
+    this.page = 1;
+    this.updateQueryParams({ kycStatus: '', isActive: '', page: 1 });
+    this.load();
   }
 
   get hasActiveFilters(): boolean {
@@ -429,13 +437,7 @@ export class CustomerListComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-  private updateQueryParams(params: {
-    search?: string;
-    kycStatus?: string;
-    isActive?: string;
-    page?: number;
-  }) {
-    const nextSearch = params.search ?? this.search.value;
+  private updateQueryParams(params: { kycStatus?: string; isActive?: string; page?: number }) {
     const nextKyc = params.kycStatus ?? this.kycStatus.value;
     const nextActive = params.isActive ?? this.isActive.value;
     const nextPage = params.page ?? this.page;
@@ -443,11 +445,11 @@ export class CustomerListComponent implements OnInit, AfterViewInit, OnDestroy {
     this.router.navigate([], {
       relativeTo: this.route,
       // No `queryParamsHandling: 'merge'`: this list owns the full query string and recomputes ALL
-      // of its params (search/kycStatus/isActive/page) on every call, so a fresh replace is correct.
+      // non-sensitive params (kycStatus/isActive/page) on every call, so a fresh replace is correct.
+      // Free-text search deliberately stays component-local because it can contain customer PII.
       // Merging used to carry a foreign `?section=` over from Settings (e.g. /customers?section=access),
       // leaking unrelated state onto the URL. A plain navigate preserves only the list's own params.
       queryParams: {
-        search: this.blankToNull(nextSearch),
         kycStatus: this.blankToNull(nextKyc),
         isActive: this.blankToNull(nextActive),
         page: this.pageQueryValue(nextPage),

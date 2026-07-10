@@ -201,7 +201,7 @@ export class PasswordResetService {
 
     // Atomically stamp the factor (SET-ONCE). A lost race (already stamped/consumed by a concurrent call)
     // is treated as a spent challenge — fail closed rather than silently letting two factors be spent.
-    if (!(await this.challenges.markFactorVerified(challenge.id, method))) {
+    if (!(await this.challenges.markFactorVerified(challenge.id, method, challenge.maxAttempts))) {
       throw new UnauthorizedException({
         code: "Auth.ResetChallengeConsumed",
         message: "The password-reset challenge was already used.",
@@ -269,7 +269,7 @@ export class PasswordResetService {
     const now = new Date();
     // ONE transaction: atomic consume (race-loss -> 401) + password change + revoke-all.
     const consumed = await this.prisma.$transaction(async (tx) => {
-      if (!(await this.challenges.consume(challenge.id, tx))) return false;
+      if (!(await this.challenges.consume(challenge.id, challenge.maxAttempts, tx))) return false;
       await tx.user.update({
         where: { id: user.id },
         data: { passwordHash: newHash, failedLoginCount: 0, lockedUntil: null },
@@ -465,11 +465,11 @@ export class PasswordResetService {
     const secret = await this.totp.decryptSecret(user.totpSecretEnc, user.id);
     const result = await this.totp.verify(secret, code, user.lastUsedTotpStep);
     if (!result.ok) return false;
-    await this.prisma.user.update({
-      where: { id: user.id },
+    const floor = await this.prisma.user.updateMany({
+      where: { id: user.id, lastUsedTotpStep: user.lastUsedTotpStep },
       data: { lastUsedTotpStep: result.usedStep },
     });
-    return true;
+    return floor.count === 1;
   }
 
   /**
@@ -481,7 +481,7 @@ export class PasswordResetService {
     challenge: OpenResetChallenge,
     ctx: ResetContext,
   ): Promise<never> {
-    await this.challenges.registerFailedAttempt(challenge.id);
+    await this.challenges.registerFailedAttempt(challenge.id, challenge.maxAttempts);
     await this.audit.record({
       actorUserId: challenge.userId,
       action: "password.reset.verify",

@@ -57,7 +57,17 @@ function setup(opts: SetupOpts = {}) {
         args?.select?.userRoles ? Promise.resolve(roles) : Promise.resolve(user),
       ),
       findUniqueOrThrow: jest.fn().mockResolvedValue(profile()),
-      update: jest.fn().mockResolvedValue(undefined),
+      update: jest.fn().mockImplementation((args: { data?: { failedLoginCount?: { increment?: number } } }) =>
+        Promise.resolve(
+          args.data?.failedLoginCount?.increment
+            ? {
+                failedLoginCount: (user?.failedLoginCount ?? 0) + 1,
+                lockedUntil: user?.lockedUntil ?? null,
+              }
+            : undefined,
+        ),
+      ),
+      updateMany: jest.fn().mockResolvedValue({ count: 1 }),
     },
     loginAttempt: { create: jest.fn().mockResolvedValue(undefined) },
     refreshToken: {
@@ -66,8 +76,11 @@ function setup(opts: SetupOpts = {}) {
       create: jest.fn().mockResolvedValue(undefined),
       updateMany: jest.fn().mockResolvedValue({ count: 1 }),
     },
-    $transaction: jest.fn().mockResolvedValue([]),
+    $transaction: jest.fn(),
   };
+  prisma.$transaction.mockImplementation(async (input: unknown) =>
+    typeof input === 'function' ? (input as (tx: typeof prisma) => unknown)(prisma) : [],
+  );
   const jwt = { signAsync: jest.fn().mockResolvedValue('access-jwt') };
   const defaultGet = (key: string) =>
     ({ MFA_REMEMBER_DEVICE_ENABLED: opts.rememberEnabled ?? false, MFA_CHALLENGE_TTL: 300, MFA_MAX_VERIFY_ATTEMPTS: 5 })[key];
@@ -126,8 +139,9 @@ describe('AuthService.login', () => {
 
     await expect(service.login('admin@ftd.io', 'wrong')).rejects.toMatchObject({ response: { code: 'Auth.InvalidCredentials' } });
     expect(prisma.user.update).toHaveBeenCalledWith(
-      expect.objectContaining({ data: expect.objectContaining({ failedLoginCount: 1, lockedUntil: null }) }),
+      expect.objectContaining({ data: { failedLoginCount: { increment: 1 } } }),
     );
+    expect(prisma.user.updateMany).not.toHaveBeenCalled();
     // A non-locking failure (failed=1 < MAX_FAILED_LOGINS) must emit NO lockout notification.
     expect(notifications.emit).not.toHaveBeenCalled();
   });
@@ -138,7 +152,7 @@ describe('AuthService.login', () => {
     const { service, prisma, notifications } = setup({ user: fullUser({ failedLoginCount: 3 }) });
 
     await expect(service.login('admin@ftd.io', 'wrong')).rejects.toMatchObject({ response: { code: 'Auth.InvalidCredentials' } });
-    expect(prisma.user.update.mock.calls[0][0].data.lockedUntil).toBeNull();
+    expect(prisma.user.updateMany).not.toHaveBeenCalled();
     expect(notifications.emit).not.toHaveBeenCalled();
   });
 
@@ -147,9 +161,15 @@ describe('AuthService.login', () => {
     const { service, prisma, notifications } = setup({ user: fullUser({ failedLoginCount: 4 }) });
 
     await expect(service.login('admin@ftd.io', 'wrong')).rejects.toMatchObject({ response: { code: 'Auth.InvalidCredentials' } });
-    const update = prisma.user.update.mock.calls[0][0];
-    expect(update.data.failedLoginCount).toBe(5);
-    expect(update.data.lockedUntil).toBeInstanceOf(Date);
+    expect(prisma.user.update).toHaveBeenCalledWith(
+      expect.objectContaining({ data: { failedLoginCount: { increment: 1 } } }),
+    );
+    expect(prisma.user.updateMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({ failedLoginCount: 5, lockedUntil: null }),
+        data: { lockedUntil: expect.any(Date) },
+      }),
+    );
     // The lockout transition (failed >= MAX_FAILED_LOGINS) fires exactly one notification, to the LOCKED
     // user, PII-FREE (params {}), deduped per user, with the SECURITY_ALERT/critical contract.
     expect(notifications.emit).toHaveBeenCalledTimes(1);
@@ -173,7 +193,9 @@ describe('AuthService.login', () => {
     const { service, prisma, notifications } = setup({ user: fullUser({ failedLoginCount: 4 }), emitThrows: true });
 
     await expect(service.login('admin@ftd.io', 'wrong')).rejects.toMatchObject({ response: { code: 'Auth.InvalidCredentials' } });
-    expect(prisma.user.update.mock.calls[0][0].data.lockedUntil).toBeInstanceOf(Date);
+    expect(prisma.user.updateMany).toHaveBeenCalledWith(
+      expect.objectContaining({ data: { lockedUntil: expect.any(Date) } }),
+    );
     expect(notifications.emit).toHaveBeenCalledTimes(1); // attempted, threw, was swallowed
   });
 
@@ -192,7 +214,7 @@ describe('AuthService.login', () => {
 
     await expect(service.login('admin@ftd.io', 'pw')).rejects.toMatchObject({ response: { code: 'Auth.InvalidCredentials' } });
     expect(prisma.user.update).toHaveBeenCalledWith(
-      expect.objectContaining({ data: expect.objectContaining({ failedLoginCount: 1 }) }),
+      expect.objectContaining({ data: { failedLoginCount: { increment: 1 } } }),
     );
   });
 
@@ -349,13 +371,31 @@ describe('AuthService.refresh', () => {
     const result = await service.refresh(REFRESH_TOKEN);
 
     // Old revoked + new minted inside one $transaction; a fresh rt_ token is returned.
-    expect(prisma.refreshToken.update).toHaveBeenCalledWith(
-      expect.objectContaining({ data: expect.objectContaining({ replacedById: expect.any(String) }) }),
+    expect(prisma.refreshToken.updateMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { id: VALID_TOKEN_ID, revokedAt: null },
+        data: expect.objectContaining({ replacedById: expect.any(String) }),
+      }),
     );
     expect(prisma.refreshToken.create).toHaveBeenCalled();
     expect(prisma.$transaction).toHaveBeenCalled();
     expect(result.refreshToken.startsWith('rt_')).toBe(true);
     expect(result.body.accessToken).toBe('access-jwt');
+  });
+
+  it('treats a lost conditional-revoke race as token reuse and mints no replacement', async () => {
+    const { service, prisma } = setup({
+      refreshRow: { id: VALID_TOKEN_ID, userId: 'user-1', sessionId: 'sess-1', revokedAt: null, expiresAt: new Date(Date.now() + 60_000), tokenHash: 'h' },
+    });
+    prisma.refreshToken.updateMany
+      .mockResolvedValueOnce({ count: 0 })
+      .mockResolvedValueOnce({ count: 1 });
+
+    await expect(service.refresh(REFRESH_TOKEN)).rejects.toMatchObject({ response: { code: 'Auth.TokenReused' } });
+    expect(prisma.refreshToken.create).not.toHaveBeenCalled();
+    expect(prisma.refreshToken.updateMany).toHaveBeenLastCalledWith(
+      expect.objectContaining({ where: { userId: 'user-1', revokedAt: null } }),
+    );
   });
 });
 

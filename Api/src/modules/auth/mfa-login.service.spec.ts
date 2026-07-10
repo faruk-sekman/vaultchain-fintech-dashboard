@@ -34,7 +34,12 @@ const SESSION = {
  * arms). The default mirrors the shipped defaults: the remember flag follows `rememberEnabled`, TTL = 30d.
  */
 function setup(opts: { rememberEnabled?: boolean; configGet?: (key: string) => unknown; emitThrows?: boolean } = {}) {
-  const prisma = { user: { findUnique: jest.fn().mockResolvedValue({ id: 'u1', totpSecretEnc: 'enc', lastUsedTotpStep: null }), update: jest.fn().mockResolvedValue({}) } };
+  const prisma = {
+    user: {
+      findUnique: jest.fn().mockResolvedValue({ id: 'u1', totpSecretEnc: 'enc', lastUsedTotpStep: null }),
+      updateMany: jest.fn().mockResolvedValue({ count: 1 }),
+    },
+  };
   const totp = { decryptSecret: jest.fn().mockResolvedValue('SECRET'), verify: jest.fn() };
   const backupCodes = { verify: jest.fn() };
   const challenges = { registerFailedAttempt: jest.fn().mockResolvedValue(undefined), consume: jest.fn().mockResolvedValue(true) };
@@ -73,8 +78,11 @@ describe('MfaLoginService', () => {
     const res = await m.svc.verifyTotp(LOGIN, '123456', false, { ip: '1.2.3.4' });
     expect(res.session.refreshToken).toBe('rt_x.y');
     expect(res.rememberDevice).toBeUndefined();
-    expect(m.prisma.user.update).toHaveBeenCalledWith({ where: { id: 'u1' }, data: { lastUsedTotpStep: 42 } });
-    expect(m.challenges.consume).toHaveBeenCalledWith('c1');
+    expect(m.prisma.user.updateMany).toHaveBeenCalledWith({
+      where: { id: 'u1', lastUsedTotpStep: null },
+      data: { lastUsedTotpStep: 42 },
+    });
+    expect(m.challenges.consume).toHaveBeenCalledWith('c1', 5);
     expect(m.audit.record).toHaveBeenCalledWith(expect.objectContaining({ action: 'mfa.verify', outcome: 'SUCCESS' }));
   });
 
@@ -82,7 +90,7 @@ describe('MfaLoginService', () => {
     const m = setup();
     m.totp.verify.mockResolvedValue({ ok: false });
     await expect(m.svc.verifyTotp(LOGIN, '000000', false, {})).rejects.toBeInstanceOf(UnauthorizedException);
-    expect(m.challenges.registerFailedAttempt).toHaveBeenCalledWith('c1');
+    expect(m.challenges.registerFailedAttempt).toHaveBeenCalledWith('c1', 5);
     expect(m.audit.record).toHaveBeenCalledWith(expect.objectContaining({ outcome: 'FAIL' }));
     expect(m.challenges.consume).not.toHaveBeenCalled();
   });
@@ -189,6 +197,17 @@ describe('MfaLoginService', () => {
     m.totp.verify.mockResolvedValue({ ok: true, usedStep: 9 });
     m.challenges.consume.mockResolvedValue(false); // another request won the race
     await expect(m.svc.verifyTotp(LOGIN, '123456', false, {})).rejects.toBeInstanceOf(UnauthorizedException);
+    expect(m.auth.issueSessionForUser).not.toHaveBeenCalled();
+  });
+
+  it('#9 rejects a TOTP that loses the atomic replay-floor compare-and-set', async () => {
+    const m = setup();
+    m.totp.verify.mockResolvedValue({ ok: true, usedStep: 10 });
+    m.prisma.user.updateMany.mockResolvedValue({ count: 0 });
+
+    await expect(m.svc.verifyTotp(LOGIN, '123456', false, {})).rejects.toBeInstanceOf(UnauthorizedException);
+    expect(m.challenges.registerFailedAttempt).toHaveBeenCalledWith('c1', 5);
+    expect(m.challenges.consume).not.toHaveBeenCalled();
     expect(m.auth.issueSessionForUser).not.toHaveBeenCalled();
   });
 });

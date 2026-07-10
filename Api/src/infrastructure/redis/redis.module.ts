@@ -10,8 +10,9 @@
  *   - set         → a single shared ioredis client is created for commands + publishing (subscribers
  *     get their own duplicated connection, per ioredis pub/sub rules). It is destroyed on shutdown.
  *
- * Connection failures never crash the app: `lazyConnect` + a bounded retry let the consuming code
- * degrade rather than throw on the request path. No secrets are logged (only lifecycle, never the URL).
+ * Connection failures never crash the process: `lazyConnect` + a bounded retry let consumers apply
+ * their own policy. Realtime degrades to same-instance delivery; distributed throttling denies requests
+ * until shared counters recover. No secrets are logged (only lifecycle, never the URL).
  */
 import {
   Global,

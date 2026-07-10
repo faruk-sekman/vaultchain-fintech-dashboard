@@ -67,7 +67,7 @@ Limits are per IP per minute, enforced by `@nestjs/throttler` classes:
 | Reset initiate | 5/min | self-service password-reset start |
 | Reset request | 3/min | administrator-approval reset queue entry |
 
-With `REDIS_URL` set, counters move to Redis so the limit holds across instances; a Redis outage degrades to a per-instance in-memory decision — the limiter fails enforced, not open. `TRUST_PROXY` controls whether the client IP is derived from a trusted `X-Forwarded-For`, so per-IP throttling and audit IP hashes survive a reverse proxy.
+With `REDIS_URL` set, counters move to Redis so the limit holds across instances; a Redis outage fails closed for throttled requests until the shared counter store recovers. There is deliberately no per-instance fallback because it would multiply and reset the global abuse budget. Deployments that do not need shared counters can leave `REDIS_URL` unset and use the built-in local store. `TRUST_PROXY` controls whether the client IP is derived from a trusted `X-Forwarded-For`, so per-IP throttling and audit IP hashes survive a reverse proxy.
 
 ## PII handling
 

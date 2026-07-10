@@ -165,19 +165,41 @@ describe('MfaChallengeService', () => {
     const prisma = makePrisma();
     const svc = new MfaChallengeService(prisma as unknown as PrismaService);
     prisma.mfaChallenge.updateMany.mockResolvedValueOnce({ count: 1 });
-    expect(await svc.consume('c1')).toBe(true);
+    expect(await svc.consume('c1', 5)).toBe(true);
     prisma.mfaChallenge.updateMany.mockResolvedValueOnce({ count: 0 });
-    expect(await svc.consume('c1')).toBe(false);
+    expect(await svc.consume('c1', 5)).toBe(false);
   });
 
   it('#7 registerFailedAttempt increments only an un-consumed challenge', async () => {
     const prisma = makePrisma();
     const svc = new MfaChallengeService(prisma as unknown as PrismaService);
     prisma.mfaChallenge.updateMany.mockResolvedValue({ count: 1 });
-    await svc.registerFailedAttempt('c1');
+    await svc.registerFailedAttempt('c1', 5);
     expect(prisma.mfaChallenge.updateMany).toHaveBeenCalledWith({
-      where: { id: 'c1', consumedAt: null },
+      where: {
+        id: 'c1',
+        consumedAt: null,
+        expiresAt: { gt: expect.any(Date) },
+        attemptCount: { lt: 5 },
+      },
       data: { attemptCount: { increment: 1 } },
+    });
+  });
+
+  it('#8 consume re-checks expiry and the attempt budget in the winning update', async () => {
+    const prisma = makePrisma();
+    const svc = new MfaChallengeService(prisma as unknown as PrismaService);
+    prisma.mfaChallenge.updateMany.mockResolvedValue({ count: 0 });
+
+    expect(await svc.consume('c1', 5)).toBe(false);
+    expect(prisma.mfaChallenge.updateMany).toHaveBeenCalledWith({
+      where: {
+        id: 'c1',
+        consumedAt: null,
+        expiresAt: { gt: expect.any(Date) },
+        attemptCount: { lt: 5 },
+      },
+      data: { consumedAt: expect.any(Date) },
     });
   });
 });
