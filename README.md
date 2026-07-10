@@ -17,6 +17,17 @@ correctness, security and privacy discipline a real product team would demand.</
 
 ---
 
+## ⚡ Evaluate Vaultchain in 60–90 seconds
+
+![Vaultchain evaluator walkthrough](docs/assets/demo/walkthrough.gif)
+
+[**Watch the flow**](docs/evaluator-path.md#1-watch-the-flow-20-seconds) ·
+[**Run locally**](#-run-it-in-60-seconds) ·
+[**Read the architecture/security decisions**](docs/security-proof-map.md)
+
+> The visual tour uses checked-in showcase screenshots only. No external account, API key, or real
+> customer data is required; the Docker demo seeds fictional operators and customers.
+
 ## 📖 Table of contents
 
 - [What is this?](#-what-is-this)
@@ -30,6 +41,7 @@ correctness, security and privacy discipline a real product team would demand.</
 - [Project structure](#-project-structure)
 - [Documentation](#-documentation)
 - [Security](#-security)
+- [Security proof map](docs/security-proof-map.md)
 - [Honest scope](#-honest-scope)
 - [License](#-license)
 
