@@ -545,6 +545,12 @@
 
 /* ---------- compact viewports (right pane; the brand pane owns its own media queries) ---------- */
 @media (width < 900px) {
+  /* On a phone the showcase hero is decorative, while the sign-in action is the conversion
+     target. Remove the hero from the document flow so the form starts in the first viewport. */
+  .login__shell > app-auth-brand-pane {
+    display: none;
+  }
+
   /* Keep the stacked mobile title clear of the absolutely-positioned lang/theme controls. */
   .login__panel {
     padding: 66px 28px 44px;
