@@ -392,18 +392,20 @@ export class PasswordResetRequestService {
 
     const challengeTtlSeconds =
       this.config.get<number>('PWRESET_CHALLENGE_TTL') ?? PWRESET_CHALLENGE_TTL_DEFAULT;
+    const maxAttempts =
+      this.config.get<number>('PWRESET_MAX_ATTEMPTS') ?? PWRESET_MAX_ATTEMPTS_DEFAULT;
     const { token, challengeId } = await this.challenges.create({
       userId: row.userId,
       purpose: PasswordResetPurpose.PasswordReset,
       ttlSeconds: challengeTtlSeconds,
-      maxAttempts: this.config.get<number>('PWRESET_MAX_ATTEMPTS') ?? PWRESET_MAX_ATTEMPTS_DEFAULT,
+      maxAttempts,
       ip: ctx.ip,
       userAgent: ctx.userAgent,
     });
     // Pre-stamp the factor. A fresh unconsumed challenge always wins this; a false here is a DB
     // anomaly — fail closed to 'pending' (the next poll simply re-mints) rather than hand out a
     // challenge the password step would reject.
-    if (!(await this.challenges.markFactorVerified(challengeId, 'admin_approval'))) {
+    if (!(await this.challenges.markFactorVerified(challengeId, 'admin_approval', maxAttempts))) {
       this.logger.warn(`Reset-request ${row.id}: factor pre-stamp lost on fresh challenge ${challengeId}.`);
       return { status: 'pending' };
     }

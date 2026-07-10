@@ -121,9 +121,15 @@ export class PasswordResetChallengeService {
    * recorded at most once and two racing verify-code calls cannot both pass and double-spend a backup
    * code. NEVER touches consumed/attempt state — the later password step consumes the challenge.
    */
-  async markFactorVerified(challengeId: string, method: ResetMethod): Promise<boolean> {
+  async markFactorVerified(challengeId: string, method: ResetMethod, maxAttempts: number): Promise<boolean> {
     const { count } = await this.prisma.passwordResetChallenge.updateMany({
-      where: { id: challengeId, consumedAt: null, factorVerifiedAt: null },
+      where: {
+        id: challengeId,
+        consumedAt: null,
+        factorVerifiedAt: null,
+        expiresAt: { gt: new Date() },
+        attemptCount: { lt: maxAttempts },
+      },
       data: { factorVerifiedAt: new Date(), factorMethod: method },
     });
     return count === 1;
@@ -135,10 +141,16 @@ export class PasswordResetChallengeService {
    * `false`, so one challenge can authorize a reset at most once. A `tx` may be passed so the
    * consume is atomic with the password change (the success transaction).
    */
-  async consume(challengeId: string, tx?: PrismaTxClient): Promise<boolean> {
+  async consume(challengeId: string, maxAttempts: number, tx?: PrismaTxClient): Promise<boolean> {
     const client = tx ?? this.prisma;
     const { count } = await client.passwordResetChallenge.updateMany({
-      where: { id: challengeId, consumedAt: null },
+      where: {
+        id: challengeId,
+        consumedAt: null,
+        factorVerifiedAt: { not: null },
+        expiresAt: { gt: new Date() },
+        attemptCount: { lt: maxAttempts },
+      },
       data: { consumedAt: new Date() },
     });
     return count === 1;
@@ -149,9 +161,14 @@ export class PasswordResetChallengeService {
    * reaches `max_attempts` the challenge fails closed in `loadOpen`. This NEVER touches the user's
    * `failed_login_count` / `locked_until` — the victim is never locked by reset attempts.
    */
-  async registerFailedAttempt(challengeId: string): Promise<void> {
+  async registerFailedAttempt(challengeId: string, maxAttempts: number): Promise<void> {
     await this.prisma.passwordResetChallenge.updateMany({
-      where: { id: challengeId, consumedAt: null },
+      where: {
+        id: challengeId,
+        consumedAt: null,
+        expiresAt: { gt: new Date() },
+        attemptCount: { lt: maxAttempts },
+      },
       data: { attemptCount: { increment: 1 } },
     });
   }

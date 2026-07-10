@@ -136,7 +136,7 @@ Realtime is deliberately minimal: **one** SSE stream, `GET /api/v1/dashboard/str
 
 - **Authorization** — the stream is authorized by a dedicated httpOnly cookie (`ftd_stream`), so no token ever appears in a URL and the browser's native `EventSource` works without header hacks.
 - **Single-process default** — events flow through an in-process RxJS Subject. No broker, no infrastructure to run locally.
-- **Optional scale-out** — setting `REDIS_URL` switches rate-limit counters to shared Redis storage and bridges realtime events across instances via pub/sub (channel `ftd:realtime:dashboard`). Redis failures degrade features; they never crash the API.
+- **Optional scale-out** — setting `REDIS_URL` switches rate-limit counters to shared Redis storage and bridges realtime events across instances via pub/sub (channel `ftd:realtime:dashboard`). Redis failures never crash the process: realtime falls back to same-instance delivery, while throttled requests fail closed until shared counters recover.
 
 This is the "pay for scale only when you scale" seam: the local demo and a multi-instance deployment run the same code path with one environment variable of difference.
 

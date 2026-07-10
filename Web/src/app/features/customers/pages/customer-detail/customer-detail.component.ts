@@ -164,7 +164,12 @@ export class CustomerDetailComponent implements OnInit, OnDestroy {
     // masked (no error). This path deliberately does NOT reload the wallet/tx/kyc/risk panels.
     this.revealToggle$
       .pipe(
-        tap(next => this.reveal.set(next)),
+        tap(next => {
+          this.reveal.set(next);
+          // Masking is security-sensitive: remove the revealed object synchronously instead of leaving
+          // it renderable until the masked network response arrives (or forever if that request fails).
+          if (!next) this.customer.set(null);
+        }),
         switchMap(next =>
           this.customersApi.getById(this.id, { reveal: next }).pipe(
             tap(c => this.customer.set(c)),

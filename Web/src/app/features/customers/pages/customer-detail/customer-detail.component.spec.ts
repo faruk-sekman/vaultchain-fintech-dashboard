@@ -554,6 +554,27 @@ describe('CustomerDetailComponent — PII reveal toggle', () => {
     expect(component.customer()?.address.line1).toBe('1***');
   });
 
+  it('drops revealed PII immediately while the masked response is still pending', () => {
+    const maskedResponse$ = new Subject<any>();
+    let call = 0;
+    const { component } = makeComponent(granted, (_id, opts) => {
+      call += 1;
+      if (call === 1) return of(MASKED);
+      if (opts?.reveal) return of(RAW);
+      return maskedResponse$;
+    });
+
+    component.toggleReveal();
+    expect(component.customer()?.name).toBe('Ada Lovelace');
+
+    component.toggleReveal();
+    expect(component.reveal()).toBe(false);
+    expect(component.customer()).toBeNull();
+
+    maskedResponse$.next(MASKED);
+    expect(component.customer()?.name).toBe('Ada L***');
+  });
+
   it('renders masked WITHOUT error when a reveal=true re-fetch is server-downgraded to masked (AC10)', () => {
     const { component, appError } = makeComponent(granted, () => of(MASKED)); // server always masks (grant lapsed)
     component.toggleReveal();

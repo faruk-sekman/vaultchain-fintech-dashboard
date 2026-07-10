@@ -119,7 +119,7 @@ export class AuthService {
 
     const verified = !!user && user.status === 'ACTIVE' && (await verify(user.passwordHash, password).catch(() => false));
     if (!user || !verified) {
-      if (user) await this.registerFailure(user.id, user.failedLoginCount, email, ctx?.ip);
+      if (user) await this.registerFailure(user.id, email, ctx?.ip);
       else await this.recordAttempt(null, email, false, 'unknown_user', ctx?.ip);
       throw new UnauthorizedException({ code: 'Auth.InvalidCredentials', message: 'Invalid email or password.' });
     }
@@ -198,16 +198,31 @@ export class AuthService {
       throw new UnauthorizedException({ code: 'Auth.InvalidToken', message: 'Invalid or expired refresh token.' });
     }
 
-    // Rotate within the same session family: revoke the old, mint the new, atomically.
+    // Rotate within the same session family. The conditional revoke is the single-winner gate: two
+    // requests may both validate the same stale row, but only one transaction may mint a replacement.
     const newId = uuidv7();
     const secret = randomBytes(32).toString('base64url');
     const tokenHash = await hash(secret);
-    await this.prisma.$transaction([
-      this.prisma.refreshToken.update({ where: { id: row.id }, data: { revokedAt: new Date(), replacedById: newId } }),
-      this.prisma.refreshToken.create({
+    const rotated = await this.prisma.$transaction(async tx => {
+      const winner = await tx.refreshToken.updateMany({
+        where: { id: row.id, revokedAt: null },
+        data: { revokedAt: new Date(), replacedById: newId },
+      });
+      if (winner.count !== 1) return false;
+      await tx.refreshToken.create({
         data: { id: newId, tokenHash, userId: row.userId, sessionId: row.sessionId, expiresAt: new Date(Date.now() + REFRESH_TTL_MS) },
-      }),
-    ]);
+      });
+      return true;
+    });
+    if (!rotated) {
+      // A concurrent refresh already spent this token. Treat the losing replay exactly like a later
+      // reuse: revoke every still-active session for the user and return the stable reuse error.
+      await this.prisma.refreshToken.updateMany({
+        where: { userId: row.userId, revokedAt: null },
+        data: { revokedAt: new Date() },
+      });
+      throw new UnauthorizedException({ code: 'Auth.TokenReused', message: 'Refresh token reuse detected; sessions revoked.' });
+    }
     return this.buildResponse(row.userId, `rt_${newId}.${secret}`);
   }
 
@@ -293,13 +308,28 @@ export class AuthService {
     };
   }
 
-  private async registerFailure(userId: string, currentCount: number, email: string, ip?: string): Promise<void> {
-    const failed = currentCount + 1;
-    const locked = failed >= MAX_FAILED_LOGINS;
-    await this.prisma.user.update({
+  private async registerFailure(userId: string, email: string, ip?: string): Promise<void> {
+    // Increment from the database value, never from login()'s stale snapshot. The follow-up lock write
+    // compare-and-sets the exact count + prior deadline, so concurrent failures cannot lose increments
+    // and a racing successful login reset cannot be overwritten by an old failure.
+    const state = await this.prisma.user.update({
       where: { id: userId },
-      data: { failedLoginCount: failed, lockedUntil: locked ? new Date(Date.now() + LOCK_MS) : null },
+      data: { failedLoginCount: { increment: 1 } },
+      select: { failedLoginCount: true, lockedUntil: true },
     });
+    const alreadyLocked = !!state.lockedUntil && state.lockedUntil.getTime() > Date.now();
+    let locked = false;
+    if (state.failedLoginCount >= MAX_FAILED_LOGINS && !alreadyLocked) {
+      const winner = await this.prisma.user.updateMany({
+        where: {
+          id: userId,
+          failedLoginCount: state.failedLoginCount,
+          lockedUntil: state.lockedUntil,
+        },
+        data: { lockedUntil: new Date(Date.now() + LOCK_MS) },
+      });
+      locked = winner.count === 1;
+    }
     await this.recordAttempt(userId, email, false, 'bad_password', ip);
     // Notify the locked operator ONLY on the failure that TRANSITIONS the account to locked (the same
     // condition that sets lockedUntil) — earlier non-locking failures emit nothing. The dedupeKey bounds

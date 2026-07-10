@@ -99,6 +99,24 @@ describe('Customers state', () => {
     expect(deleteFailed.deleteError).toBe('bad');
   });
 
+  it('drops revealed rows synchronously when a masked reload starts', () => {
+    const revealed = {
+      ...initialState,
+      data: [customer],
+      total: 1,
+      lastParams: { page: 1, reveal: true },
+    };
+
+    const remasking = customersReducer(
+      revealed,
+      loadCustomers({ params: { page: 1, reveal: undefined } }),
+    );
+
+    expect(remasking.data).toEqual([]);
+    expect(remasking.loading).toBe(true);
+    expect(remasking.total).toBe(1);
+  });
+
   it('customersReducer keeps total when delete id not found', () => {
     const state = { ...initialState, data: [customer], total: 1 };
     const next = customersReducer(state, deleteCustomerSuccess({ id: '2' }));

@@ -81,6 +81,32 @@ describe('Enterprise customer flows', () => {
     cy.byTestId('customers-pii-toggle').should('not.exist');
   });
 
+  it('keeps free-text search out of the URL and removes revealed PII when masking again', () => {
+    customersList.visit();
+
+    customersList.togglePiiReveal();
+    cy.wait('@listCustomers');
+    cy.byTestId('customers-table').should('contain.text', 'Aylin Kaya');
+
+    customersList.search('Bora');
+    cy.wait('@listCustomers').then(interception => {
+      const params = new URL(interception.request.url).searchParams;
+      expect(params.get('filter[q]')).to.eq('Bora');
+    });
+    cy.url().then(url => {
+      const params = new URL(url).searchParams;
+      expect(params.has('search')).to.eq(false);
+      expect(url).not.to.contain('Bora');
+    });
+
+    customersList.clearSearch();
+    cy.wait('@listCustomers');
+    customersList.togglePiiReveal();
+    cy.byTestId('customers-table').should('not.contain.text', 'Aylin Kaya');
+    cy.wait('@listCustomers');
+    cy.byTestId('customers-table').should('contain.text', 'Aylin K***');
+  });
+
   it('creates, edits, and deletes a customer through the real forms', () => {
     visitAuthenticated('/customers/new');
 

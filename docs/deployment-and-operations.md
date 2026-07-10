@@ -122,7 +122,7 @@ curl -s http://localhost:3000/api/v1/health
 The API is single-instance by default and horizontally scalable by configuration:
 
 - **`REDIS_URL` unset** — in-memory rate-limit counters and a single-process Server-Sent Events (SSE) stream. Correct for one instance; the default everywhere.
-- **`REDIS_URL` set** — a shared ioredis client provides distributed rate-limit counters and cross-instance realtime fan-out over the pub/sub channel `ftd:realtime:dashboard`, so SSE clients on any instance see the same events behind a load balancer. Redis failures degrade gracefully and never crash the app.
+- **`REDIS_URL` set** — a shared ioredis client provides distributed rate-limit counters and cross-instance realtime fan-out over the pub/sub channel `ftd:realtime:dashboard`, so SSE clients on any instance see the same events behind a load balancer. Redis failures never crash the process: realtime falls back to same-instance delivery, while throttled requests are denied until the shared counter store recovers.
 
 ## Honest boundary
 

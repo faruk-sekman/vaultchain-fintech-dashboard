@@ -68,8 +68,13 @@ export class MfaLoginService {
     const result = await this.totp.verify(secret, code, user.lastUsedTotpStep);
     if (!result.ok) return this.reject(challenge, ctx, 'totp');
 
-    // Advance the replay floor BEFORE issuing the session so the accepted code can never be re-used.
-    await this.prisma.user.update({ where: { id: challenge.userId }, data: { lastUsedTotpStep: result.usedStep } });
+    // Compare-and-set the replay floor. Two requests can verify the same TOTP against the same stale
+    // snapshot, but only one may advance that snapshot; the loser is treated as a replay.
+    const floor = await this.prisma.user.updateMany({
+      where: { id: challenge.userId, lastUsedTotpStep: user.lastUsedTotpStep },
+      data: { lastUsedTotpStep: result.usedStep },
+    });
+    if (floor.count !== 1) return this.reject(challenge, ctx, 'totp');
     return this.complete(challenge, rememberDevice, ctx, 'totp');
   }
 
@@ -89,7 +94,7 @@ export class MfaLoginService {
 
   /** Count the bad attempt (the challenge fails closed at maxAttempts), audit, and throw a generic 401. */
   private async reject(challenge: OpenChallenge, ctx: MfaLoginContext, method: VerifyMethod): Promise<never> {
-    await this.challenges.registerFailedAttempt(challenge.id);
+    await this.challenges.registerFailedAttempt(challenge.id, challenge.maxAttempts);
     await this.audit.record({
       actorUserId: challenge.userId,
       action: 'mfa.verify',
@@ -101,9 +106,9 @@ export class MfaLoginService {
     throw new UnauthorizedException({ code: 'Mfa.InvalidCode', message: 'Invalid or expired code.' });
   }
 
-  /** Atomically consume the challenge, issue the session, optionally remember the device, and audit. */
+  /** Consume the challenge with a single-winner guard, then issue the session and audit. */
   private async complete(challenge: OpenChallenge, rememberDevice: boolean, ctx: MfaLoginContext, method: VerifyMethod): Promise<MfaLoginResult> {
-    if (!(await this.challenges.consume(challenge.id))) {
+    if (!(await this.challenges.consume(challenge.id, challenge.maxAttempts))) {
       // Lost the single-use race — another request already upgraded this challenge to a session.
       throw new UnauthorizedException({ code: 'Mfa.ChallengeConsumed', message: 'The MFA challenge was already used.' });
     }

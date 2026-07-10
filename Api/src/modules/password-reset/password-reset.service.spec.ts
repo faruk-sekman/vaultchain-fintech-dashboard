@@ -83,7 +83,7 @@ function setup() {
   const prisma = {
     user: {
       findUnique: jest.fn(),
-      update: jest.fn().mockResolvedValue({}),
+      updateMany: jest.fn().mockResolvedValue({ count: 1 }),
     },
     // A15 completion hook: the default (no linked admin-approval request) is the null/no-op path.
     passwordResetRequest: {
@@ -252,11 +252,11 @@ describe("PasswordResetService.verifyCode (Step 2 — factor only, stamps the ch
     m.totp.verify.mockResolvedValue({ ok: true, usedStep: 42 });
     const res = await m.svc.verifyCode(OPEN, "123456", { ip: "1.2.3.4" });
     expect(res).toEqual({ status: "code_verified" });
-    expect(m.prisma.user.update).toHaveBeenCalledWith({
-      where: { id: "u1" },
+    expect(m.prisma.user.updateMany).toHaveBeenCalledWith({
+      where: { id: "u1", lastUsedTotpStep: null },
       data: { lastUsedTotpStep: 42 },
     });
-    expect(m.challenges.markFactorVerified).toHaveBeenCalledWith("c1", "totp");
+    expect(m.challenges.markFactorVerified).toHaveBeenCalledWith("c1", "totp", 5);
     expect(m.challenges.consume).not.toHaveBeenCalled();
     expect(m.prisma.$transaction).not.toHaveBeenCalled();
     expect(m.audit.record).toHaveBeenCalledWith(
@@ -278,6 +278,7 @@ describe("PasswordResetService.verifyCode (Step 2 — factor only, stamps the ch
     expect(m.challenges.markFactorVerified).toHaveBeenCalledWith(
       "c1",
       "backup_code",
+      5,
     );
     expect(m.audit.record).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -294,7 +295,7 @@ describe("PasswordResetService.verifyCode (Step 2 — factor only, stamps the ch
     await expect(
       m.svc.verifyCode(OPEN, "000000", { ip: "9.9.9.9" }),
     ).rejects.toMatchObject({ response: { code: "Auth.ResetInvalidCode" } });
-    expect(m.challenges.registerFailedAttempt).toHaveBeenCalledWith("c1");
+    expect(m.challenges.registerFailedAttempt).toHaveBeenCalledWith("c1", 5);
     expect(m.challenges.markFactorVerified).not.toHaveBeenCalled();
     expect(m.audit.record).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -315,7 +316,7 @@ describe("PasswordResetService.verifyCode (Step 2 — factor only, stamps the ch
     await expect(
       m.svc.verifyCode(bound, "123456", { ip: "2.2.2.2", userAgent: "ua-b" }),
     ).rejects.toBeInstanceOf(UnauthorizedException);
-    expect(m.challenges.registerFailedAttempt).toHaveBeenCalledWith("c1");
+    expect(m.challenges.registerFailedAttempt).toHaveBeenCalledWith("c1", 5);
     expect(m.totp.verify).not.toHaveBeenCalled();
     expect(m.backupCodes.verify).not.toHaveBeenCalled();
     expect(m.prisma.user.findUnique).not.toHaveBeenCalled();
@@ -335,7 +336,7 @@ describe("PasswordResetService.verifyCode (Step 2 — factor only, stamps the ch
         userAgent: "ua-evil",
       }),
     ).rejects.toBeInstanceOf(UnauthorizedException);
-    expect(m.challenges.registerFailedAttempt).toHaveBeenCalledWith("c1");
+    expect(m.challenges.registerFailedAttempt).toHaveBeenCalledWith("c1", 5);
     expect(m.totp.verify).not.toHaveBeenCalled();
   });
 
@@ -345,7 +346,7 @@ describe("PasswordResetService.verifyCode (Step 2 — factor only, stamps the ch
     await expect(m.svc.verifyCode(OPEN, "123456", {})).rejects.toBeInstanceOf(
       UnauthorizedException,
     );
-    expect(m.challenges.registerFailedAttempt).toHaveBeenCalledWith("c1");
+    expect(m.challenges.registerFailedAttempt).toHaveBeenCalledWith("c1", 5);
     expect(m.challenges.markFactorVerified).not.toHaveBeenCalled();
   });
 
@@ -378,7 +379,7 @@ describe("PasswordResetService.verifyCode (Step 2 — factor only, stamps the ch
     expect(m.prisma.user.findUnique).not.toHaveBeenCalled();
     expect(m.totp.verify).not.toHaveBeenCalled();
     expect(m.backupCodes.verify).not.toHaveBeenCalled();
-    expect(m.prisma.user.update).not.toHaveBeenCalled();
+    expect(m.prisma.user.updateMany).not.toHaveBeenCalled();
     expect(m.challenges.markFactorVerified).not.toHaveBeenCalled();
     expect(m.challenges.registerFailedAttempt).not.toHaveBeenCalled();
   });
@@ -400,7 +401,7 @@ describe("PasswordResetService.verifyCode (Step 2 — factor only, stamps the ch
       ip: "5.5.5.5",
       userAgent: "ua-z",
     });
-    expect(m.challenges.markFactorVerified).toHaveBeenCalledWith("c1", "totp");
+    expect(m.challenges.markFactorVerified).toHaveBeenCalledWith("c1", "totp", 5);
   });
 });
 
@@ -416,7 +417,7 @@ describe("PasswordResetService.verify (Step 3 — password only, gated on the fa
     const { hash } = await import("@node-rs/argon2");
     withUser(m, await hash("Different-Current-1!"));
     await m.svc.verify(OPEN_VERIFIED, STRONG, { ip: "1.2.3.4" });
-    expect(m.challenges.consume).toHaveBeenCalledWith("c1", m.tx);
+    expect(m.challenges.consume).toHaveBeenCalledWith("c1", 5, m.tx);
     expect(m.tx.user.update).toHaveBeenCalledWith(
       expect.objectContaining({
         where: { id: "u1" },
@@ -561,7 +562,7 @@ describe("PasswordResetService.verify (Step 3 — password only, gated on the fa
     await expect(
       m.svc.verify(boundVerified, STRONG, { ip: "2.2.2.2", userAgent: "ua-b" }),
     ).rejects.toBeInstanceOf(UnauthorizedException);
-    expect(m.challenges.registerFailedAttempt).toHaveBeenCalledWith("c1");
+    expect(m.challenges.registerFailedAttempt).toHaveBeenCalledWith("c1", 5);
     expect(m.challenges.consume).not.toHaveBeenCalled();
   });
 
@@ -581,7 +582,7 @@ describe("PasswordResetService.verify (Step 3 — password only, gated on the fa
     await expect(
       m.svc.verify(OPEN_VERIFIED, STRONG, {}),
     ).rejects.toBeInstanceOf(UnauthorizedException);
-    expect(m.challenges.registerFailedAttempt).toHaveBeenCalledWith("c1");
+    expect(m.challenges.registerFailedAttempt).toHaveBeenCalledWith("c1", 5);
     expect(m.challenges.consume).not.toHaveBeenCalled();
   });
 });

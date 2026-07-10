@@ -386,7 +386,7 @@ describe('PasswordResetRequestService.status (fail-closed poll + claim)', () => 
       userAgent: 'poll-ua',
     });
     // Pre-stamped 'admin_approval' — the admin identity check IS the factor on this path.
-    expect(m.challenges.markFactorVerified).toHaveBeenCalledWith('ch-1', 'admin_approval');
+    expect(m.challenges.markFactorVerified).toHaveBeenCalledWith('ch-1', 'admin_approval', 5);
     // Latest-wins linkage for the completion hook.
     expect(m.prisma.passwordResetRequest.update).toHaveBeenCalledWith({
       where: { id: REQ_ID },

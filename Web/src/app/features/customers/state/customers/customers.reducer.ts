@@ -41,12 +41,18 @@ export const initialState: CustomersState = {
 
 export const customersReducer = createReducer(
   initialState,
-  on(loadCustomers, (state, { params }) => ({
-    ...state,
-    loading: true,
-    error: null,
-    lastParams: params,
-  })),
+  on(loadCustomers, (state, { params }) => {
+    const remasking = state.lastParams?.reveal === true && params.reveal !== true;
+    return {
+      ...state,
+      // Never keep previously revealed rows renderable while the masked replacement is in flight.
+      // A failed masked reload therefore fails closed to an empty list, not stale unmasked PII.
+      data: remasking ? [] : state.data,
+      loading: true,
+      error: null,
+      lastParams: params,
+    };
+  }),
   on(loadCustomersSuccess, (state, { data, total }) => ({
     ...state,
     data,

@@ -171,17 +171,26 @@ describe('PasswordResetChallengeService', () => {
     const prisma = makePrisma();
     const svc = new PasswordResetChallengeService(prisma as unknown as PrismaService);
     prisma.passwordResetChallenge.updateMany.mockResolvedValueOnce({ count: 1 });
-    expect(await svc.consume('c1')).toBe(true);
+    expect(await svc.consume('c1', 5)).toBe(true);
     prisma.passwordResetChallenge.updateMany.mockResolvedValueOnce({ count: 0 });
-    expect(await svc.consume('c1')).toBe(false);
+    expect(await svc.consume('c1', 5)).toBe(false);
   });
 
   it('#8 consume uses the passed tx client when given (atomic with the password change)', async () => {
     const prisma = makePrisma();
     const svc = new PasswordResetChallengeService(prisma as unknown as PrismaService);
     const tx = { passwordResetChallenge: { updateMany: jest.fn().mockResolvedValue({ count: 1 }) } };
-    expect(await svc.consume('c1', tx as never)).toBe(true);
-    expect(tx.passwordResetChallenge.updateMany).toHaveBeenCalledWith({ where: { id: 'c1', consumedAt: null }, data: { consumedAt: expect.any(Date) } });
+    expect(await svc.consume('c1', 5, tx as never)).toBe(true);
+    expect(tx.passwordResetChallenge.updateMany).toHaveBeenCalledWith({
+      where: {
+        id: 'c1',
+        consumedAt: null,
+        factorVerifiedAt: { not: null },
+        expiresAt: { gt: expect.any(Date) },
+        attemptCount: { lt: 5 },
+      },
+      data: { consumedAt: expect.any(Date) },
+    });
     expect(prisma.passwordResetChallenge.updateMany).not.toHaveBeenCalled();
   });
 
@@ -189,9 +198,14 @@ describe('PasswordResetChallengeService', () => {
     const prisma = makePrisma();
     const svc = new PasswordResetChallengeService(prisma as unknown as PrismaService);
     prisma.passwordResetChallenge.updateMany.mockResolvedValue({ count: 1 });
-    await svc.registerFailedAttempt('c1');
+    await svc.registerFailedAttempt('c1', 5);
     expect(prisma.passwordResetChallenge.updateMany).toHaveBeenCalledWith({
-      where: { id: 'c1', consumedAt: null },
+      where: {
+        id: 'c1',
+        consumedAt: null,
+        expiresAt: { gt: expect.any(Date) },
+        attemptCount: { lt: 5 },
+      },
       data: { attemptCount: { increment: 1 } },
     });
   });
@@ -200,9 +214,15 @@ describe('PasswordResetChallengeService', () => {
     const prisma = makePrisma();
     const svc = new PasswordResetChallengeService(prisma as unknown as PrismaService);
     prisma.passwordResetChallenge.updateMany.mockResolvedValue({ count: 1 });
-    expect(await svc.markFactorVerified('c1', 'totp')).toBe(true);
+    expect(await svc.markFactorVerified('c1', 'totp', 5)).toBe(true);
     expect(prisma.passwordResetChallenge.updateMany).toHaveBeenCalledWith({
-      where: { id: 'c1', consumedAt: null, factorVerifiedAt: null },
+      where: {
+        id: 'c1',
+        consumedAt: null,
+        factorVerifiedAt: null,
+        expiresAt: { gt: expect.any(Date) },
+        attemptCount: { lt: 5 },
+      },
       data: { factorVerifiedAt: expect.any(Date), factorMethod: 'totp' },
     });
   });
@@ -211,14 +231,14 @@ describe('PasswordResetChallengeService', () => {
     const prisma = makePrisma();
     const svc = new PasswordResetChallengeService(prisma as unknown as PrismaService);
     prisma.passwordResetChallenge.updateMany.mockResolvedValue({ count: 0 });
-    expect(await svc.markFactorVerified('c1', 'backup_code')).toBe(false);
+    expect(await svc.markFactorVerified('c1', 'backup_code', 5)).toBe(false);
   });
 
   it('#M3 markFactorVerified records the backup_code method when that factor was used', async () => {
     const prisma = makePrisma();
     const svc = new PasswordResetChallengeService(prisma as unknown as PrismaService);
     prisma.passwordResetChallenge.updateMany.mockResolvedValue({ count: 1 });
-    await svc.markFactorVerified('c1', 'backup_code');
+    await svc.markFactorVerified('c1', 'backup_code', 5);
     expect(prisma.passwordResetChallenge.updateMany).toHaveBeenCalledWith(
       expect.objectContaining({ data: expect.objectContaining({ factorMethod: 'backup_code' }) }),
     );

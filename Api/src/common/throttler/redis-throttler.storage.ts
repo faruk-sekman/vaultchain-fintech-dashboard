@@ -15,10 +15,10 @@
  *
  * Resilience (HARDENING-2, sec-review / fail-closed): if Redis is unreachable the Lua `eval`
  * rejects, and NestJS `ThrottlerGuard` treats a storage error as ALLOW — silently DISABLING the rate
- * limit exactly when a shared limiter matters most. To avoid that fail-OPEN, an `increment()` Redis
- * error DEGRADES to a LOCAL in-memory throttle decision (the same increment+TTL+block algorithm against
- * a per-process Map) so the limit STAYS ENFORCED per-instance through the outage. We deliberately do
- * NOT fail-closed-deny (that would DoS legit users on a transient blip). The degradation is logged once.
+ * limit exactly when a shared limiter matters most. A local fallback would split the security budget
+ * across instances and reset it on every process, so an `increment()` Redis error instead returns a
+ * blocked decision. This intentionally trades availability for preserving the configured global abuse
+ * boundary; deployments that do not require Redis can leave REDIS_URL unset and use Nest's local store.
  */
 import { Logger } from '@nestjs/common';
 import type { ThrottlerStorage } from '@nestjs/throttler';
@@ -68,18 +68,9 @@ return { totalHits, hitPttl, isBlocked, timeToBlockExpire }
 /** Namespace so throttler keys never collide with other Redis state (realtime, future caches). */
 const KEY_PREFIX = 'ftd:throttle';
 
-/** Per-key local fallback record (ms-precision deadlines), mirroring the Lua script's state. */
-interface LocalEntry {
-  totalHits: number;
-  expiresAt: number; // hit-count window deadline (epoch ms)
-  blockExpiresAt: number; // block-window deadline (epoch ms); 0 when not blocked
-}
-
 export class RedisThrottlerStorage implements ThrottlerStorage {
   private readonly logger = new Logger(RedisThrottlerStorage.name);
-  /** Local fallback state used ONLY while Redis is unreachable (HARDENING-2 degradation). */
-  private readonly local = new Map<string, LocalEntry>();
-  /** One-shot guard so a Redis outage logs a single degradation warning, not one per request. */
+  /** One-shot guard so a Redis outage logs a single fail-closed warning, not one per request. */
   private degraded = false;
 
   constructor(private readonly redis: Redis) {}
@@ -113,53 +104,20 @@ export class RedisThrottlerStorage implements ThrottlerStorage {
       const [totalHits, timeToExpireMs, isBlockedFlag, timeToBlockExpireMs] = result;
       return this.toRecord(totalHits, timeToExpireMs, isBlockedFlag === 1, timeToBlockExpireMs);
     } catch (error) {
-      // FAIL-CLOSED-ENFORCE (not fail-open allow, not fail-closed deny): degrade to per-instance
-      // in-memory throttling so the limit stays enforced during the Redis outage (HARDENING-2).
-      // ACCEPTED DEGRADATION (re-audit THR-002): behind N instances the effective global limit is
-      // multiplied ~N× while Redis is down — a monitored, bounded trade-off. The one-shot warn below is
-      // the alerting signal, and the shared Redis counter resumes automatically on recovery.
+      // Fail closed. Falling back to a fresh per-process Map would multiply the effective budget by
+      // instance count and let restarts reset it, which breaks the distributed security invariant.
       if (!this.degraded) {
         this.degraded = true;
         // No secrets: only the error message, never the Redis URL.
         this.logger.warn(
-          `Redis throttler storage unreachable; degrading to per-instance in-memory rate limiting. ${
+          `Redis throttler storage unreachable; denying throttled requests until shared counters recover. ${
             error instanceof Error ? error.message : 'unknown error'
           }`,
         );
       }
-      return this.incrementLocal(hitKey, ttl, limit, blockDuration);
+      const denyFor = Math.max(ttl, blockDuration, 1_000);
+      return this.toRecord(limit + 1, denyFor, true, denyFor);
     }
-  }
-
-  /**
-   * Local-Map fallback mirroring INCREMENT_LUA: increment within the TTL window, open a block window
-   * at limit+1, and while blocked report the live count + remaining block window WITHOUT counting the
-   * hit. Pure per-process state — correct for a single instance, which is the outage degradation goal.
-   */
-  private incrementLocal(
-    hitKey: string,
-    ttl: number,
-    limit: number,
-    blockDuration: number,
-  ): ThrottlerStorageRecord {
-    const now = Date.now();
-    let entry = this.local.get(hitKey);
-    if (!entry || entry.expiresAt <= now) {
-      entry = { totalHits: 0, expiresAt: now + ttl, blockExpiresAt: 0 };
-      this.local.set(hitKey, entry);
-    }
-
-    if (entry.blockExpiresAt > now) {
-      // Currently blocked: do not count this hit; report remaining windows.
-      return this.toRecord(entry.totalHits, entry.expiresAt - now, true, entry.blockExpiresAt - now);
-    }
-
-    entry.totalHits += 1;
-    if (entry.totalHits > limit) {
-      entry.blockExpiresAt = now + blockDuration;
-      return this.toRecord(entry.totalHits, entry.expiresAt - now, true, blockDuration);
-    }
-    return this.toRecord(entry.totalHits, entry.expiresAt - now, false, 0);
   }
 
   /** Build the throttler record, converting ms windows to ceil-seconds (matches in-memory storage). */
