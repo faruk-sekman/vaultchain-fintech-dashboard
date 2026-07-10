@@ -1,0 +1,307 @@
+<section
+  class="settings-panel motion-stagger"
+  role="tabpanel"
+  data-testid="settings-panel-security"
+  [attr.id]="panelId"
+  [attr.aria-labelledby]="labelledBy"
+>
+  <header class="settings-panel__head">
+    <span class="settings-medallion settings-medallion--blue" aria-hidden="true">
+      <i class="ri-shield-keyhole-line"></i>
+    </span>
+    <div class="settings-panel__heading">
+      <h2 class="settings-panel__title">{{ 'mfa.settings.cardTitle' | translate }}</h2>
+      <p class="settings-panel__sub">{{ 'mfa.settings.cardSubtitle' | translate }}</p>
+    </div>
+  </header>
+
+  <div class="settings-rows">
+    <div class="settings-row">
+      <div class="settings-row__text">
+        <span class="settings-row__label">{{ 'mfa.settings.status' | translate }}</span>
+        <span class="settings-row__hint">{{ 'mfa.settings.statusHint' | translate }}</span>
+      </div>
+      @if (mfaEnabled) {
+        <app-ui-badge
+          color="green"
+          [dot]="true"
+          [text]="'mfa.settings.statusEnabled' | translate"
+        ></app-ui-badge>
+      } @else {
+        <app-ui-badge
+          color="gray"
+          [text]="'mfa.settings.statusDisabled' | translate"
+        ></app-ui-badge>
+      }
+    </div>
+  </div>
+
+  @if (!mfaEnabled) {
+    <div class="settings-actions">
+      <app-ui-button type="button" size="lg" (click)="enableMfa.emit()">
+        <i class="ri-shield-check-line ui-button__icon" aria-hidden="true"></i>
+        {{ 'mfa.settings.enable' | translate }}
+      </app-ui-button>
+    </div>
+  } @else {
+    @if (mfaErrorKey; as key) {
+      <app-ui-alert
+        type="danger"
+        icon="ri-error-warning-line"
+        [message]="key | translate"
+      ></app-ui-alert>
+    }
+
+    @if (mfaNewBackupCodes.length > 0) {
+      <app-ui-alert
+        type="warning"
+        icon="ri-alert-line"
+        [message]="'mfa.settings.newBackupHint' | translate"
+      ></app-ui-alert>
+      <ul
+        class="settings-backup-codes"
+        role="list"
+        [attr.aria-label]="'mfa.settings.newBackupTitle' | translate"
+      >
+        @for (code of mfaNewBackupCodes; track code) {
+          <li class="settings-backup-code">{{ code }}</li>
+        }
+      </ul>
+      <label class="settings-mfa-saved">
+        <input
+          type="checkbox"
+          [checked]="mfaCodesSaved"
+          (change)="toggleMfaCodesSaved.emit()"
+          [attr.aria-label]="'mfa.settings.savedConfirm' | translate"
+        />
+        <span>{{ 'mfa.settings.savedConfirm' | translate }}</span>
+      </label>
+      <div class="settings-actions">
+        <app-ui-button
+          type="button"
+          [disabled]="!mfaCodesSaved"
+          (click)="dismissNewBackupCodes.emit()"
+        >
+          {{ 'mfa.settings.backupDone' | translate }}
+        </app-ui-button>
+      </div>
+    } @else if (mfaAction; as action) {
+      <form
+        class="settings-mfa-reauth"
+        [formGroup]="mfaReauthForm"
+        (ngSubmit)="submitMfaAction.emit()"
+        novalidate
+      >
+        <p class="settings-panel__sub">
+          {{
+            (action === 'disable'
+              ? 'mfa.settings.disableReauthHint'
+              : 'mfa.settings.regenerateReauthHint'
+            ) | translate
+          }}
+        </p>
+        <div class="form-field">
+          <label for="mfa-reauth-password">{{ 'mfa.settings.reauthPassword' | translate }}</label>
+          <app-ui-input
+            id="mfa-reauth-password"
+            type="password"
+            autocomplete="current-password"
+            iconStart="ri-lock-2-line"
+            [control]="mfaReauthForm.controls.password"
+            [ariaInvalid]="
+              mfaReauthForm.controls.password.invalid && mfaReauthForm.controls.password.touched
+            "
+          ></app-ui-input>
+          @if (mfaReauthForm.controls.password.invalid && mfaReauthForm.controls.password.touched) {
+            <p class="settings-field-error" role="alert">
+              {{
+                (mfaReauthForm.controls.password.errors?.['required']
+                  ? 'validation.required'
+                  : 'validation.minLength'
+                ) | translate: { min: 8 }
+              }}
+            </p>
+          }
+        </div>
+        <div class="form-field">
+          <label for="mfa-reauth-code">{{ 'mfa.settings.reauthCode' | translate }}</label>
+          <app-ui-input
+            id="mfa-reauth-code"
+            iconStart="ri-key-2-line"
+            [control]="mfaReauthForm.controls.code"
+            [placeholder]="'mfa.settings.reauthCodePlaceholder' | translate"
+            [ariaInvalid]="
+              mfaReauthForm.controls.code.invalid && mfaReauthForm.controls.code.touched
+            "
+          ></app-ui-input>
+          @if (mfaReauthForm.controls.code.invalid && mfaReauthForm.controls.code.touched) {
+            <p class="settings-field-error" role="alert">
+              {{
+                (mfaReauthForm.controls.code.errors?.['required']
+                  ? 'validation.required'
+                  : 'mfa.settings.reauthCodeInvalid'
+                ) | translate
+              }}
+            </p>
+          }
+        </div>
+        <div class="settings-actions settings-actions--split">
+          <app-ui-button variant="ghost" type="button" (click)="cancelMfaAction.emit()">
+            {{ 'common.cancel' | translate }}
+          </app-ui-button>
+          <app-ui-button
+            type="submit"
+            [variant]="action === 'disable' ? 'danger' : 'primary'"
+            [loading]="mfaSubmitting"
+            [disabled]="mfaReauthForm.invalid || mfaSubmitting"
+          >
+            {{
+              (action === 'disable'
+                ? 'mfa.settings.disableConfirm'
+                : 'mfa.settings.regenerateConfirm'
+              ) | translate
+            }}
+          </app-ui-button>
+        </div>
+      </form>
+    } @else {
+      <div class="settings-actions settings-actions--split">
+        <app-ui-button variant="ghost" type="button" (click)="openMfaAction.emit('regenerate')">
+          <i class="ri-refresh-line ui-button__icon" aria-hidden="true"></i>
+          {{ 'mfa.settings.regenerate' | translate }}
+        </app-ui-button>
+        <app-ui-button variant="danger" type="button" (click)="openMfaAction.emit('disable')">
+          <i class="ri-shield-cross-line ui-button__icon" aria-hidden="true"></i>
+          {{ 'mfa.settings.disable' | translate }}
+        </app-ui-button>
+      </div>
+    }
+  }
+
+  <div class="settings-devices">
+    <header class="settings-devices__head">
+      <h3 class="settings-devices__title">{{ 'mfa.devices.title' | translate }}</h3>
+      <p class="settings-devices__sub">{{ 'mfa.devices.subtitle' | translate }}</p>
+    </header>
+
+    @if (devicesLoading) {
+      <div
+        class="settings-devices__loading"
+        role="status"
+        [attr.aria-label]="'mfa.devices.loading' | translate"
+      >
+        @for (row of skeletonRows; track row) {
+          <app-ui-skeleton
+            variant="line"
+            width="100%"
+            height="56px"
+            radius="14px"
+          ></app-ui-skeleton>
+        }
+      </div>
+    } @else if (devicesErrorKey; as key) {
+      <app-ui-alert
+        type="danger"
+        icon="ri-error-warning-line"
+        [title]="'mfa.devices.errorTitle' | translate"
+        [message]="key | translate"
+      ></app-ui-alert>
+      <div class="settings-actions">
+        <app-ui-button variant="ghost" type="button" (click)="retryLoadDevices.emit()">
+          <i class="ri-refresh-line ui-button__icon" aria-hidden="true"></i>
+          {{ 'mfa.devices.retry' | translate }}
+        </app-ui-button>
+      </div>
+    } @else if (devices.length === 0) {
+      <p class="settings-devices__empty">
+        <i class="ri-device-line" aria-hidden="true"></i>
+        {{ 'mfa.devices.empty' | translate }}
+      </p>
+    } @else {
+      <ul
+        class="settings-devices__list"
+        role="list"
+        [attr.aria-label]="'mfa.devices.title' | translate"
+      >
+        @for (device of devices; track device.id) {
+          <li class="settings-device">
+            <span class="settings-device__icon" aria-hidden="true">
+              <i class="ri-device-line"></i>
+            </span>
+            <div class="settings-device__text">
+              <span class="settings-device__network">
+                <i class="ri-global-line" aria-hidden="true"></i>
+                {{ 'mfa.devices.networkLabel' | translate }}:
+                {{ device.ipPrefix || ('mfa.devices.networkUnknown' | translate) }}
+              </span>
+              <span class="settings-device__meta">
+                {{ 'mfa.devices.createdLabel' | translate }}:
+                {{ device.createdAt | date: 'medium' : undefined : locale }}
+                ·
+                {{ 'mfa.devices.expiresLabel' | translate }}:
+                {{ device.expiresAt | date: 'medium' : undefined : locale }}
+              </span>
+            </div>
+            <app-ui-button
+              variant="ghost"
+              size="sm"
+              type="button"
+              [loading]="revokingId === device.id"
+              [disabled]="revokingId !== null"
+              [ariaLabel]="
+                'mfa.devices.revokeAria'
+                  | translate
+                    : {
+                        network: device.ipPrefix || ('mfa.devices.networkUnknown' | translate),
+                      }
+              "
+              (click)="askRevoke.emit(device.id)"
+            >
+              <i class="ri-delete-bin-6-line ui-button__icon" aria-hidden="true"></i>
+              {{ 'mfa.devices.revoke' | translate }}
+            </app-ui-button>
+          </li>
+        }
+      </ul>
+    }
+  </div>
+
+  <app-ui-confirm-dialog
+    [open]="confirmRevokeId !== null"
+    titleKey="mfa.devices.confirmTitle"
+    messageKey="mfa.devices.confirmBody"
+    confirmLabelKey="mfa.devices.confirmRevoke"
+    cancelLabelKey="common.cancel"
+    loadingLabelKey="mfa.devices.revoking"
+    confirmIcon="ri-delete-bin-6-line"
+    [loading]="revokingId !== null"
+    (confirm)="confirmRevoke.emit()"
+    (cancel)="cancelRevoke.emit()"
+  ></app-ui-confirm-dialog>
+
+  <div class="settings-devices" *appHasPermission="'auth.mfa.admin_reset'">
+    <header class="settings-devices__head">
+      <h3 class="settings-devices__title">{{ 'mfa.adminReset.heading' | translate }}</h3>
+      <p class="settings-devices__sub">{{ 'mfa.adminReset.intro' | translate }}</p>
+    </header>
+    <div class="settings-actions">
+      <app-ui-button variant="ghost" type="button" (click)="openAdminMfaReset.emit()">
+        <i class="ri-shield-cross-line ui-button__icon" aria-hidden="true"></i>
+        {{ 'mfa.adminReset.submit' | translate }}
+      </app-ui-button>
+    </div>
+  </div>
+
+  <div class="settings-devices" *appHasPermission="'auth.password.admin_reset'">
+    <header class="settings-devices__head">
+      <h3 class="settings-devices__title">{{ 'password.adminReset.heading' | translate }}</h3>
+      <p class="settings-devices__sub">{{ 'password.adminReset.intro' | translate }}</p>
+    </header>
+    <div class="settings-actions">
+      <app-ui-button variant="ghost" type="button" (click)="openAdminPasswordReset.emit()">
+        <i class="ri-lock-unlock-line ui-button__icon" aria-hidden="true"></i>
+        {{ 'password.adminReset.submit' | translate }}
+      </app-ui-button>
+    </div>
+  </div>
+</section>

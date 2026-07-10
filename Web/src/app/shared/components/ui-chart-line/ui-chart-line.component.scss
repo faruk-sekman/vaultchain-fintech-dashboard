@@ -1,0 +1,243 @@
+:host {
+  display: block;
+}
+
+.chart-line {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+
+  // v2.1: fill the host so the (compact) empty state centres inside a sized
+  // card; 100% of an auto-height host still collapses to content.
+  height: 100%;
+
+  // §7 reveal budget: axis/grid/legend fade (--motion-fast) → path draws
+  // 360ms (no token at this value; total ≤480ms) → area + dots fade in the
+  // last --motion-fast of the draw. Updates only swap attribute values on
+  // persistent elements, so the draw never replays (no redraw-from-zero).
+  --chart-draw-duration: 360ms;
+
+  // ── Legend (named series only) ────────────────────────────────────────────
+  &__legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-7);
+    margin: 0 0 var(--space-2);
+    padding: 0;
+    list-style: none;
+    animation: ui-backdrop-in var(--motion-fast) var(--motion-ease-enter) both;
+  }
+
+  &__legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-3);
+    font-size: var(--text-caption);
+    color: var(--color-text-subtle);
+  }
+
+  &__swatch {
+    flex: none;
+    width: 10px;
+    height: 10px;
+    border-radius: var(--radius-xs);
+  }
+
+  // ── Plot ──────────────────────────────────────────────────────────────────
+  &__svg {
+    display: block;
+    width: 100%;
+    overflow: visible;
+  }
+
+  // v2 §4: horizontal gridlines only, --color-border at 50%.
+  &__grid {
+    stroke: var(--color-border);
+    stroke-width: 1;
+    opacity: 0.5;
+    vector-effect: non-scaling-stroke;
+    animation: ui-grid-fade var(--motion-fast) var(--motion-ease-enter) both;
+  }
+
+  &__area {
+    stroke: none;
+
+    // §7: area fill fades in over the last --motion-fast of the draw.
+    animation: ui-backdrop-in var(--motion-fast) var(--motion-ease-enter) both;
+    animation-delay: var(--chart-draw-duration);
+  }
+
+  // v2 §4: 2.5px smooth stroke. §7: draws left→right via normalized
+  // stroke-dash (pathLength="1" in the template) after the axis fade.
+  &__stroke {
+    fill: none;
+    stroke-width: 2.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    vector-effect: non-scaling-stroke;
+    stroke-dasharray: 1;
+    stroke-dashoffset: 0;
+    animation: ui-chart-draw var(--chart-draw-duration) var(--motion-ease-emphasized) both;
+    animation-delay: var(--motion-fast);
+  }
+
+  // v2 §4 point dots — zero-length subpaths painted as screen-space circles:
+  // ring takes the series colour, core is surface-filled ("white" per theme).
+  // §7: dots pop last (plain fade, no bounce).
+  &__dot-ring,
+  &__dot-core {
+    animation: ui-backdrop-in var(--motion-fast) var(--motion-ease-enter) both;
+    animation-delay: var(--chart-draw-duration);
+  }
+
+  &__dot-ring {
+    fill: none;
+    stroke-width: 7;
+    stroke-linecap: round;
+    vector-effect: non-scaling-stroke;
+  }
+
+  &__dot-core {
+    fill: none;
+    stroke: var(--color-surface);
+    stroke-width: 3.5;
+    stroke-linecap: round;
+    vector-effect: non-scaling-stroke;
+  }
+
+  // Hover highlight — an enlarged dot on the nearest point (no draw animation).
+  &__hover-ring {
+    fill: none;
+    stroke-width: 12;
+    stroke-linecap: round;
+    vector-effect: non-scaling-stroke;
+  }
+
+  &__hover-core {
+    fill: none;
+    stroke: var(--color-surface);
+    stroke-width: 5;
+    stroke-linecap: round;
+    vector-effect: non-scaling-stroke;
+  }
+
+  // §: the colour deepens a touch while hovering the plot.
+  &__area,
+  &__stroke {
+    transition: filter var(--motion-fast) var(--motion-ease-standard);
+  }
+
+  &:hover &__area {
+    filter: brightness(0.94);
+  }
+
+  &:hover &__stroke {
+    filter: brightness(0.9);
+  }
+
+  // ── x-axis labels ─────────────────────────────────────────────────────────
+  &__ticks {
+    position: relative;
+    height: var(--space-9);
+  }
+
+  // v2 §4: 13px muted axis labels.
+  &__tick {
+    position: absolute;
+    top: 0;
+    transform: translateX(-50%);
+    font-size: var(--text-body-sm);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text-muted);
+    white-space: nowrap;
+
+    :host-context([dir='rtl']) & {
+      transform: translateX(50%);
+    }
+  }
+
+  // ── Empty state (§6.8, v2.1 compact) ──────────────────────────────────────
+  // Small muted icon + the caller's note, centred; min-height 140px keeps a
+  // compact presence when the host is unsized (contract geometry, no tall void).
+  &__empty {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-3);
+    box-sizing: border-box;
+    min-height: 140px;
+    padding: var(--space-8);
+  }
+
+  &__empty-icon {
+    font-size: var(--text-h2);
+    color: var(--color-text-muted);
+  }
+
+  &__empty-text {
+    font-size: var(--text-body-sm);
+    color: var(--color-text-muted);
+  }
+
+  // ── Loading skeleton (shimmer block) ──────────────────────────────────────
+  &__skeleton {
+    width: 100%;
+    border-radius: var(--radius-md);
+    background: linear-gradient(90deg, var(--color-skeleton-from), var(--color-skeleton-to) 50%, var(--color-skeleton-from));
+    background-size: 200% 100%;
+    animation: ui-shimmer 1200ms linear infinite;
+  }
+
+  // ── Visually-hidden accessible data table ─────────────────────────────────
+  &__sr-table {
+    // A <table> (display:table) treats width/height:1px as MINIMUMS, so the sr-only table balloons
+    // to its content and inflates the scrollable area (phantom empty space below the dashboard).
+    // display:block makes the 1px + overflow:hidden actually clip it. Semantics stay (it's a <table>).
+    display: block;
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+  }
+}
+
+// Gridlines rest at 50% opacity, so their fade targets 0.5 (a shared
+// 0→1 fade with `both` fill would pin them at full opacity).
+@keyframes ui-grid-fade {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 0.5;
+  }
+}
+
+// §12: no path drawing — the chart appears as a whole (global 1ms collapse
+// makes the remaining fades instant); dash setup is removed so the stroke
+// can never rest hidden.
+@media (prefers-reduced-motion: reduce) {
+  .chart-line__skeleton {
+    animation: none;
+  }
+
+  .chart-line__stroke {
+    animation: none;
+    stroke-dasharray: none;
+  }
+
+  .chart-line__grid,
+  .chart-line__area,
+  .chart-line__dot-ring,
+  .chart-line__dot-core,
+  .chart-line__legend {
+    animation: none;
+  }
+}

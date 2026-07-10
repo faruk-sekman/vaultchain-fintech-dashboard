@@ -1,0 +1,535 @@
+:host {
+  display: block;
+}
+
+/*
+ * /analytics — a page-head band (mirrors the customer-detail enterprise header) over a 4-up KPI
+ * rail and two balanced rows: volume hero + KYC donut, then customer-status split + full KYC
+ * breakdown. Every region shows a skeleton while its REAL aggregates load, then reveals with a
+ * staggered entrance. Tokens only; no fabricated data anywhere.
+ */
+.analytics {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-11);
+}
+
+/* ── Page head ───────────────────────────────────────────────────────────── */
+.analytics-pagehead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-6);
+  flex-wrap: wrap;
+  padding: var(--space-5) var(--space-7);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-xs);
+  transition:
+    border-color var(--motion-fast) var(--motion-ease-standard),
+    box-shadow var(--motion-fast) var(--motion-ease-standard),
+    transform var(--motion-fast) var(--motion-ease-standard);
+}
+
+.analytics-pagehead:hover {
+  border-color: color-mix(in srgb, var(--color-primary) 42%, var(--color-border));
+  box-shadow: var(--shadow-sm);
+  transform: translateY(-2px);
+}
+
+.analytics-pagehead__id {
+  display: flex;
+  align-items: center;
+  gap: var(--space-6);
+  min-width: 0;
+}
+
+.analytics-pagehead__medallion {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-tile);
+  background: linear-gradient(135deg, var(--brand-500) 0%, var(--brand-700) 100%);
+  color: var(--color-on-brand);
+  font-size: var(--text-h3);
+}
+
+.analytics-pagehead__text {
+  display: grid;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.analytics-pagehead__title {
+  margin: 0;
+  font-size: var(--text-h3);
+  line-height: var(--text-h3-lh);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-strong);
+}
+
+.analytics-pagehead__sub {
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: var(--text-body-sm);
+  color: var(--color-text-muted);
+}
+
+.analytics-pagehead__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-6);
+  flex-wrap: wrap;
+}
+
+.analytics__freshness {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  height: 36px;
+  padding-inline: var(--space-6);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-2);
+  font-size: var(--text-caption);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-subtle);
+  white-space: nowrap;
+}
+
+.analytics__freshness-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: var(--radius-pill);
+  background: var(--color-success);
+  box-shadow: 0 0 0 3px rgb(var(--color-success-rgb) / 16%);
+}
+
+/* ── Refresh + retry buttons (shared 44px action rhythm) ─────────────────── */
+.analytics__refresh,
+.analytics__retry {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+  height: 44px;
+  min-width: 44px;
+  padding-inline: var(--space-9);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-field);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: var(--text-body-sm);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  transition:
+    background-color var(--motion-fast) var(--motion-ease-standard),
+    border-color var(--motion-fast) var(--motion-ease-standard),
+    box-shadow var(--motion-fast) var(--motion-ease-standard),
+    transform var(--motion-fast) var(--motion-ease-standard);
+
+  i {
+    font-size: 1rem;
+    line-height: 1;
+    transition: transform var(--motion-fast) var(--motion-ease-standard);
+  }
+
+  &:hover {
+    background: var(--color-surface-2);
+    border-color: var(--color-primary);
+    transform: translateY(-1px);
+  }
+
+  &:hover i {
+    transform: rotate(90deg) scale(1.08);
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: var(--shadow-focus);
+  }
+}
+
+/* ── KPI rail: 1 → 2×2 → 4 ──────────────────────────────────────────────── */
+.analytics__kpis {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-6);
+}
+
+@media (width >= 640px) {
+  .analytics__kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (width >= 1100px) {
+  .analytics__kpis {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.analytics__kpi-sk {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  padding: var(--space-9);
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-card);
+}
+
+:host-context(html[data-theme="dark"]) .analytics__kpi-sk {
+  border: 1px solid var(--color-border);
+}
+
+/* ── Rows: stacked → 12-col (desktop). Same-row cards share height (stretch). ── */
+.analytics__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-8);
+  align-items: stretch;
+}
+
+@media (width >= 1024px) {
+  .analytics__row {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 24px;
+  }
+
+  .analytics__col-8 {
+    grid-column: span 8;
+  }
+
+  .analytics__col-4 {
+    grid-column: span 4;
+  }
+}
+
+.analytics .v2-section {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  gap: var(--space-6);
+  align-content: start;
+  min-width: 0;
+}
+
+.analytics .v2-section app-ui-card {
+  display: grid;
+  min-width: 0;
+}
+
+.analytics__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-6);
+  flex-wrap: wrap;
+}
+
+.analytics__head-text {
+  display: grid;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.analytics__head-sub {
+  margin: 0;
+  font-size: var(--text-body-sm);
+  color: var(--color-text-muted);
+}
+
+/* ── Volume hero ─────────────────────────────────────────────────────────── */
+.analytics__volume {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  height: 100%;
+}
+
+.analytics__volume-chart {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.analytics__volume-note {
+  display: flex;
+  justify-content: center;
+}
+
+.analytics__note {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin: 0;
+  padding: var(--space-5) var(--space-6);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-2);
+  font-size: var(--text-caption);
+  color: var(--color-text-muted);
+  text-align: center;
+
+  i {
+    flex-shrink: 0;
+    font-size: var(--text-body);
+    color: var(--color-text-subtle);
+  }
+}
+
+/* ── Customer-status split bar ───────────────────────────────────────────── */
+.analytics__status {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--space-9);
+  height: 100%;
+  padding-block: var(--space-4);
+}
+
+.analytics__status-bar {
+  display: flex;
+  height: 18px;
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+  background: var(--color-surface-2);
+}
+
+.analytics__status-seg {
+  height: 100%;
+  transform-origin: left center;
+  animation: ui-grow-x var(--motion-slow) var(--motion-ease-enter) both;
+  cursor: default;
+  transition: filter var(--motion-fast) var(--motion-ease-standard);
+}
+
+.analytics__status-seg--active {
+  background: linear-gradient(135deg, var(--brand-500) 0%, var(--brand-700) 100%);
+  border-right: 2px solid var(--color-surface);
+}
+
+.analytics__status-seg--inactive {
+  background: var(--color-chart-muted-from);
+  animation-delay: 90ms;
+}
+
+.analytics__status-legend {
+  display: grid;
+  gap: var(--space-6);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.analytics__status-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-5);
+}
+
+.analytics__status-dot {
+  flex: none;
+  width: 10px;
+  height: 10px;
+  border-radius: var(--radius-pill);
+}
+
+.analytics__status-dot--active {
+  background: var(--brand-500);
+}
+
+.analytics__status-dot--inactive {
+  background: var(--color-chart-muted-from);
+}
+
+.analytics__status-label {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--text-body);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text);
+}
+
+.analytics__status-value {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--space-3);
+  flex-shrink: 0;
+  font-size: var(--text-body-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-strong);
+  font-variant-numeric: tabular-nums;
+}
+
+.analytics__status-pct {
+  font-size: var(--text-body-sm);
+  font-weight: var(--font-weight-regular);
+  color: var(--color-text-muted);
+}
+
+.analytics__status-sk {
+  display: grid;
+  gap: var(--space-7);
+  padding-block: var(--space-6);
+}
+
+/* ── KYC breakdown: responsive list (1 → 2 columns) ─────────────────────── */
+.analytics__breakdown {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-7) var(--space-13);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (width >= 720px) {
+  .analytics__breakdown {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.analytics__breakdown-row {
+  display: grid;
+  gap: var(--space-5);
+  min-width: 0;
+}
+
+.analytics__breakdown-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-5);
+}
+
+.analytics__breakdown-label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-4);
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: var(--text-body-lg);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-strong);
+}
+
+.analytics__breakdown-dot {
+  flex: none;
+  width: 9px;
+  height: 9px;
+  border-radius: var(--radius-pill);
+}
+
+.analytics__breakdown-value {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--space-3);
+  flex-shrink: 0;
+  font-size: var(--text-body-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-strong);
+  font-variant-numeric: tabular-nums;
+}
+
+.analytics__breakdown-percent {
+  font-size: var(--text-body);
+  font-weight: var(--font-weight-regular);
+  color: var(--color-text-muted);
+}
+
+.analytics__breakdown-track {
+  width: 100%;
+  height: 10px;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-2);
+  overflow: hidden;
+}
+
+.analytics__breakdown-fill {
+  display: block;
+  width: var(--fill-to, 0%);
+  height: 100%;
+  border-radius: var(--radius-pill);
+  transition:
+    width var(--motion-normal) var(--motion-ease-emphasized),
+    filter var(--motion-fast) var(--motion-ease-standard);
+}
+
+/* ── Hover affordance: the hovered element deepens a touch; the tooltip carries the detail. ── */
+.analytics__breakdown-row,
+.analytics__status-row {
+  cursor: default;
+}
+
+.analytics__breakdown-row:hover .analytics__breakdown-fill {
+  filter: brightness(0.9);
+}
+
+.analytics__status-seg:hover {
+  filter: brightness(0.9);
+}
+
+/* Staggered reveal: each row rises in, then its bar grows from the left. */
+.analytics__breakdown--reveal > .analytics__breakdown-row {
+  animation: ui-fade-up var(--motion-slow) var(--motion-ease-enter) both;
+}
+
+.analytics__breakdown--reveal .analytics__breakdown-fill {
+  transform-origin: left center;
+  animation: ui-grow-x var(--motion-slow) var(--motion-ease-enter) both;
+}
+
+@for $i from 1 through 8 {
+  .analytics__breakdown--reveal > .analytics__breakdown-row:nth-child(#{$i}) {
+    animation-delay: calc(#{$i - 1} * 60ms);
+  }
+
+  .analytics__breakdown--reveal > .analytics__breakdown-row:nth-child(#{$i}) .analytics__breakdown-fill {
+    animation-delay: calc(140ms + #{$i - 1} * 60ms);
+  }
+}
+
+/* ── Per-page error + retry (§8) ─────────────────────────────────────────── */
+.analytics__region-error {
+  display: grid;
+  place-items: center;
+  gap: var(--space-5);
+  padding: var(--space-11) var(--space-8);
+  text-align: center;
+  border-color: transparent;
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+}
+
+:host-context(html[data-theme="dark"]) .analytics__region-error {
+  border-color: var(--color-border);
+}
+
+.analytics__region-error-icon {
+  font-size: var(--text-display);
+  color: var(--color-danger);
+}
+
+.analytics__region-error-text {
+  font-size: var(--text-body-sm);
+  color: var(--color-text-subtle);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .analytics__breakdown-fill,
+  .analytics__status-seg {
+    transition: none;
+  }
+
+  .analytics__breakdown--reveal > .analytics__breakdown-row,
+  .analytics__breakdown--reveal .analytics__breakdown-fill,
+  .analytics__status-seg {
+    animation: none;
+    transform: none;
+  }
+}

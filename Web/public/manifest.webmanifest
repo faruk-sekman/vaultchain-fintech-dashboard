@@ -1,0 +1,13 @@
+{
+  "name": "Vaultchain — Fintech Operations",
+  "short_name": "Vaultchain",
+  "description": "Vaultchain — fintech operations dashboard.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1E66F5",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

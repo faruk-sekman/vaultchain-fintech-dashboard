@@ -1,0 +1,395 @@
+/* Copyright (c) 2026 Fintech Dashboard contributors. */
+
+/* The notifications page (v2 re-skin). Token-only colours → light/dark-correct;
+   the summary head mirrors settings-panel__head and the body is a v2 §3.3 G3 list (severity tile + two
+   lines + right rail, hairline separators — NOT bordered mini-cards). Lean (well under the 8kB budget). */
+
+.notifications-page {
+  /* Content fills the page-shell width (like the customer-detail content area) — no centred narrow card. */
+
+  /* Summary head — medallion + text stack + right-aligned mark-all (mirrors settings-panel__head). */
+  &__head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-block-end: 16px;
+  }
+
+  &__medallion {
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    inline-size: 40px;
+    block-size: 40px;
+    border-radius: 12px;
+    background: var(--tile-blue);
+    color: var(--color-link);
+    font-size: 20px;
+  }
+
+  &__heading {
+    display: grid;
+    gap: var(--space-2);
+    min-width: 0;
+  }
+
+  &__summary {
+    font-size: var(--text-h4);
+    line-height: var(--text-h4-lh);
+  }
+
+  &__summary--unread {
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-strong);
+  }
+
+  &__summary--clear {
+    color: var(--color-text-muted);
+  }
+
+  &__sub {
+    margin: 0;
+    font-size: var(--text-body-sm);
+    color: var(--color-text-muted);
+  }
+
+  &__mark-all {
+    flex-shrink: 0;
+    margin-inline-start: auto;
+    padding: 8px 12px;
+    border: 0;
+    border-radius: 10px;
+    background: transparent;
+    color: var(--color-link);
+    font-size: 13px;
+    font-weight: var(--font-weight-semibold);
+    cursor: pointer;
+    transition: background var(--motion-fast) var(--motion-ease-standard);
+
+    &:hover:not(:disabled) {
+      background: var(--color-primary-soft);
+    }
+
+    &:disabled {
+      color: var(--color-text-muted);
+      cursor: default;
+      opacity: 0.6;
+    }
+
+    &:focus-visible {
+      outline: none;
+      box-shadow: var(--shadow-focus);
+    }
+  }
+
+  /* Toolbar (segmented + 2 selects); collapses to one column below 600px. */
+  &__toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    margin-block-end: 14px;
+  }
+
+  &__filter-field {
+    min-width: 180px;
+    flex: 1 1 180px;
+  }
+
+  /* Muted bucket label sitting above each non-empty date group. */
+  &__group-label {
+    margin: 0;
+    padding: 6px 4px;
+    font-size: 11px;
+    font-weight: var(--font-weight-bold);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+  }
+
+  &__list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  &__retry,
+  &__more {
+    display: flex;
+    justify-content: center;
+    margin-top: var(--space-4);
+  }
+
+  /* A13: infinite-scroll tail — skeleton strip stacks above the sentinel + fallback button. */
+  &__more {
+    flex-direction: column;
+    gap: var(--space-3);
+    align-items: center;
+  }
+
+  &__sentinel {
+    width: 100%;
+    height: 1px;
+  }
+
+  &__all-loaded {
+    display: flex;
+    gap: var(--space-2);
+    align-items: center;
+    justify-content: center;
+    margin: var(--space-5) 0 0;
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+  }
+}
+
+/* ── G3 list row (pixel-matched to the reference) ───────────────────────────────
+   Trailing meta is INLINE: [40px category tile] [title + 1-line desc] [severity badge] [60px time]
+   [30px action]. Unread = a soft rounded card (radius 14, --color-primary-soft wash, an inset 3px
+   rail, 700 title). Read = a flat row with a hairline bottom divider and a 500 title. Token-only. */
+.notif-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 14px;
+  border-block-end: 1px solid var(--color-border);
+  margin-block-end: 6px;
+
+  &:last-child {
+    border-block-end: 0;
+    margin-block-end: 0;
+  }
+
+  /* Unread = soft card: tint + inset rail, no divider. */
+  &--unread {
+    padding-inline-start: 14px;
+    background: var(--color-primary-soft);
+    border-block-end: 0;
+  }
+
+  /* Inset, rounded 3px rail (not a full-height border). */
+  &__rail {
+    position: absolute;
+    inset-inline-start: 0;
+    inset-block: 11px;
+    inline-size: 3px;
+    border-radius: 3px;
+    background: var(--color-primary);
+  }
+
+  /* Clickable lead (tile + text). Badge / time / action sit outside it, inline. */
+  &__main {
+    display: flex;
+    flex: 1 1 auto;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    text-align: start;
+    cursor: pointer;
+
+    &:focus-visible {
+      outline: none;
+      box-shadow: var(--shadow-focus);
+      border-radius: var(--radius-md);
+    }
+  }
+
+  /* Category tile — 40×40, radius 12, soft hue bg + matching ink (encodes TYPE, not severity). */
+  &__tile {
+    display: grid;
+    place-items: center;
+    flex: 0 0 auto;
+    inline-size: 40px;
+    block-size: 40px;
+    border-radius: 12px;
+    font-size: 20px;
+    background: var(--tile-blue);
+    color: var(--color-link);
+
+    &--blue {
+      background: var(--tile-blue);
+      color: var(--color-link);
+    }
+
+    &--teal {
+      background: var(--tile-teal);
+      color: var(--badge-teal-text);
+    }
+
+    &--pink {
+      background: var(--tile-pink);
+      color: var(--badge-pink-text);
+    }
+
+    &--yellow {
+      background: var(--tile-yellow);
+      color: var(--color-warning-text);
+    }
+  }
+
+  &__text {
+    display: grid;
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  /* Read title = 500/14 text; unread title = 700/14 heading. */
+  &__title {
+    font-size: 14px;
+    font-weight: var(--font-weight-medium);
+    line-height: 1.3;
+    color: var(--color-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &--unread &__title {
+    font-weight: var(--font-weight-bold);
+    color: var(--color-heading);
+  }
+
+  &__body {
+    margin-block-start: 1px;
+    font-size: 12.5px;
+    line-height: 1.35;
+    color: var(--color-text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Relative time — fixed 60px right-aligned column so the actions line up. */
+  &__time {
+    flex: 0 0 auto;
+    inline-size: 60px;
+    font-size: 11.5px;
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text-muted);
+    white-space: nowrap;
+    text-align: end;
+  }
+
+  /* 30×30 outlined action box: checkmark on unread (→ success), arrow on read (→ link). */
+  &__action {
+    display: grid;
+    place-items: center;
+    flex: 0 0 auto;
+    inline-size: 30px;
+    block-size: 30px;
+    border-radius: 9px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    color: var(--color-text-muted);
+    font-size: 15px;
+    cursor: pointer;
+    transition:
+      border-color var(--motion-fast) var(--motion-ease-standard),
+      color var(--motion-fast) var(--motion-ease-standard);
+
+    &:disabled {
+      cursor: default;
+      opacity: 0.55;
+    }
+
+    &:focus-visible {
+      outline: none;
+      box-shadow: var(--shadow-focus);
+    }
+  }
+
+  &__action--check:hover:not(:disabled) {
+    border-color: var(--color-success-strong);
+    color: var(--color-success-strong);
+  }
+
+  &__action--go:hover {
+    border-color: var(--color-link);
+    color: var(--color-link);
+  }
+
+  /* Skeleton row mirrors the final row geometry (40px tile + 2 lines). */
+  &--sk {
+    align-items: center;
+    border-block-end: 0;
+  }
+
+  &__sk-text {
+    display: grid;
+    flex: 1 1 auto;
+    gap: var(--space-2);
+    min-width: 0;
+  }
+}
+
+/* Severity badge — soft pill with a leading icon (icon + label, never colour-only). 700/11, pad 4×9. */
+.notif-badge {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 9px;
+  border-radius: var(--radius-pill);
+  font-size: 11px;
+  font-weight: var(--font-weight-bold);
+  white-space: nowrap;
+
+  &__icon {
+    font-size: 11px;
+    line-height: 1;
+  }
+
+  &--critical {
+    color: var(--badge-red-text);
+    background: var(--badge-red-bg);
+  }
+
+  &--warning {
+    color: var(--badge-yellow-text);
+    background: var(--badge-yellow-bg);
+  }
+
+  &--info {
+    color: var(--badge-blue-text);
+    background: var(--badge-blue-bg);
+  }
+
+  &--success {
+    color: var(--badge-green-text);
+    background: var(--badge-green-bg);
+  }
+}
+
+/* Below 600px: toolbar stacks to a single column and the row rail tucks under the text comfortably. */
+@media (width <= 600px) {
+  .notifications-page__toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .notifications-page__filter-field {
+    flex: 1 1 auto;
+  }
+
+  .notif-row__rail {
+    align-items: flex-start;
+    text-align: start;
+  }
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

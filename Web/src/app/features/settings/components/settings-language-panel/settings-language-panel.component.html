@@ -1,0 +1,33 @@
+<section
+  class="settings-panel motion-stagger"
+  role="tabpanel"
+  data-testid="settings-panel-language"
+  [attr.id]="panelId"
+  [attr.aria-labelledby]="labelledBy"
+>
+  <header class="settings-panel__head">
+    <span class="settings-medallion settings-medallion--teal" aria-hidden="true">
+      <i class="ri-translate-2"></i>
+    </span>
+    <div class="settings-panel__heading">
+      <h2 class="settings-panel__title">{{ 'settings.language.title' | translate }}</h2>
+      <p class="settings-panel__sub">{{ 'settings.language.subtitle' | translate }}</p>
+    </div>
+  </header>
+
+  <div class="settings-rows">
+    <div class="settings-row">
+      <div class="settings-row__text">
+        <span class="settings-row__label">{{ 'settings.language.label' | translate }}</span>
+        <span class="settings-row__hint">{{ 'settings.language.hint' | translate }}</span>
+      </div>
+      <app-ui-segmented
+        variant="brand"
+        [items]="langOptions"
+        [value]="currentLang"
+        [ariaLabel]="'settings.language.label' | translate"
+        (valueChange)="langChange.emit($event)"
+      ></app-ui-segmented>
+    </div>
+  </div>
+</section>

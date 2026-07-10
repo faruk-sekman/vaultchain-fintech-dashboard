@@ -1,0 +1,258 @@
+<header class="header">
+  @let titleText = pageTitle.override() ?? (pageTitle.titleKey() | translate);
+
+  <div class="header__meta">
+    <nav class="header__breadcrumb" [attr.aria-label]="'common.breadcrumb' | translate">
+      <span>{{ 'header.pages' | translate }}</span>
+      <i class="ri-arrow-right-s-line" aria-hidden="true"></i>
+      <span class="header__breadcrumb-current">{{ titleText }}</span>
+    </nav>
+    <!-- The routed page title — the app's single H1; pages render none. -->
+    <h1 class="header__title" [attr.title]="titleText">{{ titleText }}</h1>
+  </div>
+
+  <div class="header__toolbar">
+    <form class="header__search" role="search" (submit)="$event.preventDefault(); onSearch()">
+      <label class="sr-only" for="header-search">{{ 'header.search' | translate }}</label>
+      <i class="header__search-icon ri-search-line" aria-hidden="true"></i>
+      <input
+        id="header-search"
+        type="text"
+        class="header__search-input"
+        [formControl]="searchControl"
+        [placeholder]="'common.searchPlaceholder' | translate"
+      />
+    </form>
+
+    <!-- Drawer toggle — mobile only (≤767); tablet+ shows the rail instead (header.scss). -->
+    <button
+      type="button"
+      appIconPop
+      class="header__tool header__menu"
+      data-testid="mobile-menu-trigger"
+      (click)="menuToggle.emit()"
+      [attr.aria-label]="'common.menu' | translate"
+    >
+      <i class="ri-menu-2-line" aria-hidden="true"></i>
+    </button>
+
+    <!--
+      Preferences cluster: theme toggle + language switch, side by side. The theme toggle carries
+      a tooltip (and a matching dynamic aria-label) describing the action it will take; the
+      language switch uses the brand variant so the active language reads at a glance. The old
+      standalone Settings link was removed — Settings already lives in the profile menu below.
+    -->
+    <div class="header__prefs">
+      <app-ui-segmented
+        class="header__lang"
+        size="sm"
+        variant="brand"
+        [items]="langOptions"
+        [value]="currentLang()"
+        [ariaLabel]="'header.language' | translate"
+        (valueChange)="onLangChange($event)"
+      ></app-ui-segmented>
+      <button
+        type="button"
+        appIconPop
+        class="header__tool header__theme"
+        (click)="toggleTheme()"
+        [appUiTooltip]="
+          (theme() === 'dark' ? 'header.themeSwitchToLight' : 'header.themeSwitchToDark')
+            | translate
+        "
+        [attr.aria-label]="
+          (theme() === 'dark' ? 'header.themeSwitchToLight' : 'header.themeSwitchToDark')
+            | translate
+        "
+        [attr.aria-pressed]="theme() === 'dark'"
+      >
+        <i [ngClass]="theme() === 'dark' ? 'ri-sun-line' : 'ri-moon-line'" aria-hidden="true"></i>
+      </button>
+    </div>
+
+    <!--
+      Notifications: a bespoke interactive popover (the shared ui-menu's flat label/icon entry model
+      can't carry relative time + unread emphasis + param-interpolated titles). The trigger owns
+      aria-expanded/-controls/-haspopup; the badge count is announced via a visually-hidden role="status"
+      aria-live="polite" region (textual + colour-independent, not a colour-only dot).
+    -->
+    <div class="notifications">
+      <button
+        type="button"
+        appIconPop
+        class="header__tool notifications__trigger"
+        data-testid="notifications-trigger"
+        [class.notifications__trigger--unread]="hasUnread()"
+        aria-haspopup="dialog"
+        [attr.aria-expanded]="notificationsOpen()"
+        aria-controls="header-notifications-panel"
+        [attr.aria-label]="'header.notificationsWithCount' | translate: { count: unreadCount() }"
+        (click)="toggleNotifications()"
+      >
+        <i class="ri-notification-3-line" aria-hidden="true"></i>
+        @if (hasUnread()) {
+          <span class="notifications__dot" aria-hidden="true"></span>
+        }
+      </button>
+
+      <!-- Live count for assistive tech: textual + colour-independent. -->
+      <span class="sr-only" role="status" aria-live="polite">
+        @if (hasUnread()) {
+          {{ 'header.unreadCount' | translate: { count: unreadCount() } }}
+        } @else {
+          {{ 'header.noUnread' | translate }}
+        }
+      </span>
+
+      @if (notificationsOpen()) {
+        <!-- Bespoke popover, pixel-matched to the v2 mockup: a fixed 380px card with an 8px
+             caret aligned under the bell, a head (title + "N new" pill + Mark all as read), an internally
+             scrolling 56px-row list with a bottom fade, and a footer "see all" link. Token-only colours;
+             raw px for geometry (interim redesign budget). -->
+        <div
+          id="header-notifications-panel"
+          class="notif-pop"
+          role="dialog"
+          tabindex="-1"
+          [attr.aria-label]="'header.notifications' | translate"
+        >
+          <span class="notif-pop__caret" aria-hidden="true"></span>
+          <div class="notif-pop__card">
+            <!-- HEAD: title + unread "N yeni" pill (aria-hidden; the sr-only status region is the sole
+                 announcer) + compact mark-all. -->
+            <header class="notif-pop__head">
+              <span class="notif-pop__title-wrap">
+                <span class="notif-pop__title">{{ 'header.notifications' | translate }}</span>
+                @if (hasUnread()) {
+                  <span class="notif-pop__count" aria-hidden="true">
+                    {{ 'header.newCount' | translate: { count: unreadCount() } }}
+                  </span>
+                }
+              </span>
+              <button
+                type="button"
+                class="notif-pop__markall"
+                [disabled]="!hasUnread()"
+                (click)="markAllNotificationsRead()"
+              >
+                {{ 'notifications.markAllRead' | translate }}
+              </button>
+            </header>
+
+            <!-- SCROLL REGION: the list scrolls internally; a bottom fade hints at more rows. -->
+            <div class="notif-pop__scroll">
+              @if (!notificationsLoaded()) {
+                <!-- Loading: skeleton rows that mirror the populated row (tile + two text lines). -->
+                <div
+                  class="notif-pop__list"
+                  role="status"
+                  [attr.aria-label]="'common.loading' | translate"
+                >
+                  @for (row of [0, 1, 2]; track row) {
+                    <div class="notif-pop__skel">
+                      <app-ui-skeleton
+                        variant="block"
+                        width="34px"
+                        height="34px"
+                        radius="10px"
+                      ></app-ui-skeleton>
+                      <div class="notif-pop__skel-text">
+                        <app-ui-skeleton variant="line" width="80%" height="12px"></app-ui-skeleton>
+                        <app-ui-skeleton variant="line" width="45%" height="10px"></app-ui-skeleton>
+                      </div>
+                    </div>
+                  }
+                </div>
+              } @else if (recentNotifications().length === 0) {
+                <app-ui-empty
+                  class="notif-pop__empty"
+                  icon="ri-inbox-line"
+                  [title]="'notifications.empty' | translate"
+                ></app-ui-empty>
+              } @else {
+                <ul class="notif-pop__list" role="list">
+                  @for (item of recentNotifications(); track item.id) {
+                    @let time = notificationTime(item.createdAt);
+                    <li class="notif-pop__item" [class.notif-pop__item--unread]="!item.readAt">
+                      <button
+                        type="button"
+                        class="notif-pop__row"
+                        (click)="onNotificationClick(item)"
+                      >
+                        <span
+                          class="notif-pop__tile"
+                          [attr.data-severity]="item.severity"
+                          aria-hidden="true"
+                        >
+                          <i [class]="notificationIcon(item.type)"></i>
+                        </span>
+                        <span class="notif-pop__text">
+                          <span class="notif-pop__row-title">{{ notificationTitle(item) }}</span>
+                          <span class="notif-pop__meta">
+                            <span class="notif-pop__badge" [attr.data-severity]="item.severity">
+                              {{ severityKey(item.severity) | translate }}
+                            </span>
+                            <span class="notif-pop__time">
+                              @if (time.absolute) {
+                                {{ item.createdAt | date: 'short' : undefined : locale() }}
+                              } @else {
+                                {{ time.key | translate: time.params }}
+                              }
+                            </span>
+                          </span>
+                        </span>
+                        @if (!item.readAt) {
+                          <span
+                            class="notif-pop__dot"
+                            [attr.aria-label]="'notifications.unread' | translate"
+                          ></span>
+                        }
+                      </button>
+                    </li>
+                  }
+                </ul>
+              }
+              <span class="notif-pop__fade" aria-hidden="true"></span>
+            </div>
+
+            <footer class="notif-pop__foot">
+              <button type="button" class="notif-pop__seeall" (click)="goToAllNotifications()">
+                {{ 'notifications.seeAll' | translate }}
+                <i class="ri-arrow-right-line" aria-hidden="true"></i>
+              </button>
+            </footer>
+          </div>
+        </div>
+      }
+    </div>
+
+    <app-ui-menu
+      class="user-menu"
+      align="end"
+      panelVariant="profile"
+      summaryIcon="ri-user-3-line"
+      [summaryTitle]="currentUser.name || ('header.account' | translate)"
+      [summarySubtitle]="currentUser.role"
+      [entries]="userMenuEntries"
+      [menuLabelKey]="'header.userMenu'"
+      (select)="onUserMenuSelect($event)"
+    >
+      <button
+        trigger
+        type="button"
+        appIconPop
+        data-ui-menu-trigger
+        data-testid="user-menu-trigger"
+        class="header__avatar"
+        [attr.aria-label]="'header.userMenu' | translate"
+      >
+        <app-ui-avatar size="md" icon="ri-user-3-line" [name]="currentUser.name || null" />
+      </button>
+    </app-ui-menu>
+  </div>
+
+  <div class="progress" aria-hidden="true">
+    <div class="bar" [style.width.%]="(loading$ | async) ? 100 : 0"></div>
+  </div>
+</header>

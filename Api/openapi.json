@@ -1,0 +1,4381 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/api/v1/health": {
+      "get": {
+        "operationId": "HealthController_check",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Service is live."
+          }
+        },
+        "tags": [
+          "health"
+        ]
+      }
+    },
+    "/api/v1/auth/login": {
+      "post": {
+        "operationId": "AuthController_login",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "On success: a 15-min access token + the httpOnly refresh cookie (status `authenticated`). For an operator with opt-in MFA: status `mfa_required` with NO tokens, plus the short-lived httpOnly `ftd_mfa` challenge cookie — complete it at POST /auth/mfa/verify.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthenticatedResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/v1/auth/refresh": {
+      "post": {
+        "operationId": "AuthController_refresh",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Reads the refresh token from the httpOnly cookie, rotates it, and re-sets the cookie; returns a new access token.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/v1/auth/logout": {
+      "post": {
+        "operationId": "AuthController_logout",
+        "parameters": [],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/v1/auth/me": {
+      "get": {
+        "operationId": "AuthController_me",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Current principal + effective permissions.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MeResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/v1/auth/mfa/verify": {
+      "post": {
+        "operationId": "MfaController_verify",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VerifyTotpDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Verify a TOTP code for the in-progress login challenge. On success the session is issued (ftd_refresh set, ftd_mfa cleared); on failure the per-challenge attempt counter advances.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthenticatedResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/v1/auth/mfa/backup-code/verify": {
+      "post": {
+        "operationId": "MfaController_verifyBackupCode",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VerifyBackupCodeDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Redeem a one-time backup code for the in-progress login challenge and issue the session. Remember-device is not offered on the recovery path.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthenticatedResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/v1/auth/mfa/setup/start": {
+      "post": {
+        "operationId": "MfaAccountController_setupStart",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StartMfaSetupDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Begin opt-in MFA enrolment (password re-auth). Returns the otpauth URI + QR to import into an authenticator app. MFA is NOT active until /setup/confirm.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MfaSetupStartResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/v1/auth/mfa/setup/confirm": {
+      "post": {
+        "operationId": "MfaAccountController_setupConfirm",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConfirmMfaSetupDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Confirm enrolment with the first code: activates MFA and returns the one-time backup codes (shown ONCE).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MfaSetupConfirmResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/v1/auth/mfa/disable": {
+      "post": {
+        "operationId": "MfaAccountController_disable",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MfaReauthDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Disable MFA (password + a current TOTP or backup code). Clears MFA state and revokes remembered devices."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/v1/auth/mfa/backup-codes/regenerate": {
+      "post": {
+        "operationId": "MfaAccountController_regenerateBackupCodes",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MfaReauthDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Replace the backup codes (password + a current TOTP or backup code); returns the new set ONCE.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MfaSetupConfirmResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/v1/auth/mfa/admin-reset": {
+      "post": {
+        "operationId": "MfaAccountController_adminReset",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminResetMfaDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Administrator-only: reset a target operator’s MFA and revoke their sessions, devices, and live challenges."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/v1/auth/mfa/devices": {
+      "get": {
+        "operationId": "MfaAccountController_listDevices",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "List the operator’s active trusted (\"remember this device\") devices — empty when the feature is off.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RememberedDeviceDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/v1/auth/mfa/devices/{id}": {
+      "delete": {
+        "operationId": "MfaAccountController_revokeDevice",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Revoke one of the operator’s own trusted devices (the next sign-in from it re-prompts for MFA)."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/v1/auth/password/reset/initiate": {
+      "post": {
+        "operationId": "PasswordResetController_initiate",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InitiatePasswordResetDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Start a self-service password reset. ALWAYS responds 202 { status: \"reset_initiated\" } (no user enumeration). Sets the httpOnly ftd_pwreset challenge cookie ONLY when the account exists AND has confirmed MFA — MFA-enabled state is never revealed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResetInitiatedResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/v1/auth/password/reset/verify-code": {
+      "post": {
+        "operationId": "PasswordResetController_verifyCode",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VerifyCodeDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Step 2: verify the second factor (6-digit TOTP or one-time backup code) ONCE and stamp the challenge (factor_verified_at). On success 200 { status: \"code_verified\" } — the TOTP replay floor is advanced / the backup code consumed, and the later /verify needs no code. IDEMPOTENT for an already-stamped challenge (a Back/retry does not re-spend the factor). On a bad/expired factor the per-challenge attempt counter advances and 401 Auth.ResetInvalidCode is returned. The verify-code call sets NO cookie and issues NO token.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResetCodeVerifiedResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/v1/auth/password/reset/verify": {
+      "post": {
+        "operationId": "PasswordResetController_verify",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VerifyPasswordResetDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Step 3: set the new password. Requires a prior factor stamp from verify-code (else 401 Auth.ResetFactorRequired); takes the new password ONLY (no code). On success the password is changed, ALL sessions/devices/challenges are revoked, the ftd_pwreset cookie is cleared, and NO session is issued (a fresh /login is required). The bound IP/UA fingerprint is re-enforced on this call too.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResetCompleteResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/v1/auth/password/admin-reset": {
+      "post": {
+        "operationId": "PasswordResetAdminController_adminReset",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminPasswordResetDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Administrator-only: set a working password for a target operator who cannot self-serve the MFA-gated reset, and revoke their sessions, devices, and live challenges. No session/token is issued. Self-reset via this path is forbidden (use the self-service reset)."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/v1/auth/password/reset-request": {
+      "post": {
+        "operationId": "PasswordResetRequestController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateResetRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Ask an administrator to reset the password for an account. ALWAYS responds 202 { status: \"reset_request_received\" } and ALWAYS sets the httpOnly ftd_pwreq cookie (a decoy on non-created branches) — no user enumeration: unknown email, duplicate open request, and cooldown are indistinguishable from a fresh request. At most one open request per account; poll the status endpoint (with the cookie) for the owner-only outcome.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResetRequestReceivedResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/v1/auth/password/reset-request/status": {
+      "post": {
+        "operationId": "PasswordResetRequestController_status",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Poll the caller's own reset request, keyed by the httpOnly ftd_pwreq cookie. NEVER 401/404 — a missing/unknown/decoy token reads as { status: 'pending' }. On an approved, unclaimed request the call CLAIMS it: a standard ftd_pwreset challenge cookie (factor pre-stamped 'admin_approval', bound to this call's IP/UA) is set so POST /auth/password/reset/verify can finish with the new password. Re-polling re-mints (latest wins); after completion the status stays 'approved' with no cookie. POST because the claim is a side effect; SameSite=Strict is the CSRF control.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResetRequestStatusResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/v1/auth/password/reset-requests": {
+      "get": {
+        "operationId": "PasswordResetRequestAdminController_list",
+        "parameters": [
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "description": "PENDING | APPROVED | DENIED | EXPIRED",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Administrator-only: the reset-request queue, PENDING first, newest first (max 100). Account emails are ALWAYS masked.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ResetRequestItemDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/v1/auth/password/reset-requests/{id}": {
+      "get": {
+        "operationId": "PasswordResetRequestAdminController_detail",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Administrator-only: one reset request incl. coarse device metadata (ipPrefix — never a raw IP — plus a User-Agent summary and the raw UA). 404 Auth.ResetRequestNotFound when unknown.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResetRequestDetailDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/v1/auth/password/reset-requests/{id}/approve": {
+      "post": {
+        "operationId": "PasswordResetRequestAdminController_approve",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Approve a pending reset request (verify the requester's identity OUT-OF-BAND first). The requester's polling browser then claims a factor-pre-stamped set-password challenge — the admin never chooses or sees a password. Returns the refreshed detail. Errors: 404 Auth.ResetRequestNotFound · 409 Auth.ResetRequestAlreadyDecided · 409 Auth.ResetRequestExpired · 403 Auth.SelfResetForbidden.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResetRequestDetailDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/v1/auth/password/reset-requests/{id}/deny": {
+      "post": {
+        "operationId": "PasswordResetRequestAdminController_deny",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Deny a pending reset request; the requester is notified (durable receipt). Same contract and error set as approve.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResetRequestDetailDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/v1/operator/notifications": {
+      "get": {
+        "operationId": "NotificationController_list",
+        "parameters": [
+          {
+            "name": "filter[read]",
+            "required": false,
+            "in": "query",
+            "description": "true = read only, false = unread only.",
+            "schema": {}
+          },
+          {
+            "name": "filter[severity]",
+            "required": false,
+            "in": "query",
+            "description": "info | success | warning | critical",
+            "schema": {}
+          },
+          {
+            "name": "filter[type]",
+            "required": false,
+            "in": "query",
+            "description": "SECURITY_ALERT | KYC_EVENT | CUSTOMER_EVENT | SYSTEM | ACCOUNT",
+            "schema": {}
+          },
+          {
+            "name": "page[size]",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20
+            }
+          },
+          {
+            "name": "page[number]",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Recipient-scoped paged notifications + the recipient's total unreadCount.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedNotificationListDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "operator"
+        ]
+      }
+    },
+    "/api/v1/operator/notifications/{id}/read": {
+      "post": {
+        "operationId": "NotificationController_markRead",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Mark ONE of the caller's own notifications read (404 if not owned/known). Idempotent.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationReadResultDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "operator"
+        ]
+      }
+    },
+    "/api/v1/operator/notifications/read-all": {
+      "post": {
+        "operationId": "NotificationController_markAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Mark ALL of the caller's unread notifications read; returns unreadCount = 0.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationReadResultDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "operator"
+        ]
+      }
+    },
+    "/api/v1/dashboard/stream-token": {
+      "post": {
+        "operationId": "RealtimeController_streamToken",
+        "parameters": [],
+        "responses": {
+          "204": {
+            "description": "Sets a short-lived (60s) httpOnly cookie (`ftd_stream`, scope `stream:read`) used to authenticate GET /dashboard/stream. No body — the credential is never exposed to JS."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "dashboard"
+        ]
+      }
+    },
+    "/api/v1/dashboard/stream": {
+      "get": {
+        "operationId": "RealtimeController_stream",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "dashboard"
+        ]
+      }
+    },
+    "/api/v1/catalog/currencies": {
+      "get": {
+        "operationId": "CatalogController_listCurrencies",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Active ISO-4217 currency catalog.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CurrencyCatalogDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "catalog"
+        ]
+      }
+    },
+    "/api/v1/operator/profile": {
+      "get": {
+        "operationId": "OperatorController_getProfile",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Authenticated operator profile/settings.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OperatorProfileDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "operator"
+        ]
+      },
+      "patch": {
+        "operationId": "OperatorController_updateProfile",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateOperatorProfileDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Update authenticated operator profile/settings.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OperatorProfileDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "operator"
+        ]
+      }
+    },
+    "/api/v1/operator/notification-preferences": {
+      "get": {
+        "operationId": "OperatorController_getNotificationPreferences",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Authenticated operator notification preferences.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationPreferencesDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "operator"
+        ]
+      },
+      "patch": {
+        "operationId": "OperatorController_updateNotificationPreferences",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateNotificationPreferencesDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Update authenticated operator notification preferences.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationPreferencesDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "operator"
+        ]
+      }
+    },
+    "/api/v1/roles": {
+      "get": {
+        "operationId": "RbacController_listRoles",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "List roles with their permission codes."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "rbac"
+        ]
+      },
+      "post": {
+        "operationId": "RbacController_createRole",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateRoleDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Create a role."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "rbac"
+        ]
+      }
+    },
+    "/api/v1/permissions": {
+      "get": {
+        "operationId": "RbacController_listPermissions",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "The permission catalog."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "rbac"
+        ]
+      }
+    },
+    "/api/v1/users": {
+      "get": {
+        "operationId": "RbacController_listUsers",
+        "parameters": [
+          {
+            "name": "filter[q]",
+            "required": false,
+            "in": "query",
+            "description": "Search by display name (case-insensitive contains).",
+            "schema": {}
+          },
+          {
+            "name": "page[size]",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 25
+            }
+          },
+          {
+            "name": "page[number]",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Admin-only paged user list for the password-reset operator picker + status panel: id, displayName, status, roles, a server-side MASKED email, and lockout telemetry (locked / failedLoginCount / lastLoginAt). No raw PII.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedUserListDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "rbac"
+        ]
+      }
+    },
+    "/api/v1/roles/{roleId}/permissions": {
+      "post": {
+        "operationId": "RbacController_grantPermission",
+        "parameters": [
+          {
+            "name": "roleId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GrantPermissionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Grant a permission to a role (self-escalation guarded)."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "rbac"
+        ]
+      }
+    },
+    "/api/v1/roles/{roleId}/permissions/{permissionId}": {
+      "delete": {
+        "operationId": "RbacController_revokePermission",
+        "parameters": [
+          {
+            "name": "roleId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "permissionId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "rbac"
+        ]
+      }
+    },
+    "/api/v1/users/{userId}/roles": {
+      "post": {
+        "operationId": "RbacController_assignRole",
+        "parameters": [
+          {
+            "name": "userId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssignRoleDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Assign a role to a user (self-escalation guarded)."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "rbac"
+        ]
+      }
+    },
+    "/api/v1/users/{userId}/roles/{roleId}": {
+      "delete": {
+        "operationId": "RbacController_revokeRole",
+        "parameters": [
+          {
+            "name": "userId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "roleId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "rbac"
+        ]
+      }
+    },
+    "/api/v1/customers/{id}/risk-decisions": {
+      "post": {
+        "operationId": "RiskController_record",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateRiskDecisionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Persist a rule-based screening decision with its safety label.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RiskAssessmentResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "risk"
+        ]
+      }
+    },
+    "/api/v1/customers/{id}/risk-screenings": {
+      "post": {
+        "operationId": "RiskController_screen",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScreenRiskAddressDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Screen an address through the bound risk provider without persisting a decision.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RiskScreeningResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "risk"
+        ]
+      }
+    },
+    "/api/v1/customers/{id}/risk-assessments": {
+      "get": {
+        "operationId": "RiskController_list",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page[size]",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 25
+            }
+          },
+          {
+            "name": "page[number]",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Screening history, newest first; each carries its isSimulated flag.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedRiskAssessmentListDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "risk"
+        ]
+      }
+    },
+    "/api/v1/transactions": {
+      "post": {
+        "operationId": "TransactionsController_create",
+        "parameters": [
+          {
+            "name": "idempotency-key",
+            "required": true,
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "description": "UUID; replay-safe key.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTransactionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Transaction posted (balanced double-entry ledger set)."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "transactions"
+        ]
+      }
+    },
+    "/api/v1/customers/{id}/transactions": {
+      "get": {
+        "operationId": "CustomerTransactionsController_list",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "required": false,
+            "in": "query",
+            "description": "Whitelist: occurredAt, createdAt (default -occurredAt).",
+            "schema": {}
+          },
+          {
+            "name": "filter[currency]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "filter[status]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "filter[kind]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "filter[occurredTo]",
+            "required": true,
+            "in": "query",
+            "description": "ISO-8601 end (required, ≤ 366d span).",
+            "schema": {}
+          },
+          {
+            "name": "filter[occurredFrom]",
+            "required": true,
+            "in": "query",
+            "description": "ISO-8601 start (required).",
+            "schema": {}
+          },
+          {
+            "name": "page[size]",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 25
+            }
+          },
+          {
+            "name": "page[number]",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The customer's transactions over the date range.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedTransactionListDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "transactions"
+        ]
+      }
+    },
+    "/api/v1/dashboard/summary": {
+      "get": {
+        "operationId": "AnalyticsController_getSummary",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Top-line KPIs over all customers.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DashboardSummaryDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "dashboard"
+        ]
+      }
+    },
+    "/api/v1/dashboard/kyc-distribution": {
+      "get": {
+        "operationId": "AnalyticsController_getKycDistribution",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "KYC status distribution (zero-filled).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KycDistributionDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "dashboard"
+        ]
+      }
+    },
+    "/api/v1/dashboard/latest-customer": {
+      "get": {
+        "operationId": "AnalyticsController_getLatestCustomer",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Most-recently-updated customer (PII masked); data is null when none exist.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LatestCustomerDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "dashboard"
+        ]
+      }
+    },
+    "/api/v1/dashboard/recent-customers": {
+      "get": {
+        "operationId": "AnalyticsController_getRecentCustomers",
+        "parameters": [
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "How many to return (1..10, default 3).",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The most-recently-updated customers (PII masked), newest first.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MaskedCustomerDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "dashboard"
+        ]
+      }
+    },
+    "/api/v1/metrics/daily": {
+      "get": {
+        "operationId": "MetricsController_getDaily",
+        "parameters": [
+          {
+            "name": "to",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "from",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "metric",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "customers_new_daily",
+                "customers_active_total_daily",
+                "transactions_count_daily",
+                "transactions_volume_minor_daily"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Daily rollup series for the selected metric.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DailyMetricsDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "metrics"
+        ]
+      }
+    },
+    "/api/v1/customers": {
+      "get": {
+        "operationId": "CustomersController_list",
+        "parameters": [
+          {
+            "name": "reveal",
+            "required": false,
+            "in": "query",
+            "description": "true → return UNMASKED PII. Honored ONLY for holders of `customers.pii.reveal`; otherwise silently masked (default-deny). Every effective reveal is audited.",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "sort",
+            "required": false,
+            "in": "query",
+            "description": "Whitelist: createdAt, updatedAt, fullName (prefix \"-\" = desc).",
+            "schema": {}
+          },
+          {
+            "name": "filter[active]",
+            "required": false,
+            "in": "query",
+            "description": "true = ACTIVE, false = not-ACTIVE (used when filter[status] is absent).",
+            "schema": {}
+          },
+          {
+            "name": "filter[status]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "filter[kycStatus]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "filter[q]",
+            "required": false,
+            "in": "query",
+            "description": "Search name / email / wallet number.",
+            "schema": {}
+          },
+          {
+            "name": "page[size]",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 25
+            }
+          },
+          {
+            "name": "page[number]",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Masked by default; unmasked only with customers.pii.reveal + ?reveal=true.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedCustomerListDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "customers"
+        ]
+      },
+      "post": {
+        "operationId": "CustomersController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCustomerDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Creates a customer + default wallet; returns masked detail.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerDetailDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "customers"
+        ]
+      }
+    },
+    "/api/v1/customers/{id}": {
+      "get": {
+        "operationId": "CustomersController_getById",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "reveal",
+            "required": false,
+            "in": "query",
+            "description": "true → return UNMASKED PII. Honored ONLY for holders of `customers.pii.reveal`; otherwise silently masked (default-deny). Every effective reveal is audited.",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Masked by default; unmasked only with customers.pii.reveal + ?reveal=true.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerDetailDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "customers"
+        ]
+      },
+      "put": {
+        "operationId": "CustomersController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCustomerDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updates a customer (rowVersion-guarded); returns masked detail. Administrator-only (customers.update).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerDetailDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "customers"
+        ]
+      },
+      "delete": {
+        "operationId": "CustomersController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "customers"
+        ]
+      }
+    },
+    "/api/v1/customers/{id}/kyc-verifications": {
+      "get": {
+        "operationId": "CustomersController_listKycVerifications",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page[size]",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 25
+            }
+          },
+          {
+            "name": "page[number]",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "KYC verification history, newest first.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedKycVerificationListDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "customers"
+        ]
+      }
+    },
+    "/api/v1/customers/{id}/credential-preview": {
+      "get": {
+        "operationId": "CustomersController_getCredentialPreview",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Data-minimized KYC credential preview.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CredentialPreviewDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "customers"
+        ]
+      }
+    },
+    "/api/v1/customers/{id}/wallet": {
+      "get": {
+        "operationId": "WalletsController_getForCustomer",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The customer's default wallet (balance + limits).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WalletDetailDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "wallets"
+        ]
+      },
+      "patch": {
+        "operationId": "WalletsController_updateLimits",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateWalletLimitsDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updates the customer's wallet limits (rowVersion-guarded).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WalletDetailDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "wallets"
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "Fintech Dashboard API",
+    "description": "System-of-record backend (NestJS on Fastify + Prisma + PostgreSQL).",
+    "version": "1.0",
+    "contact": {}
+  },
+  "tags": [],
+  "servers": [],
+  "components": {
+    "securitySchemes": {
+      "bearer": {
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "type": "http"
+      }
+    },
+    "schemas": {
+      "LoginDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 8,
+            "maxLength": 128
+          }
+        },
+        "required": [
+          "email",
+          "password"
+        ]
+      },
+      "MeUserDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "object",
+            "nullable": true
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "mfaEnabled": {
+            "type": "boolean",
+            "description": "Whether this operator has opt-in MFA enabled (drives the Settings MFA card)."
+          },
+          "lastLoginAt": {
+            "type": "object",
+            "nullable": true,
+            "format": "date-time",
+            "description": "ISO timestamp of the most recent successful sign-in (stamped at login), or null before the first one. Drives the Settings \"last sign-in\" readout."
+          }
+        },
+        "required": [
+          "id",
+          "displayName",
+          "email",
+          "mfaEnabled",
+          "lastLoginAt"
+        ]
+      },
+      "AuthenticatedResponseDto": {
+        "type": "object",
+        "properties": {
+          "accessToken": {
+            "type": "string",
+            "description": "Short-lived JWT access token (15 min)."
+          },
+          "tokenType": {
+            "type": "string",
+            "default": "Bearer"
+          },
+          "expiresIn": {
+            "type": "number",
+            "description": "Access-token lifetime in seconds."
+          },
+          "permissions": {
+            "description": "Effective permission codes.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "user": {
+            "$ref": "#/components/schemas/MeUserDto"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "authenticated"
+            ],
+            "default": "authenticated",
+            "description": "Login completed — a session was issued."
+          }
+        },
+        "required": [
+          "accessToken",
+          "tokenType",
+          "expiresIn",
+          "permissions",
+          "user",
+          "status"
+        ]
+      },
+      "LoginResponseDto": {
+        "type": "object",
+        "properties": {
+          "accessToken": {
+            "type": "string",
+            "description": "Short-lived JWT access token (15 min)."
+          },
+          "tokenType": {
+            "type": "string",
+            "default": "Bearer"
+          },
+          "expiresIn": {
+            "type": "number",
+            "description": "Access-token lifetime in seconds."
+          },
+          "permissions": {
+            "description": "Effective permission codes.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "user": {
+            "$ref": "#/components/schemas/MeUserDto"
+          }
+        },
+        "required": [
+          "accessToken",
+          "tokenType",
+          "expiresIn",
+          "permissions",
+          "user"
+        ]
+      },
+      "MeResponseDto": {
+        "type": "object",
+        "properties": {
+          "user": {
+            "$ref": "#/components/schemas/MeUserDto"
+          },
+          "permissions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "user",
+          "permissions"
+        ]
+      },
+      "VerifyTotpDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "pattern": "^\\d{6}$",
+            "example": "123456",
+            "description": "The 6-digit code from the authenticator app."
+          },
+          "rememberDevice": {
+            "type": "boolean",
+            "default": false,
+            "description": "Trust this device and skip MFA until expiry — honoured only when remember-device is enabled."
+          }
+        },
+        "required": [
+          "code"
+        ]
+      },
+      "VerifyBackupCodeDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9]{5}-?[A-Za-z0-9]{5}$",
+            "example": "A1B2C-D3E4F",
+            "description": "A one-time backup recovery code (case-insensitive; the hyphen is optional)."
+          }
+        },
+        "required": [
+          "code"
+        ]
+      },
+      "StartMfaSetupDto": {
+        "type": "object",
+        "properties": {
+          "password": {
+            "type": "string",
+            "minLength": 8,
+            "maxLength": 128,
+            "description": "The operator’s current password — re-auth for this sensitive change."
+          }
+        },
+        "required": [
+          "password"
+        ]
+      },
+      "MfaSetupStartResponseDto": {
+        "type": "object",
+        "properties": {
+          "otpauthUri": {
+            "type": "string",
+            "description": "otpauth:// URI to import into an authenticator app."
+          },
+          "qrDataUrl": {
+            "type": "string",
+            "description": "PNG data-URL of the QR encoding the otpauth URI."
+          }
+        },
+        "required": [
+          "otpauthUri",
+          "qrDataUrl"
+        ]
+      },
+      "ConfirmMfaSetupDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "pattern": "^\\d{6}$",
+            "example": "123456",
+            "description": "The first 6-digit code from the authenticator app, proving enrolment."
+          }
+        },
+        "required": [
+          "code"
+        ]
+      },
+      "MfaSetupConfirmResponseDto": {
+        "type": "object",
+        "properties": {
+          "backupCodes": {
+            "description": "One-time backup recovery codes — shown ONCE; store them now.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "backupCodes"
+        ]
+      },
+      "MfaReauthDto": {
+        "type": "object",
+        "properties": {
+          "password": {
+            "type": "string",
+            "minLength": 8,
+            "maxLength": 128,
+            "description": "The operator’s current password."
+          },
+          "code": {
+            "type": "string",
+            "example": "123456",
+            "description": "A current 6-digit TOTP code OR a one-time backup code (XXXXX-XXXXX)."
+          }
+        },
+        "required": [
+          "password",
+          "code"
+        ]
+      },
+      "AdminResetMfaDto": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The target operator whose MFA enrolment is to be reset."
+          }
+        },
+        "required": [
+          "userId"
+        ]
+      },
+      "RememberedDeviceDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "ipPrefix": {
+            "type": "string",
+            "description": "Coarse network prefix bound at issue — NOT a full IP."
+          }
+        },
+        "required": [
+          "id",
+          "createdAt",
+          "expiresAt",
+          "ipPrefix"
+        ]
+      },
+      "InitiatePasswordResetDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "operator@example.com",
+            "description": "The account email to start a reset for."
+          }
+        },
+        "required": [
+          "email"
+        ]
+      },
+      "ResetInitiatedResponseDto": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "reset_initiated"
+            ],
+            "example": "reset_initiated",
+            "description": "Constant acknowledgement — returned for every email (no enumeration)."
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "VerifyCodeDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "example": "123456",
+            "description": "A current 6-digit TOTP code OR a one-time backup code (XXXXX-XXXXX)."
+          }
+        },
+        "required": [
+          "code"
+        ]
+      },
+      "ResetCodeVerifiedResponseDto": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "code_verified"
+            ],
+            "example": "code_verified",
+            "description": "the second factor was verified and the challenge stamped. Proceed to set the new password via /verify. NO tokens are issued."
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "VerifyPasswordResetDto": {
+        "type": "object",
+        "properties": {
+          "newPassword": {
+            "type": "string",
+            "minLength": 12,
+            "maxLength": 64,
+            "description": "The new password (min 12 chars; must include upper, lower, digit, and symbol)."
+          }
+        },
+        "required": [
+          "newPassword"
+        ]
+      },
+      "ResetCompleteResponseDto": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "reset_complete"
+            ],
+            "example": "reset_complete",
+            "description": "The password was changed and all sessions revoked. NO tokens are issued — sign in again."
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "AdminPasswordResetDto": {
+        "type": "object",
+        "properties": {
+          "targetUserId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The target operator whose password is to be reset."
+          },
+          "newPassword": {
+            "type": "string",
+            "minLength": 12,
+            "maxLength": 64,
+            "description": "The new password (min 12 chars; must include upper, lower, digit, and symbol)."
+          }
+        },
+        "required": [
+          "targetUserId",
+          "newPassword"
+        ]
+      },
+      "CreateResetRequestDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "operator@example.com",
+            "description": "The account email to request an administrator password reset for."
+          }
+        },
+        "required": [
+          "email"
+        ]
+      },
+      "ResetRequestReceivedResponseDto": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "reset_request_received"
+            ],
+            "example": "reset_request_received",
+            "description": "Constant acknowledgement — returned for EVERY create call (new, duplicate, cooldown, or unknown email alike; no enumeration)."
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "ResetRequestStatusResponseDto": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "approved",
+              "denied",
+              "expired"
+            ],
+            "example": "pending",
+            "description": "The caller's own request state, keyed by the httpOnly ftd_pwreq cookie. NEVER 401/404 — a missing/unknown/decoy token reads as 'pending' (indistinguishable). On 'approved' (not yet completed) the response ALSO sets the ftd_pwreset challenge cookie so the standard /auth/password/reset/verify step can finish the reset."
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "ResetRequestAccountDto": {
+        "type": "object",
+        "properties": {
+          "displayName": {
+            "type": "string",
+            "nullable": true,
+            "description": "The requesting account's display name."
+          },
+          "emailMasked": {
+            "type": "string",
+            "example": "o***@e***.com",
+            "description": "The requesting account email — ALWAYS masked."
+          }
+        },
+        "required": [
+          "displayName",
+          "emailMasked"
+        ]
+      },
+      "PasswordResetRequestStatus": {
+        "type": "string",
+        "enum": [
+          "PENDING",
+          "APPROVED",
+          "DENIED",
+          "EXPIRED"
+        ]
+      },
+      "ResetRequestItemDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "account": {
+            "$ref": "#/components/schemas/ResetRequestAccountDto"
+          },
+          "status": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PasswordResetRequestStatus"
+              }
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the request lapses (covers pending AND approved-unclaimed)."
+          },
+          "decidedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "decidedByName": {
+            "type": "string",
+            "nullable": true,
+            "description": "Display name of the deciding administrator (masked email fallback)."
+          },
+          "completedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "Stamped when the granted set-password challenge was consumed."
+          }
+        },
+        "required": [
+          "id",
+          "account",
+          "status",
+          "createdAt",
+          "expiresAt",
+          "decidedAt",
+          "decidedByName",
+          "completedAt"
+        ]
+      },
+      "ResetRequestDetailDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "account": {
+            "$ref": "#/components/schemas/ResetRequestAccountDto"
+          },
+          "status": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PasswordResetRequestStatus"
+              }
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the request lapses (covers pending AND approved-unclaimed)."
+          },
+          "decidedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "decidedByName": {
+            "type": "string",
+            "nullable": true,
+            "description": "Display name of the deciding administrator (masked email fallback)."
+          },
+          "completedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "Stamped when the granted set-password challenge was consumed."
+          },
+          "ipPrefix": {
+            "type": "string",
+            "nullable": true,
+            "example": "203.0.113.0/24",
+            "description": "Coarse network prefix bound at request time — the raw IP is never stored or shown."
+          },
+          "deviceSummary": {
+            "type": "string",
+            "example": "Chrome on macOS",
+            "description": "Coarse device summary parsed from the stored User-Agent at read time."
+          },
+          "userAgent": {
+            "type": "string",
+            "nullable": true,
+            "description": "The raw User-Agent as presented (service-truncated to 400 chars)."
+          }
+        },
+        "required": [
+          "id",
+          "account",
+          "status",
+          "createdAt",
+          "expiresAt",
+          "decidedAt",
+          "decidedByName",
+          "completedAt",
+          "deviceSummary",
+          "userAgent"
+        ]
+      },
+      "NotificationItemDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "SECURITY_ALERT",
+              "KYC_EVENT",
+              "CUSTOMER_EVENT",
+              "SYSTEM",
+              "ACCOUNT"
+            ]
+          },
+          "severity": {
+            "type": "string",
+            "enum": [
+              "info",
+              "success",
+              "warning",
+              "critical"
+            ]
+          },
+          "titleKey": {
+            "type": "string",
+            "example": "notifications.security.adminPasswordReset.title"
+          },
+          "bodyKey": {
+            "type": "string",
+            "example": "notifications.security.adminPasswordReset.body"
+          },
+          "params": {
+            "type": "object",
+            "nullable": true,
+            "additionalProperties": true,
+            "description": "Allowlisted, non-PII interpolation values for the FE; null when none."
+          },
+          "resourceType": {
+            "type": "string",
+            "example": "user"
+          },
+          "resourceId": {
+            "type": "object",
+            "nullable": true,
+            "format": "uuid"
+          },
+          "readAt": {
+            "type": "object",
+            "nullable": true,
+            "format": "date-time",
+            "description": "null = unread."
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "severity",
+          "titleKey",
+          "bodyKey",
+          "params",
+          "resourceType",
+          "resourceId",
+          "readAt",
+          "createdAt"
+        ]
+      },
+      "NotificationPageDto": {
+        "type": "object",
+        "properties": {
+          "number": {
+            "type": "number",
+            "example": 1
+          },
+          "size": {
+            "type": "number",
+            "example": 20
+          },
+          "totalItems": {
+            "type": "number",
+            "example": 7
+          },
+          "totalPages": {
+            "type": "number",
+            "example": 1
+          }
+        },
+        "required": [
+          "number",
+          "size",
+          "totalItems",
+          "totalPages"
+        ]
+      },
+      "PaginatedNotificationListDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NotificationItemDto"
+            }
+          },
+          "page": {
+            "$ref": "#/components/schemas/NotificationPageDto"
+          },
+          "unreadCount": {
+            "type": "number",
+            "example": 3,
+            "description": "Recipient's TOTAL unread count (independent of page/filter)."
+          }
+        },
+        "required": [
+          "data",
+          "page",
+          "unreadCount"
+        ]
+      },
+      "NotificationReadResultDto": {
+        "type": "object",
+        "properties": {
+          "unreadCount": {
+            "type": "number",
+            "example": 2,
+            "description": "Recipient's unread count AFTER the operation."
+          }
+        },
+        "required": [
+          "unreadCount"
+        ]
+      },
+      "CurrencyDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 3,
+            "example": "TRY"
+          },
+          "name": {
+            "type": "string",
+            "example": "Turkish Lira"
+          },
+          "scale": {
+            "type": "number",
+            "example": 2
+          }
+        },
+        "required": [
+          "code",
+          "name",
+          "scale"
+        ]
+      },
+      "CurrencyCatalogDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CurrencyDto"
+            }
+          }
+        },
+        "required": [
+          "items"
+        ]
+      },
+      "OperatorProfileDto": {
+        "type": "object",
+        "properties": {
+          "displayName": {
+            "type": "object",
+            "nullable": true
+          },
+          "email": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "object",
+            "nullable": true
+          },
+          "jobTitle": {
+            "type": "object",
+            "nullable": true,
+            "description": "Operator-entered title stored as settings state."
+          }
+        },
+        "required": [
+          "displayName",
+          "email",
+          "phone",
+          "jobTitle"
+        ]
+      },
+      "UpdateOperatorProfileDto": {
+        "type": "object",
+        "properties": {
+          "displayName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "phone": {
+            "type": "string",
+            "maxLength": 32
+          },
+          "jobTitle": {
+            "type": "string",
+            "maxLength": 80
+          }
+        }
+      },
+      "NotificationPreferencesDto": {
+        "type": "object",
+        "properties": {
+          "productUpdates": {
+            "type": "boolean"
+          },
+          "securityAlerts": {
+            "type": "boolean"
+          },
+          "weeklyDigest": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "productUpdates",
+          "securityAlerts",
+          "weeklyDigest"
+        ]
+      },
+      "UpdateNotificationPreferencesDto": {
+        "type": "object",
+        "properties": {
+          "productUpdates": {
+            "type": "boolean"
+          },
+          "securityAlerts": {
+            "type": "boolean"
+          },
+          "weeklyDigest": {
+            "type": "boolean"
+          }
+        }
+      },
+      "CreateRoleDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 64
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "UserListItemDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "User id — the value used as targetUserId by admin tools."
+          },
+          "displayName": {
+            "type": "object",
+            "nullable": true,
+            "description": "Operator display name (the picker label); null if unset."
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ACTIVE",
+              "SUSPENDED",
+              "LOCKED",
+              "DELETED"
+            ],
+            "description": "Account status (e.g. ACTIVE / SUSPENDED / LOCKED)."
+          },
+          "roles": {
+            "example": [
+              "administrator"
+            ],
+            "description": "Role names the user holds.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "emailMasked": {
+            "type": "string",
+            "example": "m***@s***.local",
+            "description": "Email MASKED server-side (raw address never leaves the service). For the operator picker."
+          },
+          "locked": {
+            "type": "boolean",
+            "description": "True when the account is locked (status LOCKED or a future lockedUntil). Drives the \"Kilitli\" badge."
+          },
+          "failedLoginCount": {
+            "type": "number",
+            "example": 5,
+            "description": "Consecutive failed-login count (real lockout telemetry)."
+          },
+          "lastLoginAt": {
+            "type": "object",
+            "nullable": true,
+            "format": "date-time",
+            "description": "Last successful sign-in (ISO 8601); null if never. Rendered relative on the client."
+          }
+        },
+        "required": [
+          "id",
+          "displayName",
+          "status",
+          "roles",
+          "emailMasked",
+          "locked",
+          "failedLoginCount",
+          "lastLoginAt"
+        ]
+      },
+      "UserListPageDto": {
+        "type": "object",
+        "properties": {
+          "number": {
+            "type": "number",
+            "example": 1
+          },
+          "size": {
+            "type": "number",
+            "example": 25
+          },
+          "totalItems": {
+            "type": "number",
+            "example": 3
+          },
+          "totalPages": {
+            "type": "number",
+            "example": 1
+          }
+        },
+        "required": [
+          "number",
+          "size",
+          "totalItems",
+          "totalPages"
+        ]
+      },
+      "PaginatedUserListDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UserListItemDto"
+            }
+          },
+          "page": {
+            "$ref": "#/components/schemas/UserListPageDto"
+          }
+        },
+        "required": [
+          "data",
+          "page"
+        ]
+      },
+      "GrantPermissionDto": {
+        "type": "object",
+        "properties": {
+          "permissionId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Permission id from GET /permissions."
+          }
+        },
+        "required": [
+          "permissionId"
+        ]
+      },
+      "AssignRoleDto": {
+        "type": "object",
+        "properties": {
+          "roleId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Role id from GET /roles."
+          }
+        },
+        "required": [
+          "roleId"
+        ]
+      },
+      "RiskSignalDto": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "description": "Signal key, e.g. sanctionsHit."
+          },
+          "hit": {
+            "type": "boolean"
+          },
+          "severity": {
+            "type": "string",
+            "enum": [
+              "low",
+              "medium",
+              "high"
+            ]
+          }
+        },
+        "required": [
+          "key",
+          "hit",
+          "severity"
+        ]
+      },
+      "CreateRiskDecisionDto": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string",
+            "description": "On-chain address (0x + 40 hex)."
+          },
+          "decision": {
+            "type": "string",
+            "enum": [
+              "ALLOW",
+              "REVIEW",
+              "BLOCK"
+            ]
+          },
+          "isSimulated": {
+            "type": "boolean",
+            "description": "Safety flag — must be true while the rule-based engine is bound."
+          },
+          "signals": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RiskSignalDto"
+            }
+          }
+        },
+        "required": [
+          "address",
+          "decision",
+          "isSimulated"
+        ]
+      },
+      "RiskAssessmentResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "customerId": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string"
+          },
+          "decision": {
+            "type": "string",
+            "enum": [
+              "ALLOW",
+              "REVIEW",
+              "BLOCK"
+            ]
+          },
+          "isSimulated": {
+            "type": "boolean",
+            "description": "True for rule-based screening (never a live vendor regulatory decision)."
+          },
+          "providerName": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "signals": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RiskSignalDto"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "customerId",
+          "address",
+          "decision",
+          "isSimulated",
+          "providerName",
+          "createdAt",
+          "signals"
+        ]
+      },
+      "ScreenRiskAddressDto": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string",
+            "description": "On-chain address (0x + 40 hex)."
+          }
+        },
+        "required": [
+          "address"
+        ]
+      },
+      "RiskScreeningResponseDto": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string"
+          },
+          "decision": {
+            "type": "string",
+            "enum": [
+              "ALLOW",
+              "REVIEW",
+              "BLOCK"
+            ]
+          },
+          "isSimulated": {
+            "type": "boolean",
+            "description": "True for rule-based screening (never a live vendor regulatory decision)."
+          },
+          "providerName": {
+            "type": "string"
+          },
+          "signals": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RiskSignalDto"
+            }
+          }
+        },
+        "required": [
+          "address",
+          "decision",
+          "isSimulated",
+          "providerName",
+          "signals"
+        ]
+      },
+      "PageDto": {
+        "type": "object",
+        "properties": {
+          "number": {
+            "type": "number",
+            "example": 1
+          },
+          "size": {
+            "type": "number",
+            "example": 25
+          },
+          "totalItems": {
+            "type": "number",
+            "example": 1
+          },
+          "totalPages": {
+            "type": "number",
+            "example": 1
+          }
+        },
+        "required": [
+          "number",
+          "size",
+          "totalItems",
+          "totalPages"
+        ]
+      },
+      "PaginatedRiskAssessmentListDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RiskAssessmentResponseDto"
+            }
+          },
+          "page": {
+            "$ref": "#/components/schemas/PageDto"
+          }
+        },
+        "required": [
+          "data",
+          "page"
+        ]
+      },
+      "CreateTransactionDto": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "DEPOSIT",
+              "WITHDRAWAL",
+              "TRANSFER",
+              "FEE",
+              "ADJUSTMENT",
+              "REVERSAL"
+            ]
+          },
+          "sourceWalletId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Required for WITHDRAWAL/TRANSFER."
+          },
+          "targetWalletId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Required for DEPOSIT/TRANSFER."
+          },
+          "originalTransactionId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Required for REVERSAL — the POSTED transaction to reverse (amountMinor + currency must match it)."
+          },
+          "amountMinor": {
+            "type": "number",
+            "description": "Amount in integer minor units (> 0).",
+            "minimum": 1
+          },
+          "currency": {
+            "type": "string",
+            "description": "ISO-4217 code; both legs share one currency (no cross-currency)."
+          },
+          "categoryId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 255
+          }
+        },
+        "required": [
+          "kind",
+          "amountMinor",
+          "currency"
+        ]
+      },
+      "TransactionListItemDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "publicRef": {
+            "type": "object",
+            "nullable": true,
+            "example": "TX-2026-000123"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "DEPOSIT",
+              "WITHDRAWAL",
+              "TRANSFER",
+              "FEE",
+              "ADJUSTMENT",
+              "REVERSAL"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "POSTED",
+              "FAILED",
+              "REVERSED"
+            ]
+          },
+          "amountMinor": {
+            "type": "string",
+            "description": "Signed net for the customer (minor units), as a decimal string: CREDIT > 0, DEBIT < 0."
+          },
+          "currency": {
+            "type": "string",
+            "description": "ISO-4217 currency code."
+          },
+          "description": {
+            "type": "object",
+            "nullable": true
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "postedAt": {
+            "type": "object",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "publicRef",
+          "kind",
+          "status",
+          "amountMinor",
+          "currency",
+          "description",
+          "occurredAt",
+          "postedAt"
+        ]
+      },
+      "TransactionPageDto": {
+        "type": "object",
+        "properties": {
+          "number": {
+            "type": "number"
+          },
+          "size": {
+            "type": "number"
+          },
+          "totalItems": {
+            "type": "number"
+          },
+          "totalPages": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "number",
+          "size",
+          "totalItems",
+          "totalPages"
+        ]
+      },
+      "PaginatedTransactionListDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TransactionListItemDto"
+            }
+          },
+          "page": {
+            "$ref": "#/components/schemas/TransactionPageDto"
+          }
+        },
+        "required": [
+          "data",
+          "page"
+        ]
+      },
+      "AgeStatsDto": {
+        "type": "object",
+        "properties": {
+          "avg": {
+            "type": "object",
+            "nullable": true,
+            "description": "Whole years; null when no dated births."
+          },
+          "min": {
+            "type": "object",
+            "nullable": true
+          },
+          "max": {
+            "type": "object",
+            "nullable": true
+          }
+        },
+        "required": [
+          "avg",
+          "min",
+          "max"
+        ]
+      },
+      "DashboardSummaryDto": {
+        "type": "object",
+        "properties": {
+          "totalCustomers": {
+            "type": "number",
+            "description": "Total customers — not page-size limited."
+          },
+          "activeCount": {
+            "type": "number"
+          },
+          "inactiveCount": {
+            "type": "number"
+          },
+          "activeRate": {
+            "type": "number",
+            "description": "Percent (one decimal), server-computed."
+          },
+          "inactiveRate": {
+            "type": "number",
+            "description": "Percent (one decimal), server-computed."
+          },
+          "ageStats": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AgeStatsDto"
+              }
+            ]
+          },
+          "asOf": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Freshness stamp (≤5 min target)."
+          }
+        },
+        "required": [
+          "totalCustomers",
+          "activeCount",
+          "inactiveCount",
+          "activeRate",
+          "inactiveRate",
+          "ageStats",
+          "asOf"
+        ]
+      },
+      "KycDistributionItemDto": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "NOT_STARTED",
+              "PENDING",
+              "IN_REVIEW",
+              "VERIFIED",
+              "REJECTED",
+              "EXPIRED"
+            ]
+          },
+          "count": {
+            "type": "number"
+          },
+          "percent": {
+            "type": "number",
+            "description": "Percent of total (one decimal)."
+          }
+        },
+        "required": [
+          "status",
+          "count",
+          "percent"
+        ]
+      },
+      "KycDistributionDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "description": "Every enum value present (0 allowed).",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/KycDistributionItemDto"
+            }
+          },
+          "total": {
+            "type": "number",
+            "description": "Equals DashboardSummary.totalCustomers."
+          },
+          "asOf": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "items",
+          "total",
+          "asOf"
+        ]
+      },
+      "MaskedCustomerDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "fullName": {
+            "type": "string",
+            "description": "Masked, e.g. Ada L***"
+          },
+          "email": {
+            "type": "string",
+            "description": "Masked, e.g. j***@e***.com"
+          },
+          "phone": {
+            "type": "object",
+            "nullable": true,
+            "description": "Masked, last four digits only."
+          },
+          "kycStatus": {
+            "type": "string",
+            "enum": [
+              "NOT_STARTED",
+              "PENDING",
+              "IN_REVIEW",
+              "VERIFIED",
+              "REJECTED",
+              "EXPIRED"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ACTIVE",
+              "INACTIVE",
+              "CLOSED"
+            ]
+          },
+          "riskLevel": {
+            "type": "string",
+            "enum": [
+              "LOW",
+              "MEDIUM",
+              "HIGH",
+              "BLOCKED"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "fullName",
+          "email",
+          "phone",
+          "kycStatus",
+          "status",
+          "riskLevel",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "WalletSummaryDto": {
+        "type": "object",
+        "properties": {
+          "currency": {
+            "type": "string",
+            "description": "ISO-4217 code."
+          },
+          "balanceMinor": {
+            "type": "string",
+            "description": "Integer minor units, as a decimal string."
+          }
+        },
+        "required": [
+          "currency",
+          "balanceMinor"
+        ]
+      },
+      "LatestCustomerDto": {
+        "type": "object",
+        "properties": {
+          "customer": {
+            "$ref": "#/components/schemas/MaskedCustomerDto"
+          },
+          "wallet": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/WalletSummaryDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "customer",
+          "wallet"
+        ]
+      },
+      "DailyMetricItemDto": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date",
+            "example": "2026-06-07"
+          },
+          "value": {
+            "type": "string",
+            "description": "Numeric value serialized as a string to preserve bigint/numeric precision for counts and minor-unit volume.",
+            "example": "125000"
+          }
+        },
+        "required": [
+          "date",
+          "value"
+        ]
+      },
+      "DailyMetricsDto": {
+        "type": "object",
+        "properties": {
+          "metric": {
+            "type": "string",
+            "enum": [
+              "customers_new_daily",
+              "customers_active_total_daily",
+              "transactions_count_daily",
+              "transactions_volume_minor_daily"
+            ]
+          },
+          "items": {
+            "description": "One row per rolled-up day. Currency-dimensioned volume rows are summed per day for this read model.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DailyMetricItemDto"
+            }
+          },
+          "asOf": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Freshness stamp from metric_daily.updated_at."
+          }
+        },
+        "required": [
+          "metric",
+          "items",
+          "asOf"
+        ]
+      },
+      "CustomerListItemDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "fullName": {
+            "type": "string",
+            "description": "Masked by default (e.g. \"Ada L***\"); raw only with `customers.pii.reveal` + `?reveal=true`."
+          },
+          "email": {
+            "type": "string",
+            "description": "Masked by default (e.g. \"a***@e***.com\"); raw only with `customers.pii.reveal` + `?reveal=true`."
+          },
+          "phone": {
+            "type": "object",
+            "nullable": true,
+            "description": "Masked last 4 by default (e.g. \"*** *** 1234\"); raw only with `customers.pii.reveal` + `?reveal=true`."
+          },
+          "walletNumber": {
+            "type": "object",
+            "nullable": true,
+            "description": "Masked last 4 by default (e.g. \"************3456\"); raw only with `customers.pii.reveal` + `?reveal=true`."
+          },
+          "nationalIdLast4": {
+            "type": "object",
+            "nullable": true,
+            "description": "Last 4 of the national ID in ALL modes; the full national ID is NEVER served (no decrypt path)."
+          },
+          "kycStatus": {
+            "type": "string",
+            "enum": [
+              "NOT_STARTED",
+              "PENDING",
+              "IN_REVIEW",
+              "VERIFIED",
+              "REJECTED",
+              "EXPIRED"
+            ]
+          },
+          "riskLevel": {
+            "type": "string",
+            "enum": [
+              "LOW",
+              "MEDIUM",
+              "HIGH",
+              "BLOCKED"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ACTIVE",
+              "INACTIVE",
+              "CLOSED"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "fullName",
+          "email",
+          "phone",
+          "walletNumber",
+          "nationalIdLast4",
+          "kycStatus",
+          "riskLevel",
+          "status",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "PaginatedCustomerListDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CustomerListItemDto"
+            }
+          },
+          "page": {
+            "$ref": "#/components/schemas/PageDto"
+          }
+        },
+        "required": [
+          "data",
+          "page"
+        ]
+      },
+      "AddressDto": {
+        "type": "object",
+        "properties": {
+          "country": {
+            "type": "object",
+            "nullable": true,
+            "description": "Always raw (low-identifying, retained for ops UX)."
+          },
+          "city": {
+            "type": "object",
+            "nullable": true,
+            "description": "Masked to `null` by default; raw only with `customers.pii.reveal` + `?reveal=true`."
+          },
+          "postalCode": {
+            "type": "object",
+            "nullable": true,
+            "description": "Masked to `null` by default; raw only with `customers.pii.reveal` + `?reveal=true`."
+          },
+          "line1": {
+            "type": "object",
+            "nullable": true,
+            "description": "Masked to first-char + `***` by default; raw only with `customers.pii.reveal` + `?reveal=true`."
+          }
+        },
+        "required": [
+          "country",
+          "city",
+          "postalCode",
+          "line1"
+        ]
+      },
+      "CustomerDetailDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "fullName": {
+            "type": "string",
+            "description": "Masked by default (e.g. \"Ada L***\"); raw only with `customers.pii.reveal` + `?reveal=true`."
+          },
+          "email": {
+            "type": "string",
+            "description": "Masked by default (e.g. \"a***@e***.com\"); raw only with `customers.pii.reveal` + `?reveal=true`."
+          },
+          "phone": {
+            "type": "object",
+            "nullable": true,
+            "description": "Masked last 4 by default (e.g. \"*** *** 1234\"); raw only with `customers.pii.reveal` + `?reveal=true`."
+          },
+          "walletNumber": {
+            "type": "object",
+            "nullable": true,
+            "description": "Masked last 4 by default (e.g. \"************3456\"); raw only with `customers.pii.reveal` + `?reveal=true`."
+          },
+          "nationalIdLast4": {
+            "type": "object",
+            "nullable": true,
+            "description": "Last 4 of the national ID in ALL modes; the full national ID is NEVER served (no decrypt path)."
+          },
+          "kycStatus": {
+            "type": "string",
+            "enum": [
+              "NOT_STARTED",
+              "PENDING",
+              "IN_REVIEW",
+              "VERIFIED",
+              "REJECTED",
+              "EXPIRED"
+            ]
+          },
+          "riskLevel": {
+            "type": "string",
+            "enum": [
+              "LOW",
+              "MEDIUM",
+              "HIGH",
+              "BLOCKED"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ACTIVE",
+              "INACTIVE",
+              "CLOSED"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "dateOfBirth": {
+            "type": "object",
+            "format": "date",
+            "nullable": true
+          },
+          "address": {
+            "$ref": "#/components/schemas/AddressDto"
+          },
+          "contractSigned": {
+            "type": "boolean",
+            "description": "Commercial flag — NOT a KYC state."
+          },
+          "rowVersion": {
+            "type": "number",
+            "description": "Optimistic-concurrency token for updates."
+          }
+        },
+        "required": [
+          "id",
+          "fullName",
+          "email",
+          "phone",
+          "walletNumber",
+          "nationalIdLast4",
+          "kycStatus",
+          "riskLevel",
+          "status",
+          "createdAt",
+          "updatedAt",
+          "dateOfBirth",
+          "address",
+          "contractSigned",
+          "rowVersion"
+        ]
+      },
+      "KycVerificationDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "customerId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "NOT_STARTED",
+              "PENDING",
+              "IN_REVIEW",
+              "VERIFIED",
+              "REJECTED",
+              "EXPIRED"
+            ]
+          },
+          "method": {
+            "type": "string"
+          },
+          "reasonCode": {
+            "type": "object",
+            "nullable": true
+          },
+          "decidedAt": {
+            "type": "object",
+            "nullable": true,
+            "format": "date-time"
+          },
+          "decidedBy": {
+            "type": "object",
+            "nullable": true,
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "customerId",
+          "status",
+          "method",
+          "reasonCode",
+          "decidedAt",
+          "decidedBy",
+          "createdAt"
+        ]
+      },
+      "PaginatedKycVerificationListDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/KycVerificationDto"
+            }
+          },
+          "page": {
+            "$ref": "#/components/schemas/PageDto"
+          }
+        },
+        "required": [
+          "data",
+          "page"
+        ]
+      },
+      "CredentialSubjectDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Pairwise DID-like preview id scoped to this customer."
+          },
+          "kycVerified": {
+            "type": "boolean",
+            "description": "Whether the customer is currently KYC verified."
+          }
+        },
+        "required": [
+          "id",
+          "kycVerified"
+        ]
+      },
+      "CredentialPreviewDto": {
+        "type": "object",
+        "properties": {
+          "@context": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "type": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "issuer": {
+            "type": "string"
+          },
+          "issuanceDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "credentialSubject": {
+            "$ref": "#/components/schemas/CredentialSubjectDto"
+          }
+        },
+        "required": [
+          "@context",
+          "type",
+          "issuer",
+          "issuanceDate",
+          "credentialSubject"
+        ]
+      },
+      "AddressInputDto": {
+        "type": "object",
+        "properties": {
+          "country": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 50
+          },
+          "city": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 80
+          },
+          "postalCode": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 12
+          },
+          "line1": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 120
+          }
+        }
+      },
+      "CreateCustomerDto": {
+        "type": "object",
+        "properties": {
+          "fullName": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 100
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "phone": {
+            "type": "string",
+            "nullable": true,
+            "pattern": "^\\+?\\d{7,15}$",
+            "description": "Digits (7-15), optional leading +; separators (spaces/dashes/parentheses) are normalized away."
+          },
+          "nationalId": {
+            "type": "string",
+            "description": "Turkish national ID (TC Kimlik No). Stored column-encrypted; only the last 4 are ever returned."
+          },
+          "dateOfBirth": {
+            "type": "string",
+            "nullable": true,
+            "format": "date",
+            "example": "1990-01-04"
+          },
+          "address": {
+            "$ref": "#/components/schemas/AddressInputDto"
+          }
+        },
+        "required": [
+          "fullName",
+          "email",
+          "nationalId"
+        ]
+      },
+      "UpdateCustomerDto": {
+        "type": "object",
+        "properties": {
+          "fullName": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 100
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "phone": {
+            "type": "string",
+            "nullable": true,
+            "pattern": "^\\+?\\d{7,15}$",
+            "description": "Digits (7-15), optional leading +; separators (spaces/dashes/parentheses) are normalized away."
+          },
+          "dateOfBirth": {
+            "type": "string",
+            "nullable": true,
+            "format": "date"
+          },
+          "address": {
+            "$ref": "#/components/schemas/AddressInputDto"
+          },
+          "kycStatus": {
+            "type": "string",
+            "enum": [
+              "NOT_STARTED",
+              "PENDING",
+              "IN_REVIEW",
+              "VERIFIED",
+              "REJECTED",
+              "EXPIRED"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ACTIVE",
+              "INACTIVE",
+              "CLOSED"
+            ]
+          },
+          "contractSigned": {
+            "type": "boolean",
+            "description": "Commercial flag — NOT a KYC state."
+          },
+          "rowVersion": {
+            "type": "number",
+            "description": "Optimistic-concurrency token from the last read; mismatch → 409."
+          }
+        },
+        "required": [
+          "rowVersion"
+        ]
+      },
+      "WalletDetailDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "currency": {
+            "type": "string",
+            "description": "ISO-4217 currency code."
+          },
+          "balanceMinor": {
+            "type": "string",
+            "description": "Balance in integer minor units, as a decimal string."
+          },
+          "availableBalanceMinor": {
+            "type": "string",
+            "description": "Available balance (balance − holds), minor units, as a decimal string."
+          },
+          "dailyLimitMinor": {
+            "type": "string",
+            "description": "Daily limit, minor units, as a decimal string."
+          },
+          "monthlyLimitMinor": {
+            "type": "string",
+            "description": "Monthly limit, minor units, as a decimal string."
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ACTIVE",
+              "FROZEN",
+              "CLOSED"
+            ]
+          },
+          "rowVersion": {
+            "type": "number",
+            "description": "Optimistic-concurrency token for limit updates."
+          }
+        },
+        "required": [
+          "id",
+          "currency",
+          "balanceMinor",
+          "availableBalanceMinor",
+          "dailyLimitMinor",
+          "monthlyLimitMinor",
+          "status",
+          "rowVersion"
+        ]
+      },
+      "UpdateWalletLimitsDto": {
+        "type": "object",
+        "properties": {
+          "dailyLimit": {
+            "type": "number",
+            "description": "Daily limit in MAJOR units (must be < monthlyLimit).",
+            "minimum": 0
+          },
+          "monthlyLimit": {
+            "type": "number",
+            "description": "Monthly limit in MAJOR units (must be > dailyLimit).",
+            "minimum": 0
+          },
+          "rowVersion": {
+            "type": "number",
+            "description": "Optimistic-concurrency token from the last read; mismatch → 409."
+          }
+        },
+        "required": [
+          "dailyLimit",
+          "monthlyLimit",
+          "rowVersion"
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,44 @@
+@if (open) {
+  <div
+    class="ui-drawer__scrim"
+    [class.ui-drawer__scrim--start]="anchor === 'start'"
+    (click)="onScrimClick()"
+  >
+    <aside
+      class="ui-drawer__panel"
+      [class.ui-drawer__panel--sm]="size === 'sm'"
+      [class.ui-drawer__panel--md]="size === 'md'"
+      [class.ui-drawer__panel--lg]="size === 'lg'"
+      [class.ui-drawer__panel--start]="anchor === 'start'"
+      role="dialog"
+      aria-modal="true"
+      [attr.aria-labelledby]="title ? titleId : null"
+      tabindex="-1"
+      (click)="$event.stopPropagation()"
+    >
+      <header class="ui-drawer__header">
+        @if (title) {
+          <h3 class="ui-drawer__title" [id]="titleId">{{ title }}</h3>
+        }
+        @if (!disableClose) {
+          <button
+            type="button"
+            class="ui-drawer__close"
+            [attr.aria-label]="closeAriaLabel"
+            (click)="closed.emit()"
+          >
+            <i class="ri-close-line" aria-hidden="true"></i>
+          </button>
+        }
+      </header>
+
+      <div class="ui-drawer__body">
+        <ng-content></ng-content>
+      </div>
+
+      <footer class="ui-drawer__footer">
+        <ng-content select="[drawer-footer]"></ng-content>
+      </footer>
+    </aside>
+  </div>
+}

@@ -1,0 +1,111 @@
+<!--
+###### UI Hero / Wallet Card (v2.1 §4 / §3.3 G6) ######
+Usage (all strings arrive PRE-TRANSLATED and pre-masked from the consumer):
+<app-ui-hero-card
+  variant="gradient" decorated icon="ri-group-line"
+  [valueLabel]="translatedLabel" [value]="'1,248'"
+  [segments]="[{label:'active', value:'1,102', pct:88}, {label:'inactive', value:'146', pct:12}]"
+  [footnote]="ratioLine">
+</app-ui-hero-card>
+
+<app-ui-hero-card
+  variant="outline"
+  [valueLabel]="translatedLabel" [value]="'742'"
+  [ring]="58" [meta]="[{label:'As of', value:'6/15/26'}]">
+</app-ui-hero-card>
+
+variant: gradient (brand gradient + on-brand text) | outline (surface + 1px border, navy text)
+Visual options (opt-in): icon medallion · ring (circular %) · segments (split bar) · decorated (bg rings).
+Real data only (G6). States: populated · empty (em-dash value with screen-reader text)
+#################################
+-->
+
+<div
+  class="hero-card"
+  [class.hero-card--gradient]="variant === 'gradient'"
+  [class.hero-card--outline]="variant === 'outline'"
+  [attr.id]="id || null"
+>
+  @if (decorated) {
+    <svg class="hero-card__decor" viewBox="0 0 180 180" aria-hidden="true" focusable="false">
+      <circle cx="150" cy="150" r="40"></circle>
+      <circle cx="150" cy="150" r="68"></circle>
+      <circle cx="150" cy="150" r="96"></circle>
+    </svg>
+  }
+
+  <div class="hero-card__head">
+    <div class="hero-card__main">
+      @if (valueLabel) {
+        <p class="hero-card__label">
+          @if (labelIcon) {
+            <i class="hero-card__label-icon {{ labelIcon }}" aria-hidden="true"></i>
+          }
+          {{ valueLabel }}
+        </p>
+      }
+      @if (isEmpty) {
+        <p class="hero-card__value hero-card__value--empty" aria-hidden="true">—</p>
+        <span class="hero-card__sr">{{ valueLabel }}: —</span>
+      } @else {
+        <p class="hero-card__value">{{ value }}</p>
+      }
+    </div>
+
+    @if (ringPct !== null) {
+      <div class="hero-card__ring" aria-hidden="true">
+        <div class="hero-card__ring-circle">
+          <svg viewBox="0 0 64 64">
+            <circle class="hero-card__ring-track" cx="32" cy="32" [attr.r]="ringRadius"></circle>
+            <circle
+              class="hero-card__ring-fill"
+              cx="32"
+              cy="32"
+              [attr.r]="ringRadius"
+              [attr.stroke-dasharray]="ringCircumference"
+              [attr.stroke-dashoffset]="ringDashoffset"
+              [style.--ring-circ]="ringCircumference"
+            ></circle>
+          </svg>
+          <span class="hero-card__ring-label">{{ ringLabel }}</span>
+        </div>
+        @if (ringCaption) {
+          <span class="hero-card__ring-caption">{{ ringCaption }}</span>
+        }
+      </div>
+    } @else if (icon) {
+      <span class="hero-card__icon" aria-hidden="true"><i [class]="icon"></i></span>
+    }
+  </div>
+
+  @if (segments.length) {
+    <div class="hero-card__split">
+      <div class="hero-card__bar" aria-hidden="true">
+        @for (s of segments; track s.label) {
+          <span class="hero-card__bar-seg" [style.width.%]="s.pct"></span>
+        }
+      </div>
+      <dl class="hero-card__meta">
+        @for (s of segments; track s.label) {
+          <div class="hero-card__meta-pair">
+            <dt class="hero-card__meta-label">{{ s.label }}</dt>
+            <dd class="hero-card__meta-value">{{ s.value }}</dd>
+          </div>
+        }
+      </dl>
+    </div>
+  } @else if (metaPairs.length > 0) {
+    <dl class="hero-card__meta">
+      @for (pair of metaPairs; track pair.label) {
+        <div class="hero-card__meta-pair">
+          <dt class="hero-card__meta-label">{{ pair.label }}</dt>
+          <dd class="hero-card__meta-value">{{ pair.value }}</dd>
+        </div>
+      }
+    </dl>
+  }
+
+  @if (footnote) {
+    <p class="hero-card__footnote">{{ footnote }}</p>
+  }
+</div>

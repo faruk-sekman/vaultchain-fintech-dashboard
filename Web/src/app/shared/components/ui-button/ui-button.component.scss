@@ -1,0 +1,193 @@
+:host {
+  @apply inline-flex max-w-full align-middle;
+}
+
+:host(.ui-button-host--full) {
+  @apply flex w-full;
+}
+
+.ui-button {
+  @apply relative inline-flex box-border max-w-full cursor-pointer items-center justify-center whitespace-nowrap border border-transparent text-center no-underline outline-none;
+
+  border-radius: var(--radius-field);
+  gap: var(--space-4);
+  font-weight: var(--font-weight-semibold);
+  transition:
+    background-color var(--motion-duration-fast) var(--motion-ease-standard),
+    border-color var(--motion-duration-fast) var(--motion-ease-standard),
+    color var(--motion-duration-fast) var(--motion-ease-standard),
+    box-shadow var(--motion-duration-fast) var(--motion-ease-standard),
+    transform var(--motion-duration-fast) var(--motion-ease-standard);
+
+  &:focus-visible {
+    box-shadow: var(--shadow-focus);
+  }
+
+  &:hover:not(:disabled) {
+    transform: translateY(-1px);
+  }
+
+  // v2 §4: pressed affordance, scale ≤ 0.98.
+  &:active:not(:disabled) {
+    transform: translateY(0) scale(0.98);
+  }
+
+  &:disabled {
+    @apply cursor-not-allowed opacity-55;
+
+    box-shadow: none;
+    transform: none;
+  }
+
+  // Project-wide action rhythm: sm/md/lg/pill keep one 44px button height.
+  &--sm,
+  &--md,
+  &--lg,
+  &--pill {
+    height: 44px;
+    min-width: 44px;
+    padding-inline: var(--space-9);
+    font-size: var(--text-body-sm);
+  }
+
+  &--sm {
+    @apply leading-4;
+  }
+
+  &--md,
+  &--lg {
+    @apply leading-5;
+  }
+
+  &__icon {
+    @apply shrink-0 leading-none;
+
+    width: 1rem;
+    height: 1rem;
+    font-size: 1rem;
+    line-height: 1;
+    transition: transform var(--motion-duration-fast) var(--motion-ease-standard);
+  }
+
+  &--primary {
+    border-color: var(--color-primary);
+    background: var(--color-primary);
+    color: var(--color-on-primary);
+    box-shadow: var(--shadow-xs);
+
+    &:hover:not(:disabled) {
+      background: var(--color-primary-hover);
+      border-color: var(--color-primary-hover);
+      box-shadow: var(--shadow-sm);
+    }
+
+    &:active:not(:disabled) {
+      background: var(--color-primary-active);
+      border-color: var(--color-primary-active);
+      box-shadow: var(--shadow-xs);
+    }
+  }
+
+  &--ghost {
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    color: var(--color-text);
+
+    &:hover:not(:disabled) {
+      background: var(--color-surface-2);
+      border-color: var(--color-border-strong);
+      color: var(--color-text-strong);
+    }
+  }
+
+  // v2 §4: solid danger (--color-danger bg, white text).
+  &--danger {
+    border-color: var(--color-danger);
+    background: var(--color-danger);
+    color: var(--color-on-primary);
+
+    &:hover:not(:disabled) {
+      background: var(--color-danger-strong);
+      border-color: var(--color-danger-strong);
+    }
+
+    &:active:not(:disabled) {
+      background: var(--color-danger-deep);
+      border-color: var(--color-danger-deep);
+    }
+  }
+
+  // v2 §4: pill outline variant for inline/table row-actions.
+  // Border = --color-text-muted (#718EBF) at 45% (the rgb(113 142 191 / 45%) contract value).
+  &--pill {
+    border-radius: var(--radius-pill);
+    border-color: color-mix(in srgb, var(--color-text-muted) 45%, transparent);
+    background: transparent;
+    color: var(--color-link);
+    font-weight: var(--font-weight-medium);
+
+    &:hover:not(:disabled) {
+      border-color: var(--color-primary);
+      background: transparent;
+      color: var(--color-primary);
+    }
+  }
+
+  &--full {
+    @apply w-full;
+  }
+
+  &--icon-only {
+    width: 44px;
+    padding-inline: 0;
+  }
+
+  // §3 Button Inline Loading: width kept, label dimmed to 70%, 16px inline
+  // spinner at iconStart. The 150ms animation-delay is the appearance
+  // threshold (spinner only becomes visible if the wait exceeds it).
+  &--loading {
+    color: color-mix(in srgb, currentcolor 70%, transparent);
+  }
+
+  &__spinner {
+    flex: none;
+    width: var(--space-8);
+    height: var(--space-8);
+    border: 2px solid color-mix(in srgb, currentcolor 25%, transparent);
+    border-top-color: currentcolor;
+    border-radius: var(--radius-pill);
+    opacity: 0;
+    animation:
+      ui-backdrop-in var(--motion-fast) var(--motion-ease-enter) both,
+      ui-spin 900ms linear infinite;
+    animation-delay: 150ms; /* §3 appearance threshold (no token in the scale) */
+  }
+
+  & > span,
+  & > .ui-button__label {
+    @apply overflow-hidden text-ellipsis;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ui-button {
+    transition: none;
+  }
+
+  .ui-button:active:not(:disabled) {
+    transform: none;
+  }
+
+  // §3 reduced variant: no rotation — static dots at 60% opacity.
+  .ui-button__spinner {
+    width: auto;
+    height: auto;
+    border: 0;
+    opacity: 0.6;
+    animation: none;
+  }
+
+  .ui-button__spinner::before {
+    content: "…";
+  }
+}

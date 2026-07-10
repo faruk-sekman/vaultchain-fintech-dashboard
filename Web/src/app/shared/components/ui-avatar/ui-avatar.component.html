@@ -1,0 +1,52 @@
+<!--
+###### UI Avatar Component ######
+Usage:
+<app-ui-avatar name="Ada Lovelace" src="…" size="md" shape="circle" status="online"></app-ui-avatar>
+<app-ui-avatar name="Grace Hopper" color="auto"></app-ui-avatar>     ← deterministic hue
+<app-ui-avatar icon="ri-user-line" [name]="null"></app-ui-avatar>    ← icon fallback
+
+sizes: xs | sm | md | lg · shape: squircle | circle · status: online | away | offline
+A11y: alt/aria-label = name; fallback glyph is decorative.
+#################################
+-->
+
+<span
+  class="ui-avatar"
+  [class.ui-avatar--xs]="size() === 'xs'"
+  [class.ui-avatar--sm]="size() === 'sm'"
+  [class.ui-avatar--md]="size() === 'md'"
+  [class.ui-avatar--lg]="size() === 'lg'"
+  [class.ui-avatar--circle]="shape() === 'circle'"
+  [class.ui-avatar--brand]="showInitials && color() === 'brand'"
+  [class.ui-avatar--auto]="showInitials && color() === 'auto'"
+  [ngStyle]="fallbackStyles"
+  role="img"
+  [attr.id]="id() || null"
+  [attr.aria-label]="accessibleName"
+>
+  @if (showImage) {
+    <img
+      class="ui-avatar__img"
+      [src]="src()"
+      [alt]="accessibleName || ''"
+      (error)="onImageError()"
+    />
+  } @else if (showInitials) {
+    <span class="ui-avatar__initials" aria-hidden="true">{{ initials }}</span>
+  } @else if (showIcon) {
+    <i class="ui-avatar__icon {{ icon() }}" aria-hidden="true"></i>
+  } @else {
+    <i class="ui-avatar__icon ri-user-line" aria-hidden="true"></i>
+  }
+
+  @if (status()) {
+    <span
+      class="ui-avatar__status"
+      [class.ui-avatar__status--online]="status() === 'online'"
+      [class.ui-avatar__status--away]="status() === 'away'"
+      [class.ui-avatar__status--offline]="status() === 'offline'"
+    >
+      <span class="ui-avatar__status-label">{{ statusText }}</span>
+    </span>
+  }
+</span>

@@ -1,0 +1,33 @@
+<div
+  class="ui-alert ui-alert--{{ type() }} {{ class() }}"
+  [attr.role]="role"
+  [attr.id]="id() || null"
+  [attr.aria-label]="ariaLabel() || null"
+>
+  <i class="ui-alert__icon {{ iconClass }}" aria-hidden="true"></i>
+
+  <div class="ui-alert__content">
+    @if (title()) {
+      <p class="ui-alert__title">{{ title() }}</p>
+    }
+    <span class="ui-alert__title"><ng-content select="[alert-title]"></ng-content></span>
+
+    @if (message()) {
+      <p class="ui-alert__message">{{ message() }}</p>
+    }
+    <div class="ui-alert__message"><ng-content></ng-content></div>
+
+    <div class="ui-alert__actions"><ng-content select="[alert-action]"></ng-content></div>
+  </div>
+
+  @if (dismissible()) {
+    <button
+      type="button"
+      class="ui-alert__dismiss motion-pressable"
+      [attr.aria-label]="dismissLabel() || null"
+      (click)="onDismiss()"
+    >
+      <i class="ri-close-line" aria-hidden="true"></i>
+    </button>
+  }
+</div>

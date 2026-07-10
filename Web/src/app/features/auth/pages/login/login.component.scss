@@ -1,0 +1,558 @@
+/* Full-bleed login, ported 1:1 from the approved Vaultchain design file. The animated
+   LEFT brand pane and the top-right lang/theme controls now live in the shared `AuthBrandPaneComponent`
+   / `AuthHeaderControlsComponent`; this stylesheet keeps the design tokens (scoped to `.login`, also
+   INHERITED by those child components) plus the right-pane auth form + demo cards. Motion keyframes
+   live in `_animations.scss` (login-* = the design's vc-*); reduced motion is the global handler. */
+
+/* ---------- design tokens — light (exact) ---------- */
+.login {
+  /* Shared "ease-out-quint" easing — extracted from 15 inline copies to keep the component-style
+     budget honest without changing any motion. */
+  --ld-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --ld-bg-2: #eef1f6;
+  --ld-field-bg: #f3f6fb;
+  --ld-field-border: #dce3ee;
+  --ld-text: #0b1f3a;
+  --ld-muted: #54658a;
+  --ld-faint: #626f8c; // darkened for WCAG AA (~4.6:1 on the light field bg) — re-audit A11Y-003
+  --ld-border: #e4e9f1;
+  --ld-card-bg: #fff;
+  --ld-card-border: #e7ecf4;
+  --ld-card-hover: #f4f7fd;
+  --ld-primary: #1e66f5;
+  --ld-primary-2: #1655d8;
+  --ld-link: #1e66f5;
+  --ld-danger: #dc2b32;
+  --ld-ring: rgb(30 102 245 / 28%);
+  --ld-shadow-card: 0 1px 2px rgb(11 31 58 / 5%), 0 10px 26px -14px rgb(11 31 58 / 18%);
+  --ld-brand-1: #0b1f3a;
+  --ld-brand-2: #1e66f5;
+  --ld-brand-3: #1e66f5;
+  --ld-brand-faint: rgb(238 243 255 / 76%);
+  --ld-brand-tag: #7fb0ff;
+  --ld-surface: #fff;
+
+  min-height: 100dvh;
+  font-family:
+    'Space Grotesk',
+    system-ui,
+    -apple-system,
+    sans-serif;
+  background: var(--ld-surface);
+  color: var(--ld-text);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizelegibility;
+}
+
+/* ---------- design tokens — dark (exact) ---------- */
+:host-context(html[data-theme='dark']) .login {
+  --ld-bg-2: #11294a;
+  --ld-field-bg: #0e2342;
+  --ld-field-border: #22395d;
+  --ld-text: #eef3ff;
+  --ld-muted: #9db0d4;
+  --ld-faint: #6e83a8;
+  --ld-border: #1c3357;
+  --ld-card-bg: #0e2342;
+  --ld-card-border: #244069;
+  --ld-card-hover: #13294a;
+  --ld-primary-2: #3b7bff;
+  --ld-link: #7fb0ff;
+  --ld-danger: #ff6b6f;
+  --ld-ring: rgb(127 176 255 / 42%);
+  --ld-shadow-card: 0 1px 2px rgb(0 0 0 / 40%), 0 14px 32px -16px rgb(0 0 0 / 60%);
+  --ld-brand-1: #06132a;
+  --ld-brand-faint: rgb(238 243 255 / 74%);
+  --ld-surface: #0b1f3a;
+}
+
+/* Inline SVG icons sized by parent font-size; stroke="currentColor" inherits colour. */
+.login__svg {
+  flex: none;
+}
+
+/* Keyboard focus ring on the form pane — the UA default is near-invisible over the blue submit.
+   :focus-visible keeps it keyboard-only so pointer/desktop appearance is unchanged. */
+.login__panel :focus-visible {
+  outline: 2px solid var(--ld-link);
+  outline-offset: 3px;
+}
+
+/* ---------- shell: full-bleed 50/50 ---------- */
+.login__shell {
+  display: grid;
+  grid-template-columns: 1fr;
+  min-height: 100dvh;
+  animation: login-shell-in 0.6s ease both;
+}
+
+@media (width >= 900px) {
+  .login__shell {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* ---------- right: auth pane ---------- */
+.login__panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  padding: clamp(40px, 6vh, 72px) clamp(28px, 4.4vw, 68px);
+  overflow-y: auto;
+  background: var(--ld-surface);
+  line-height: normal;
+  animation: login-slide-right 0.85s var(--ld-ease) 0.45s both;
+}
+
+.login__panel-inner {
+  width: 100%;
+  max-width: 452px;
+  margin: 0 auto;
+}
+
+.login__title {
+  margin: 0;
+  font-size: clamp(27px, 3vw, 34px);
+  font-weight: 800;
+  letter-spacing: -0.022em;
+  color: var(--ld-text);
+  animation: login-rise 0.62s var(--ld-ease) 0.7s both;
+  line-height: normal;
+}
+
+.login__subtitle {
+  color: var(--ld-muted);
+  margin: 9px 0 0;
+  font-size: 15.5px;
+  animation: login-rise 0.62s var(--ld-ease) 0.8s both;
+}
+
+.login__card {
+  margin-top: 30px;
+}
+
+.login__field {
+  animation: login-rise 0.62s var(--ld-ease) var(--ed, 0s) both;
+}
+
+.login__field--email {
+  --ed: 1s;
+}
+
+.login__field--password {
+  --ed: 1.12s;
+
+  margin-top: 20px;
+}
+
+.login__label {
+  display: block;
+  margin-bottom: 9px;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ld-muted);
+}
+
+.login__control {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 54px;
+  padding: 0 16px;
+  border: 1.5px solid var(--ld-field-border);
+  border-radius: 13px;
+  background: var(--ld-field-bg);
+  transition: border-color 0.15s ease;
+
+  &:focus-within {
+    border-color: var(--ld-primary);
+    box-shadow: 0 0 0 3px var(--ld-ring);
+  }
+}
+
+.login__control-icon {
+  display: flex;
+  flex: none;
+  color: var(--ld-faint);
+}
+
+.login__control input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  font: inherit;
+  font-size: 15.5px;
+  letter-spacing: 0.005em;
+  color: var(--ld-text);
+
+  &:focus {
+    outline: none;
+  }
+
+  &::placeholder {
+    color: var(--ld-faint);
+    opacity: 1;
+  }
+}
+
+.login__toggle {
+  display: flex;
+  flex: none;
+  margin: 0 -6px 0 0;
+  padding: 6px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--ld-faint);
+  cursor: pointer;
+}
+
+.login__error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 1px;
+  font-size: 13px;
+  color: var(--ld-danger, #dc2b32);
+}
+
+.login__alert {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 16px;
+  padding: 12px 14px;
+  border: 1px solid rgb(220 43 50 / 22%);
+  border-radius: 11px;
+  background: rgb(220 43 50 / 8%);
+  font-size: 13.5px;
+  color: var(--ld-danger);
+}
+
+/* ---------- forgot-password link (right-aligned under the password field) ---------- */
+.login__field-aux {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 8px;
+  margin-bottom: 2px;
+}
+
+.login__forgot {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ld-link);
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+/* ---------- submit (exact gradient + sheen + lift + spinner) ---------- */
+.login__submit {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  height: 54px;
+  margin-top: 24px;
+  overflow: hidden;
+  isolation: isolate;
+  border: none;
+  border-radius: 13px;
+  background: linear-gradient(135deg, var(--ld-primary), var(--ld-primary-2));
+  box-shadow: 0 14px 30px -12px rgb(30 102 245 / 50%);
+  color: #fff;
+  font: inherit;
+  font-size: 15.5px;
+  font-weight: 700;
+  cursor: pointer;
+  animation: login-rise 0.62s var(--ld-ease) 1.24s both;
+  transition:
+    background 0.35s ease,
+    box-shadow 0.25s ease,
+    transform 0.15s ease;
+}
+
+.login__submit > * {
+  position: relative;
+  z-index: 1;
+}
+
+.login__submit::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 0;
+  width: 45%;
+  border-radius: inherit;
+  background: linear-gradient(110deg, transparent, rgb(255 255 255 / 28%), transparent);
+  transform: translateX(-240%);
+  pointer-events: none;
+}
+
+.login__submit:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 22px 42px -12px rgb(30 102 245 / 60%);
+}
+
+.login__submit:hover:not(:disabled)::after {
+  transform: translateX(460%);
+  transition: transform 0.75s var(--ld-ease);
+}
+
+.login__submit:active:not(:disabled) {
+  transform: translateY(0) scale(0.988);
+  transition-duration: 0.09s;
+}
+
+.login__submit:disabled {
+  opacity: 0.85;
+  cursor: default;
+}
+
+.login__submit svg {
+  transition: transform 0.3s var(--ld-ease);
+}
+
+.login__submit:hover:not(:disabled) svg {
+  transform: translateX(5px);
+}
+
+.login__spinner {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2.5px solid rgb(255 255 255 / 40%);
+  border-top-color: #fff;
+  animation: login-spin 0.7s linear infinite;
+}
+
+/* ---------- demo cards (sheen + ripple + hover lift + icon rotate + cue) ---------- */
+.login__demo {
+  margin-top: 30px;
+  padding-top: 24px;
+  border-top: 1px solid var(--ld-border);
+}
+
+.login__demo-head {
+  animation: login-rise 0.62s var(--ld-ease) 1.42s both;
+}
+
+.login__demo-title {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--ld-text);
+}
+
+.login__demo-subtitle {
+  margin: 6px 0 0;
+  font-size: 13.5px;
+  color: var(--ld-muted);
+}
+
+.login__demo-list {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+  margin: 16px 0 0;
+  padding: 0;
+  list-style: none;
+  font-family: Arial, "Space Grotesk", system-ui, -apple-system, sans-serif;
+}
+
+.login__demo-list li:nth-child(1) {
+  --ed: 1.5s;
+}
+
+.login__demo-list li:nth-child(2) {
+  --ed: 1.62s;
+}
+
+.login__demo-list li:nth-child(3) {
+  --ed: 1.74s;
+}
+
+.login__demo-card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  width: 100%;
+  padding: 15px;
+  overflow: hidden;
+  isolation: isolate;
+  border: 1px solid var(--ld-card-border);
+  border-radius: 15px;
+  background: var(--ld-card-bg);
+  box-shadow: var(--ld-shadow-card);
+  text-align: start;
+  cursor: pointer;
+  animation: login-rise-sm 0.55s var(--ld-ease) var(--ed, 0s) both;
+  transition:
+    transform 0.16s ease,
+    border-color 0.16s ease,
+    background-color 0.16s ease,
+    box-shadow 0.16s ease;
+}
+
+.login__demo-card > span {
+  position: relative;
+  z-index: 1;
+}
+
+/* click ripple (design's vc-pulse): radial pulse from the icon, replayed on each card click */
+.login__ripple {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: inherit;
+  background: radial-gradient(circle at 34px 50%, rgb(30 102 245 / 20%), transparent 62%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.login__demo-card.is-pulsing .login__ripple {
+  animation: login-ripple 0.62s ease-out;
+}
+
+.login__demo-card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 0;
+  width: 55%;
+  border-radius: inherit;
+  background: linear-gradient(110deg, transparent, rgb(30 102 245 / 13%), transparent);
+  transform: translateX(-200%);
+  pointer-events: none;
+}
+
+.login__demo-card:hover::after {
+  transform: translateX(360%);
+  transition: transform 0.7s var(--ld-ease);
+}
+
+.login__demo-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--ld-link);
+  background: var(--ld-card-hover);
+  box-shadow: 0 20px 40px -18px rgb(30 102 245 / 42%);
+}
+
+.login__demo-card:active {
+  transform: translateY(-1px) scale(0.987);
+  transition-duration: 0.09s;
+}
+
+.login__demo-avatar {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  color: #fff;
+  transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.login__demo-card:hover .login__demo-avatar {
+  transform: scale(1.07) rotate(-4deg);
+}
+
+.login__demo-card:active .login__demo-avatar {
+  transform: scale(0.93);
+}
+
+.login__demo-card--administrator .login__demo-avatar {
+  background: linear-gradient(140deg, var(--ld-primary), var(--ld-primary-2));
+  box-shadow: 0 8px 18px -10px rgb(30 102 245 / 70%);
+}
+
+.login__demo-card--operator .login__demo-avatar {
+  background: rgb(30 102 245 / 12%);
+  color: var(--ld-primary);
+}
+
+.login__demo-card--auditor .login__demo-avatar {
+  background: rgb(132 146 176 / 14%);
+  color: var(--ld-muted);
+}
+
+.login__demo-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.login__demo-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.login__demo-role {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ld-text);
+  overflow-wrap: anywhere;
+}
+
+.login__demo-action {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 3px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--ld-link);
+  transition: color 0.2s ease;
+}
+
+.login__demo-action svg {
+  transition: transform 0.28s var(--ld-ease);
+}
+
+.login__demo-card:hover .login__demo-action {
+  color: var(--ld-primary);
+}
+
+.login__demo-card:hover .login__demo-action svg {
+  transform: translateX(5px);
+}
+
+.login__demo-desc {
+  margin-top: 3px;
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--ld-muted);
+  overflow-wrap: anywhere;
+}
+
+/* ---------- compact viewports (right pane; the brand pane owns its own media queries) ---------- */
+@media (width < 900px) {
+  /* Keep the stacked mobile title clear of the absolutely-positioned lang/theme controls. */
+  .login__panel {
+    padding: 66px 28px 44px;
+  }
+}
+
+@media (width < 480px) {
+  .login__panel {
+    padding: 62px 22px 32px;
+  }
+}

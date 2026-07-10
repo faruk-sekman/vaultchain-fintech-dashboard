@@ -1,0 +1,129 @@
+<section
+  class="settings-panel motion-stagger"
+  role="tabpanel"
+  data-testid="settings-panel-access"
+  [attr.id]="panelId"
+  [attr.aria-labelledby]="labelledBy"
+>
+  <header class="settings-panel__head">
+    <span class="settings-medallion settings-medallion--teal" aria-hidden="true">
+      <i class="ri-key-2-line"></i>
+    </span>
+    <div class="settings-panel__heading">
+      <h2 class="settings-panel__title" id="access-table-title">
+        {{ 'settings.access.title' | translate }}
+      </h2>
+      <p class="settings-panel__sub">{{ 'settings.access.subtitle' | translate }}</p>
+    </div>
+  </header>
+
+  @if (accessLoadFailed) {
+    <p class="settings-local-note" role="alert">
+      <i class="ri-error-warning-line" aria-hidden="true"></i>
+      {{ 'settings.access.loadFailed' | translate }}
+    </p>
+  }
+
+  <div class="access-layout">
+    <aside class="access-aside" data-testid="settings-access-facts">
+      <div class="access-fact">
+        <span class="access-fact__value">{{ accountPermissionsCount }}</span>
+        <span class="access-fact__label">{{
+          'settings.access.grantedPermissions' | translate
+        }}</span>
+      </div>
+      <div class="access-fact">
+        <span class="access-fact__value">{{ accountResourceCount }}</span>
+        <span class="access-fact__label">{{ 'settings.access.resourceGroups' | translate }}</span>
+      </div>
+      <div class="access-fact">
+        <span class="access-fact__line access-fact__line--ok" role="status">
+          <span class="access-fact__dot" aria-hidden="true"></span>
+          {{ 'settings.identity.sessionActive' | translate }}
+        </span>
+        @if (uptimeParts; as uptime) {
+          <span class="access-fact__label">{{ 'settings.access.uptime' | translate: uptime }}</span>
+        } @else if (accessLoading) {
+          <span class="access-fact__label">{{ 'common.loading' | translate }}</span>
+        } @else {
+          <span class="access-fact__label">{{ 'common.loadError' | translate }}</span>
+        }
+      </div>
+      <div class="access-fact">
+        <span class="access-fact__line access-fact__line--warn">
+          <span class="access-fact__dot" aria-hidden="true"></span>
+          {{ 'settings.access.sensitiveCount' | translate: { count: sensitiveCount } }}
+        </span>
+        <span class="access-fact__label">{{ 'settings.access.sensitiveNote' | translate }}</span>
+      </div>
+      <div class="access-legend">
+        <span class="access-legend__title">{{ 'settings.access.categories' | translate }}</span>
+        @for (category of accessCategories; track category.key) {
+          <span class="access-legend__item">
+            <span [class]="'access-dot access-dot--' + category.key" aria-hidden="true"></span>
+            {{ category.labelKey | translate }}
+          </span>
+        }
+      </div>
+    </aside>
+
+    <div class="access-table-wrap">
+      @if (accessRows.length > 0) {
+        <table
+          class="access-table"
+          data-testid="settings-access-table"
+          aria-labelledby="access-table-title"
+        >
+          <thead>
+            <tr>
+              <th scope="col">{{ 'settings.access.colResource' | translate }}</th>
+              <th scope="col">{{ 'settings.access.colScopes' | translate }}</th>
+              <th scope="col" class="access-table__num">
+                {{ 'settings.access.colPermissions' | translate }}
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of accessRows; track row.resource) {
+              <tr>
+                <td class="access-table__resource">
+                  <span
+                    [class]="'access-dot access-dot--' + row.category"
+                    aria-hidden="true"
+                  ></span>
+                  <code>{{ row.resource }}</code>
+                </td>
+                <td>
+                  <div class="access-scopes">
+                    @for (scope of row.scopes; track scope.code) {
+                      <span
+                        class="access-scope"
+                        [class.access-scope--sensitive]="scope.sensitive"
+                        [title]="
+                          scope.sensitive
+                            ? scope.code + ' — ' + ('settings.access.sensitiveFlag' | translate)
+                            : scope.code
+                        "
+                      >
+                        <i class="ri-check-line" aria-hidden="true"></i>
+                        {{ scope.action }}
+                        @if (scope.sensitive) {
+                          <span class="access-scope__flag" aria-hidden="true"></span>
+                        }
+                      </span>
+                    }
+                  </div>
+                </td>
+                <td class="access-table__num">
+                  <span class="access-count">{{ row.scopes.length }}</span>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      } @else {
+        <p class="settings-access-empty">{{ 'settings.access.noPermissions' | translate }}</p>
+      }
+    </div>
+  </div>
+</section>

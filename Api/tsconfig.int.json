@@ -1,0 +1,18 @@
+/*
+ * Integration-test TypeScript config.
+ *
+ * WHY THIS EXISTS: the *.int-spec.ts suites boot the REAL AppModule, which wires MfaModule → otplib v13.
+ * otplib v13 pulls ESM-only transitive deps (@scure/base, and a NESTED @noble/hashes) that ship bare
+ * `export` statements. Jest must transpile those .js files instead of ignoring them as node_modules, so
+ * ts-jest needs `allowJs` here. `isolatedModules` keeps that JS transpile fast and per-file (no
+ * cross-file type analysis on third-party JS). This extends the base tsconfig so the app's own compiler
+ * options (strict, decorators, paths) are unchanged. Used ONLY by jest-int.config.cjs (`test:int`); the
+ * unit `npm test` keeps the inline package.json jest config + base tsconfig.
+ */
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "allowJs": true,
+    "isolatedModules": true
+  }
+}

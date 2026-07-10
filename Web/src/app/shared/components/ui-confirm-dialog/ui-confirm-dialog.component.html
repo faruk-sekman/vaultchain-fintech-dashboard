@@ -1,0 +1,37 @@
+<!-- The overlay is always present (so the body-portal in the component can lift it to <body> once
+     and never fight a structural @if). Visibility + enter animation are driven by `--open`; the
+     card itself is created/destroyed by @if so focus/animation fire per open. -->
+<div class="confirm-overlay" [class.confirm-overlay--open]="open">
+  @if (open) {
+    <div
+      class="confirm-card"
+      role="dialog"
+      aria-modal="true"
+      [attr.aria-labelledby]="titleId"
+      [attr.aria-describedby]="messageId"
+    >
+      <div class="confirm-icon">
+        <i [class]="icon" aria-hidden="true"></i>
+      </div>
+      <div class="confirm-content">
+        <h3 class="confirm-title" [id]="titleId">{{ titleKey | translate }}</h3>
+        <p class="confirm-message" [id]="messageId">{{ messageKey | translate: messageParams }}</p>
+        <div class="confirm-actions">
+          <app-ui-button type="button" variant="ghost" (click)="cancel.emit()" [disabled]="loading">
+            <i class="ri-close-line ui-button__icon" aria-hidden="true"></i>
+            {{ cancelLabelKey | translate }}
+          </app-ui-button>
+          <app-ui-button
+            type="button"
+            variant="danger"
+            (click)="confirm.emit()"
+            [disabled]="loading"
+          >
+            <i [class]="confirmIcon + ' ui-button__icon'" aria-hidden="true"></i>
+            {{ loading ? (loadingLabelKey | translate) : (confirmLabelKey | translate) }}
+          </app-ui-button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

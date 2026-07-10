@@ -1,0 +1,122 @@
+:host {
+  display: block;
+}
+
+.ui-pagination {
+  /* Standard pager, themed per host: a host card sets --ui-pagination-accent on an ANCESTOR to
+     colour the current page + hover tile to ITS accent (KYC=warning, Risk=danger, …). We read it
+     with an inline fallback at each usage (NOT a default declaration here, which would shadow the
+     inherited override). No accent set ⇒ brand primary, so every existing usage is unchanged. */
+  display: flex;
+  align-items: center;
+
+  &__pages {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  &__ellipsis {
+    color: var(--color-text-soft);
+    font-size: var(--font-size-xs);
+  }
+
+  // Previous/Next keep the shared 44px action rhythm.
+  &__nav {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-4);
+    height: 36px;
+    min-width: 36px;
+    padding-inline: var(--space-4);
+    border: 0;
+    background: transparent;
+    border-radius: var(--radius-field);
+    color: var(--color-link);
+    font-size: var(--text-body-sm);
+    font-weight: var(--font-weight-medium);
+    cursor: pointer;
+    transition:
+      color var(--motion-duration-fast) var(--motion-ease-standard),
+      background-color var(--motion-duration-fast) var(--motion-ease-standard),
+      transform var(--motion-duration-fast) var(--motion-ease-standard);
+
+    i {
+      width: 1rem;
+      height: 1rem;
+      font-size: 1rem;
+      line-height: 1;
+      transition: transform var(--motion-duration-fast) var(--motion-ease-standard);
+    }
+
+    &:hover:not(:disabled) {
+      background: var(--color-surface-2);
+      color: var(--ui-pagination-accent, var(--color-primary));
+      transform: translateY(-1px);
+    }
+
+    &:hover:not(:disabled) .ui-pagination__nav-icon--prev {
+      transform: translateX(-2px);
+    }
+
+    &:hover:not(:disabled) .ui-pagination__nav-icon--next {
+      transform: translateX(2px);
+    }
+
+    &:focus-visible {
+      outline: none;
+      box-shadow: var(--shadow-focus);
+    }
+
+    &:disabled {
+      color: var(--color-text-soft);
+      cursor: not-allowed;
+    }
+  }
+
+  // Page buttons follow the same 44px action size.
+  &__page {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    border-radius: var(--radius-field);
+    color: var(--color-link);
+    font-size: var(--text-body-sm);
+    font-weight: var(--font-weight-medium);
+    font-variant-numeric: tabular-nums;
+    cursor: pointer;
+    transition:
+      background-color var(--motion-duration-fast) var(--motion-ease-standard),
+      color var(--motion-duration-fast) var(--motion-ease-standard),
+      transform var(--motion-duration-fast) var(--motion-ease-standard);
+
+    &:hover:not(:disabled, .ui-pagination__page--current) {
+      background: color-mix(in srgb, var(--ui-pagination-accent, var(--color-primary)) 12%, transparent);
+      color: var(--ui-pagination-accent, var(--color-primary));
+      transform: translateY(-1px);
+    }
+
+    &:focus-visible {
+      outline: none;
+      box-shadow: var(--shadow-focus);
+    }
+
+    &--current {
+      background: var(--ui-pagination-accent, var(--color-primary));
+      color: var(--ui-pagination-accent-contrast, var(--color-on-primary));
+      font-weight: var(--font-weight-semibold);
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ui-pagination__nav,
+  .ui-pagination__page {
+    transition: none;
+  }
+}

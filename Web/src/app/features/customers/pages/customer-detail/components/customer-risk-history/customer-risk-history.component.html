@@ -1,0 +1,49 @@
+<!--
+  ~ Copyright (c) 2026 Fintech Dashboard contributors.
+  -->
+
+<div class="enterprise-panel__header">
+  <h3 class="enterprise-panel__title">
+    {{ 'customerDetail.riskHistory.title' | translate }}
+  </h3>
+</div>
+<div id="customer-detail-risk-history-list" class="enterprise-data-list">
+  @if (loadingRiskHistory()) {
+    <div class="p-3"><app-ui-skeleton width="100%" height="20px"></app-ui-skeleton></div>
+  } @else if (riskHistory().length > 0) {
+    @for (item of riskHistory(); track item.id) {
+      <div class="data-list-row" [class.is-simulated]="item.isSimulated">
+        <div class="data-list-col">
+          <div class="data-list-main">
+            <app-ui-badge
+              [color]="riskDecisionColor(item.decision)"
+              [text]="'web3.decision.' + item.decision | translate"
+            ></app-ui-badge>
+            <span class="data-list-text">{{ item.providerName }}</span>
+          </div>
+          @if (item.isSimulated) {
+            <span class="sim-warning"
+              ><i class="ri-alert-line"></i> {{ 'web3.risk.simulated' | translate }}</span
+            >
+          }
+        </div>
+        <time class="data-list-date" [attr.datetime]="item.createdAt">
+          {{ formatShortDate(item.createdAt) }}
+        </time>
+      </div>
+    }
+  } @else {
+    <div class="enterprise-empty-state">
+      {{ 'customerDetail.riskHistory.empty' | translate }}
+    </div>
+  }
+</div>
+<!-- Server-side pager (pageSize 5); ui-pagination self-hides at ≤1 page, accent = card hue. -->
+<div class="enterprise-panel__pager">
+  <app-ui-pagination
+    [page]="riskPage()"
+    [pageSize]="riskPageSize"
+    [total]="riskTotal()"
+    (pageChange)="onRiskPageChange($event)"
+  ></app-ui-pagination>
+</div>

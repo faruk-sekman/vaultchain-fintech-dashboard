@@ -1,0 +1,8 @@
+# Default ownership: every change requires owner review.
+
+* @faruk-sekman
+
+/.github/ @faruk-sekman
+/scripts/ @faruk-sekman
+/docs/ @faruk-sekman
+/SECURITY.md @faruk-sekman

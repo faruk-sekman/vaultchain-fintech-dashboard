@@ -1,0 +1,94 @@
+:host {
+  @apply block;
+}
+
+.ui-empty {
+  @apply flex min-h-56 flex-col items-center justify-center gap-1.5 px-4 py-8 text-center;
+
+  // §11: empty state fades + rises 4px once on entry (no looping illustration).
+  --motion-rise-distance: var(--motion-distance-sm);
+
+  animation: ui-rise-in var(--motion-normal) var(--motion-ease-enter) both;
+
+  &__icon {
+    @apply mb-1.5 leading-none;
+
+    font-size: 56px;
+    color: var(--color-text-soft);
+  }
+
+  &__title {
+    @apply m-0;
+
+    font-size: var(--text-h4);
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--text-h4-lh);
+    color: var(--color-text);
+  }
+
+  &__message {
+    @apply m-0 max-w-prose;
+
+    font-size: var(--text-body-sm);
+    line-height: var(--line-height-relaxed);
+    color: var(--color-text-muted);
+  }
+
+  &__actions {
+    @apply mt-3 flex flex-wrap items-center justify-center gap-3;
+
+    &:empty {
+      display: none;
+      margin-top: 0;
+    }
+  }
+
+  &__action {
+    @apply inline-flex cursor-pointer items-center justify-center border text-sm font-semibold leading-5;
+
+    height: 44px;
+    min-width: 44px;
+    gap: var(--space-4);
+    padding-inline: var(--space-9);
+    border-radius: var(--radius-field);
+    border: 1px solid var(--color-primary);
+    background: var(--color-primary);
+    color: var(--color-on-primary);
+    transition:
+      background-color var(--motion-duration-fast) var(--motion-ease-standard),
+      border-color var(--motion-duration-fast) var(--motion-ease-standard),
+      box-shadow var(--motion-duration-fast) var(--motion-ease-standard),
+      transform var(--motion-duration-fast) var(--motion-ease-standard);
+
+    & > i {
+      @apply shrink-0 leading-none;
+
+      width: 1rem;
+      height: 1rem;
+      font-size: 1rem;
+      transition: transform var(--motion-duration-fast) var(--motion-ease-standard);
+    }
+
+    &:hover {
+      background: var(--color-primary-hover);
+      border-color: var(--color-primary-hover);
+      transform: translateY(-1px);
+    }
+
+    &:hover > i {
+      transform: translateY(-1px) scale(1.06);
+    }
+
+    &:focus-visible {
+      @apply outline-none;
+
+      box-shadow: var(--shadow-focus);
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ui-empty__action {
+    transition: none;
+  }
+}

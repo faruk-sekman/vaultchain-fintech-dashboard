@@ -1,0 +1,72 @@
+# LOCAL DEMO overlay — docker compose auto-merges this file on `docker compose up` (no -f needed).
+# It turns the base stack into a true one-command, auto-seeded demo WITHOUT changing the base file:
+#   - publishes the db port to the host (so the npm-native path can reach the same DB), and
+#   - adds a one-shot `db-init` job that pushes the schema and seeds ONLY when the DB is empty,
+#     which the api waits for via `service_completed_successfully`.
+#
+# The base docker-compose.yml stays faithful to its canonical definition (seeding is a separate,
+# opt-in step) for CI/production, which run it explicitly with `-f docker-compose.yml` (override not merged).
+#
+# Seed-once: seed-dev.ts is a full-reset seed, so db-init gates it behind a "users already exist?"
+# check. Re-running `up` never re-seeds an existing volume; data persists across up/down.
+# Force a clean reseed with:  FTD_SEED_FORCE=1 docker compose run --rm db-init
+#
+# Destructive schema sync is opt-in: db-init applies the committed migrations by default
+# (fresh-clone-safe — creates the schema unprompted, and baselines a volume that predates the
+# migrations directory instead of dropping it). A destructive `prisma migrate reset` runs ONLY
+# when FTD_SEED_FORCE=1 (deliberate reseed) or FTD_DB_ACCEPT_DATA_LOSS=1 is set.
+name: fintech-dashboard
+
+services:
+  db:
+    # Publish to the host for the npm-native path (host API -> localhost:55432). Loopback-only.
+    # Distinct from the ad-hoc ftd-local-pg (:55440); they do not collide.
+    ports:
+      - "127.0.0.1:${DB_HOST_PORT:-55432}:5432"
+
+  # One-shot schema push + seed-if-empty. Runs on `up` and blocks the api until it completes.
+  db-init:
+    build:
+      context: ./Api
+      target: builder
+    # Share the db container's network namespace so localhost:5432 reaches Postgres — this also
+    # satisfies seed-dev.ts's guard (it refuses any DATABASE_URL whose host isn't localhost).
+    network_mode: "service:db"
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@localhost:5432/${POSTGRES_DB:-fintech_dev}?schema=public
+      FTD_SEED_FORCE: ${FTD_SEED_FORCE:-0}
+      FTD_DB_ACCEPT_DATA_LOSS: ${FTD_DB_ACCEPT_DATA_LOSS:-0}
+    command:
+      - sh
+      - -ceu
+      - |
+        if [ "$${FTD_SEED_FORCE:-0}" = "1" ] || [ "$${FTD_DB_ACCEPT_DATA_LOSS:-0}" = "1" ]; then
+          npx prisma migrate reset --force
+        else
+          node scripts/db-deploy.mjs
+        fi
+        # Integrity SQL is additive/idempotent: it applies the partial indexes / constraints that the
+        # Prisma schema cannot express (e.g. the F12 customer-email partial UNIQUE) to the demo DB too,
+        # so this compose demo-init path carries the same guardrails as the npm-native `npm run dev` path.
+        npx prisma db execute --file prisma/sql/integrity.sql
+        if [ "$${FTD_SEED_FORCE:-0}" = "1" ]; then
+          echo "db-init: forced reseed (FTD_SEED_FORCE=1)"
+          npx ts-node scripts/seed-dev.ts
+        elif node -e "const{Client}=require('pg');const c=new Client({connectionString:process.env.DATABASE_URL});c.connect().then(()=>c.query('SELECT count(*)::int AS n FROM public.metric_daily')).then(r=>{console.log('db-init: metric_daily='+r.rows[0].n);process.exit(r.rows[0].n>0?0:1)}).catch(()=>process.exit(1))"; then
+          echo "db-init: existing data detected — seed skipped (data preserved)"
+        else
+          echo "db-init: empty database — running dev seed"
+          npx ts-node scripts/seed-dev.ts
+        fi
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no"
+
+  api:
+    # Wait for the schema+seed to finish before the API accepts traffic (no empty-DB window).
+    depends_on:
+      db:
+        condition: service_healthy
+      db-init:
+        condition: service_completed_successfully

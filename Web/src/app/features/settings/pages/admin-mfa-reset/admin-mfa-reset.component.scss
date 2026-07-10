@@ -1,0 +1,106 @@
+/* Copyright (c) 2026 Fintech Dashboard contributors. */
+
+/*
+ * Administrator MFA-reset screen. The v2 chrome lives in the shared
+ * `_admin-reset.shared.scss` partial (which the password twin also @uses, so the two read as a
+ * set); this file adds ONLY the per-screen tweak. Token-only → light/dark-correct. Well under the
+ * 8kB warn budget.
+ */
+@use '../../admin-reset.shared' as *;
+
+.admin-reset {
+  &__page-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-8);
+    padding: var(--space-8) var(--space-11);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-xs);
+  }
+
+  &__page-lead {
+    display: flex;
+    align-items: center;
+    gap: var(--space-5);
+    min-width: 0;
+  }
+
+  &__page-icon {
+    display: grid;
+    place-items: center;
+    flex: 0 0 auto;
+    inline-size: 48px;
+    block-size: 48px;
+    border-radius: var(--radius-tile);
+    background: color-mix(in srgb, var(--color-danger) 14%, var(--color-surface));
+    color: var(--color-danger);
+    font-size: 22px;
+    box-shadow: var(--shadow-card);
+  }
+
+  &__page-copy {
+    display: grid;
+    gap: var(--space-2);
+    min-width: 0;
+  }
+
+  &__page-title {
+    margin: 0;
+    color: var(--color-heading);
+    font-size: var(--text-h3);
+    font-weight: var(--font-weight-bold);
+    line-height: 1.2;
+  }
+
+  &__page-subtitle {
+    margin: 0;
+    max-width: 78ch;
+    color: var(--color-text-muted);
+    font-size: var(--text-body-sm);
+    line-height: 1.5;
+  }
+
+  &__page-actions {
+    display: flex;
+    flex: none;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--space-4);
+
+    app-ui-button {
+      flex: none;
+    }
+  }
+}
+
+@media (width <= 768px) {
+  .admin-reset {
+    &__page-head {
+      align-items: flex-start;
+      flex-direction: column;
+      padding: var(--space-7);
+    }
+
+    &__page-actions {
+      justify-content: flex-start;
+      inline-size: 100%;
+    }
+  }
+}
+
+/*
+ * Mono face for the single raw-UUID field (the class is passed to the shared `app-ui-input` via
+ * `inputClass`, so it lands on that child component's inner <input>). `::ng-deep` is the
+ * sanctioned way to reach a child primitive's element; it is BOUNDED under `.admin-reset` so it
+ * can never leak to other inputs. Token-only (the primitive still owns size/border/focus) — this
+ * is purely the typeface + tracking.
+ */
+/* stylelint-disable-next-line selector-pseudo-element-no-unknown */
+.admin-reset ::ng-deep .admin-reset__uuid {
+  font-family: var(--font-mono, monospace);
+  letter-spacing: 0.01em;
+}

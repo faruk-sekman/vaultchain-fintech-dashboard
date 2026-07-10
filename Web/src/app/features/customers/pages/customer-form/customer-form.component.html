@@ -1,0 +1,147 @@
+<div class="page-shell customer-form">
+  <!-- Page-head card: the app's standard horizontal header band (the customer-detail
+       `.enterprise-header` pattern) — identity/title LEFT, breadcrumb + Back action RIGHT.
+       Adapts to create / edit; on EDIT it carries the masked-name avatar identity. -->
+  <header class="form-head">
+    <div class="form-head__lead">
+      @if (mode() === 'edit' && loading() && !initialValue()) {
+        <!-- Identity skeleton mirrors the loaded avatar strip. -->
+        <app-ui-skeleton variant="block" width="46px" height="46px" radius="14px"></app-ui-skeleton>
+        <div class="form-head__lead-copy">
+          <app-ui-skeleton variant="line" width="180px" height="18px"></app-ui-skeleton>
+          <app-ui-skeleton variant="line" width="220px" height="13px"></app-ui-skeleton>
+        </div>
+      } @else if (mode() === 'edit' && loadedCustomer(); as c) {
+        <app-ui-avatar
+          [name]="c.name"
+          size="md"
+          color="auto"
+          class="form-head__avatar"
+        ></app-ui-avatar>
+        <div class="form-head__lead-copy">
+          <h2 class="form-head__title form-head__title--name">{{ c.name }}</h2>
+          <div class="form-head__badges">
+            <app-customer-status-badge [status]="c.kycStatus"></app-customer-status-badge>
+            @if (c.isActive) {
+              <app-ui-badge
+                color="green"
+                [dot]="true"
+                [text]="'customers.active' | translate"
+              ></app-ui-badge>
+            } @else {
+              <app-ui-badge
+                color="gray"
+                [dot]="true"
+                [text]="'dashboard.labels.inactive' | translate"
+              ></app-ui-badge>
+            }
+            <span class="form-head__subtitle">{{
+              'customers.formHero.editSubtitle' | translate
+            }}</span>
+          </div>
+        </div>
+      } @else {
+        <span class="form-head__icon" aria-hidden="true">
+          <i [class]="mode() === 'create' ? 'ri-user-add-line' : 'ri-user-settings-line'"></i>
+        </span>
+        <div class="form-head__lead-copy">
+          <h2 class="form-head__title">
+            {{
+              (mode() === 'create'
+                ? 'customers.formHero.createTitle'
+                : 'customers.formHero.editTitle'
+              ) | translate
+            }}
+          </h2>
+          <p class="form-head__subtitle">
+            {{
+              (mode() === 'create'
+                ? 'customers.formHero.createSubtitle'
+                : 'customers.formHero.editSubtitle'
+              ) | translate
+            }}
+          </p>
+        </div>
+      }
+    </div>
+
+    <!-- A10 (bugfix-backlog-2026-07): the standalone Back button is BACK by operator request —
+         breadcrumb for wayfinding, plus an explicit rightmost Back action in both modes
+         (create → list, edit → the customer's detail; the back() handler owns the target). -->
+    <div class="form-head__actions">
+      <app-ui-breadcrumb [items]="breadcrumbItems"></app-ui-breadcrumb>
+      <app-ui-button
+        variant="ghost"
+        size="sm"
+        type="button"
+        class="form-head__back"
+        [attr.aria-label]="'common.back' | translate"
+        (click)="back()"
+      >
+        <i class="ri-arrow-left-line ui-button__icon" aria-hidden="true"></i>
+        {{ 'common.back' | translate }}
+      </app-ui-button>
+    </div>
+  </header>
+
+  <!-- One full-width form card at the standard content width. Compact 2-column field grid
+       (address line spans full width), Save/Clear pinned at the card bottom. -->
+  <app-ui-card class="form-card" padding="lg">
+    @if (loading() && !initialValue()) {
+      <div class="form-skeleton">
+        @for (i of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]; track i) {
+          <div class="form-skeleton-field" [class.form-skeleton-field--full]="i === 10">
+            <app-ui-skeleton height="12px" width="120px"></app-ui-skeleton>
+            <app-ui-skeleton height="44px" radius="15px"></app-ui-skeleton>
+          </div>
+        }
+      </div>
+      <div class="form-actions form-actions--footer">
+        <app-ui-skeleton width="110px" height="44px" radius="15px"></app-ui-skeleton>
+        <app-ui-skeleton width="190px" height="44px" radius="15px"></app-ui-skeleton>
+      </div>
+    } @else {
+      <app-ui-form
+        #uiForm
+        class="form-card__form"
+        [sections]="sections()"
+        [initialValue]="initialValue()"
+        [loading]="loading()"
+        [submitLabelKey]="mode() === 'create' ? 'customers.create' : 'common.save'"
+        [showSubmit]="false"
+        [formClass]="'motion-stagger'"
+        (submitted)="onSubmit($event, uiForm)"
+      ></app-ui-form>
+
+      <!-- v2 §5: primary Save (190×50) bottom-right; clear stays a ghost action. -->
+      <div class="form-actions form-actions--footer">
+        <app-ui-button
+          variant="ghost"
+          size="lg"
+          type="button"
+          [disabled]="loading() || !uiForm?.hasChanges"
+          (click)="clearForm()"
+        >
+          <i class="ri-eraser-line ui-button__icon" aria-hidden="true"></i>
+          {{ 'common.clear' | translate }}
+        </app-ui-button>
+        <app-ui-button
+          class="form-actions__save"
+          size="lg"
+          type="button"
+          [disabled]="loading() || !uiForm?.form || (mode() === 'edit' && !uiForm.hasChanges)"
+          (click)="handleSubmit()"
+        >
+          <i class="ri-save-3-line ui-button__icon" aria-hidden="true"></i>
+          {{
+            loading()
+              ? ('common.saving' | translate)
+              : mode() === 'create'
+                ? ('customers.create' | translate)
+                : ('common.save' | translate)
+          }}
+        </app-ui-button>
+      </div>
+    }
+  </app-ui-card>
+</div>

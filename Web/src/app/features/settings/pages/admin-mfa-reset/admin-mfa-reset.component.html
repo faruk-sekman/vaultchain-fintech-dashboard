@@ -1,0 +1,118 @@
+<div class="page-shell admin-reset">
+  <header class="admin-reset__page-head">
+    <div class="admin-reset__page-lead">
+      <span class="admin-reset__page-icon" aria-hidden="true">
+        <i class="ri-shield-keyhole-line"></i>
+      </span>
+      <div class="admin-reset__page-copy">
+        <h2 class="admin-reset__page-title">{{ 'mfa.adminReset.heading' | translate }}</h2>
+        <p class="admin-reset__page-subtitle">{{ 'mfa.adminReset.intro' | translate }}</p>
+      </div>
+    </div>
+
+    <div class="admin-reset__page-actions">
+      <app-ui-breadcrumb [items]="breadcrumbItems"></app-ui-breadcrumb>
+      <app-ui-button
+        variant="ghost"
+        size="sm"
+        type="button"
+        [ariaLabel]="'common.back' | translate"
+        (click)="backToSecurity()"
+      >
+        <i class="ri-arrow-left-line ui-button__icon" aria-hidden="true"></i>
+        {{ 'common.back' | translate }}
+      </app-ui-button>
+    </div>
+  </header>
+
+  <app-ui-card padding="lg" class="admin-reset__card motion-fade-up">
+    @if (succeeded()) {
+      <!-- ===================== Success ===================== -->
+      <section class="admin-reset__panel" aria-labelledby="admin-mfa-reset-success-title">
+        <app-ui-alert
+          type="success"
+          icon="ri-shield-check-line"
+          [title]="'mfa.adminReset.success.title' | translate"
+          [message]="'mfa.adminReset.success.body' | translate"
+        ></app-ui-alert>
+        <h2 id="admin-mfa-reset-success-title" class="sr-only">
+          {{ 'mfa.adminReset.success.title' | translate }}
+        </h2>
+        <div class="admin-reset__actions">
+          <app-ui-button type="button" size="lg" (click)="resetAnother()">
+            <i class="ri-restart-line ui-button__icon" aria-hidden="true"></i>
+            {{ 'mfa.adminReset.resetAnother' | translate }}
+          </app-ui-button>
+        </div>
+      </section>
+    } @else {
+      <!-- ===================== Idle / submitting / error ===================== -->
+      @if (errorKey(); as key) {
+        <app-ui-alert
+          class="admin-reset__alert"
+          type="danger"
+          icon="ri-error-warning-line"
+          [message]="key | translate"
+        ></app-ui-alert>
+      }
+
+      <form
+        class="admin-reset__form motion-stagger"
+        [formGroup]="form"
+        (ngSubmit)="askReset()"
+        novalidate
+      >
+        <div class="admin-reset__field">
+          <label class="admin-reset__label" [for]="inputId">
+            {{ 'mfa.adminReset.targetLabel' | translate }}
+          </label>
+          <app-ui-input
+            [id]="inputId"
+            type="text"
+            autocomplete="off"
+            iconStart="ri-key-2-line"
+            inputClass="admin-reset__uuid"
+            [control]="form.controls.userId"
+            [placeholder]="'mfa.adminReset.targetPlaceholder' | translate"
+            [ariaInvalid]="showRequired() || showUuid() ? true : null"
+            [ariaDescribedBy]="showRequired() || showUuid() ? errorId : hintId"
+          ></app-ui-input>
+          @if (showRequired()) {
+            <p [id]="errorId" class="admin-reset__error" role="alert">
+              {{ 'mfa.adminReset.validation.required' | translate }}
+            </p>
+          } @else if (showUuid()) {
+            <p [id]="errorId" class="admin-reset__error" role="alert">
+              {{ 'mfa.adminReset.validation.uuid' | translate }}
+            </p>
+          } @else {
+            <p [id]="hintId" class="admin-reset__hint">
+              {{ 'mfa.adminReset.targetHint' | translate }}
+            </p>
+          }
+        </div>
+
+        <div class="admin-reset__actions">
+          <app-ui-button type="submit" variant="danger" size="lg" [loading]="submitting()">
+            <i class="ri-shield-cross-line ui-button__icon" aria-hidden="true"></i>
+            {{ 'mfa.adminReset.submit' | translate }}
+          </app-ui-button>
+        </div>
+      </form>
+    }
+
+    <app-ui-confirm-dialog
+      [open]="confirmOpen()"
+      titleKey="mfa.adminReset.confirmTitle"
+      messageKey="mfa.adminReset.confirmBody"
+      confirmLabelKey="mfa.adminReset.confirmCta"
+      cancelLabelKey="mfa.adminReset.cancel"
+      loadingLabelKey="mfa.adminReset.working"
+      icon="ri-error-warning-line"
+      confirmIcon="ri-shield-cross-line"
+      [loading]="submitting()"
+      (confirm)="confirmReset()"
+      (cancel)="cancelReset()"
+    ></app-ui-confirm-dialog>
+  </app-ui-card>
+</div>

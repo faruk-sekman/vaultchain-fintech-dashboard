@@ -1,0 +1,1649 @@
+/* Page-shell enter: OPACITY ONLY. A retained `transform` here (animation-fill-mode: both leaves
+   translateY(0)) would make this container the containing block for any position:fixed descendant,
+   trapping the delete-customer modal overlay below the sidebar. The child cards own the rise. */
+@keyframes customer-detail-screen-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes customer-detail-card-rise {
+  from {
+    opacity: 0;
+    transform: translateY(var(--motion-distance-lg)) scale(0.99);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes customer-detail-metric-rise {
+  from {
+    opacity: 0;
+    transform: translateY(var(--motion-distance-md));
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes customer-detail-value-in {
+  from {
+    opacity: 0;
+    transform: translateY(var(--motion-distance-sm)) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes customer-detail-row-in {
+  from {
+    opacity: 0;
+    transform: translateX(var(--motion-distance-md));
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes customer-detail-skeleton-in {
+  from {
+    opacity: 0;
+    transform: translateY(var(--motion-distance-sm));
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes customer-detail-meter-sweep {
+  from {
+    transform: translateX(-110%);
+  }
+
+  to {
+    transform: translateX(110%);
+  }
+}
+
+@property --detail-border-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+
+@keyframes customer-detail-border-sweep {
+  from {
+    --detail-border-angle: 0deg;
+  }
+
+  to {
+    --detail-border-angle: 360deg;
+  }
+}
+
+.customer-detail-container {
+  --detail-page-padding-block: var(--space-8);
+  --detail-page-padding-inline: clamp(var(--space-8), 2vw, var(--space-12));
+  --detail-section-gap: var(--space-8);
+  --detail-panel-padding-block: var(--space-7);
+  --detail-panel-padding-inline: var(--space-8);
+  --detail-grid-gap: var(--space-8);
+  --detail-field-gap: var(--space-5);
+  --detail-row-gap: var(--space-4);
+  --detail-enter-duration: var(--motion-page);
+  --detail-enter-ease: var(--motion-ease-enter);
+  --detail-hover-duration: var(--motion-normal);
+  --detail-action-icon-size: 1rem;
+  --detail-action-height: 44px;
+  --detail-action-padding-inline: var(--space-9);
+  --detail-action-radius: var(--radius-field);
+  --detail-border-duration: calc(var(--motion-expressive) + var(--motion-slow));
+  --detail-border-start-angle: 315deg;
+
+  display: grid;
+  align-content: start;
+  min-height: 100vh;
+  gap: var(--detail-section-gap);
+  padding: var(--detail-page-padding-block) 0;
+  background: var(--color-surface-2);
+  font-family: var(--font-family-base);
+  animation: customer-detail-screen-in var(--detail-enter-duration) var(--detail-enter-ease) both;
+
+  /* Dark theme only: the surface-2 wash reads as a visible box against the dark app canvas,
+     so the shell goes transparent here; light mode keeps the wash (scoped to this page). */
+  html[data-theme='dark'] & {
+    background: transparent;
+  }
+
+  .enterprise-header,
+  .enterprise-panel,
+  .enterprise-metrics-bar,
+  .enterprise-not-found {
+    --detail-border-accent: var(--color-primary);
+    --detail-hover-border-color: color-mix(in srgb, var(--detail-border-accent) 42%, var(--color-border));
+    --detail-hover-border-glow: color-mix(in srgb, var(--detail-border-accent) 36%, #fff);
+    --detail-hover-border-tip: color-mix(in srgb, var(--detail-border-accent) 72%, #fff);
+
+    position: relative;
+    isolation: isolate;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background: var(--color-surface);
+    box-sizing: border-box;
+    box-shadow: var(--shadow-xs);
+    transition:
+      border-color var(--detail-hover-duration) var(--motion-ease-standard),
+      box-shadow var(--detail-hover-duration) var(--motion-ease-standard),
+      transform var(--detail-hover-duration) var(--motion-ease-standard),
+      background-color var(--detail-hover-duration) var(--motion-ease-standard);
+  }
+
+  .enterprise-header,
+  .enterprise-panel,
+  .enterprise-column-main,
+  .enterprise-column-side,
+  .enterprise-data-list,
+  .enterprise-limit-form,
+  .enterprise-not-found {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .enterprise-header,
+  .enterprise-panel,
+  .enterprise-not-found {
+    animation: customer-detail-card-rise var(--detail-enter-duration) var(--detail-enter-ease) both;
+    animation-delay: var(--detail-card-delay, 0ms);
+  }
+
+  .enterprise-header {
+    --detail-border-accent: var(--color-primary);
+    --detail-card-delay: 40ms;
+
+    /* A8: auto height with the old 77px as the floor — when the action bar wraps at mid widths
+       the card grows around it instead of letting buttons spill over the metrics bar. */
+    height: auto;
+    min-height: 77px;
+    justify-content: center;
+    overflow: visible;
+  }
+
+  .enterprise-column-main > .enterprise-panel {
+    --detail-card-delay: 180ms;
+  }
+
+  .enterprise-column-side > .enterprise-panel:nth-child(1) {
+    --detail-card-delay: 220ms;
+  }
+
+  .enterprise-column-side > .enterprise-panel:nth-child(2) {
+    --detail-card-delay: 260ms;
+  }
+
+  .enterprise-column-side > .enterprise-panel:nth-child(3) {
+    --detail-card-delay: 300ms;
+  }
+
+  .enterprise-header:hover,
+  .enterprise-panel:hover,
+  .enterprise-metrics-bar:hover {
+    border-color: var(--detail-hover-border-color);
+    box-shadow: var(--shadow-sm);
+    transform: translateY(-2px);
+  }
+
+  @supports (mask-composite: exclude) {
+    .enterprise-header::before,
+    .enterprise-panel::before,
+    .enterprise-metrics-bar::before,
+    .enterprise-not-found::before,
+    .detail-group::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      padding: 1px;
+      border-radius: inherit;
+      background:
+        conic-gradient(
+          from var(--detail-border-start-angle),
+          transparent 0deg max(0deg, calc(var(--detail-border-angle) - 28deg)),
+          color-mix(in srgb, var(--detail-hover-border-color) 34%, transparent)
+            max(0deg, calc(var(--detail-border-angle) - 18deg))
+            max(0deg, calc(var(--detail-border-angle) - 8deg)),
+          var(--detail-hover-border-glow)
+            max(0deg, calc(var(--detail-border-angle) - 8deg))
+            max(0deg, calc(var(--detail-border-angle) - 3deg)),
+          var(--detail-hover-border-tip)
+            max(0deg, calc(var(--detail-border-angle) - 3deg))
+            var(--detail-border-angle),
+          transparent calc(var(--detail-border-angle) + 0.01deg) 360deg
+        ),
+        conic-gradient(
+          from var(--detail-border-start-angle),
+          var(--detail-hover-border-color) 0deg var(--detail-border-angle),
+          transparent calc(var(--detail-border-angle) + 0.01deg) 360deg
+        );
+      filter:
+        drop-shadow(0 0 6px color-mix(in srgb, var(--detail-hover-border-tip) 52%, transparent))
+        drop-shadow(0 0 14px color-mix(in srgb, var(--detail-hover-border-color) 24%, transparent));
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity var(--motion-fast) var(--motion-ease-standard);
+      mask:
+        linear-gradient(#000 0 0) content-box,
+        linear-gradient(#000 0 0);
+      mask-composite: exclude;
+    }
+
+    .enterprise-header:hover,
+    .enterprise-panel:hover,
+    .enterprise-metrics-bar:hover {
+      border-color: var(--color-border);
+    }
+
+    .detail-group:hover {
+      border-color: color-mix(in srgb, var(--detail-field-accent, var(--color-primary)) 16%, var(--color-border));
+    }
+
+    .enterprise-header:hover::before,
+    .enterprise-panel:hover::before,
+    .enterprise-metrics-bar:hover::before,
+    .enterprise-not-found:hover::before,
+    .detail-group:hover::before {
+      opacity: 1;
+      animation: customer-detail-border-sweep var(--detail-border-duration) var(--motion-ease-emphasized) both;
+    }
+  }
+
+  .enterprise-header__top,
+  .enterprise-actions,
+  .enterprise-identity-strip,
+  .identity-main,
+  .identity-badges,
+  .identity-meta,
+  .identity-details,
+  .enterprise-identity-skeleton,
+  .enterprise-metrics-bar,
+  .enterprise-panel__header,
+  .meter-labels,
+  .data-list-row,
+  .data-list-main,
+  .sim-warning {
+    display: flex;
+    align-items: center;
+  }
+
+  .enterprise-header__top {
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: var(--detail-row-gap);
+    padding: var(--space-5) var(--detail-panel-padding-inline);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .enterprise-actions {
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    justify-content: flex-end;
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  .enterprise-actions,
+  .identity-badges,
+  .identity-meta,
+  .data-list-main,
+  .sim-warning {
+    gap: var(--space-3);
+  }
+
+  :where(.enterprise-actions, .enterprise-form-actions, .enterprise-not-found) app-ui-button .ui-button,
+  .tx-submit-btn .ui-button,
+  .filter-clear-btn .ui-button {
+    height: var(--detail-action-height);
+    min-height: var(--detail-action-height);
+    min-width: var(--detail-action-height);
+    gap: var(--space-4);
+    padding-inline: var(--detail-action-padding-inline);
+    border-radius: var(--detail-action-radius);
+    font-size: var(--font-size-sm);
+    line-height: 1;
+  }
+
+  :where(.enterprise-actions, .enterprise-form-actions, .enterprise-not-found) app-ui-button .ui-button__icon,
+  .tx-submit-btn .ui-button__icon,
+  .filter-clear-btn .ui-button__icon {
+    margin-inline: 0;
+  }
+
+  app-ui-button .ui-button {
+    transition:
+      background-color var(--detail-hover-duration) var(--motion-ease-standard),
+      border-color var(--detail-hover-duration) var(--motion-ease-standard),
+      box-shadow var(--detail-hover-duration) var(--motion-ease-standard),
+      color var(--detail-hover-duration) var(--motion-ease-standard),
+      transform var(--detail-hover-duration) var(--motion-ease-standard);
+  }
+
+  app-ui-button .ui-button:hover:not(:disabled) {
+    transform: translateY(-1px);
+  }
+
+  app-ui-button .ui-button:active:not(:disabled) {
+    transform: translateY(0) scale(0.98);
+  }
+
+  app-ui-button .ui-button:hover:not(:disabled) .ui-button__icon {
+    transform: translateY(-1px) scale(1.06);
+  }
+
+  :where(app-ui-button .ui-button__icon, .identity-meta i, .tx-creator-icon i, .tx-creator-warning i, .sim-warning i) {
+    display: inline-grid;
+    width: var(--detail-action-icon-size);
+    height: var(--detail-action-icon-size);
+    flex: 0 0 var(--detail-action-icon-size);
+    place-items: center;
+    font-size: var(--detail-action-icon-size);
+    line-height: 1;
+  }
+
+  .enterprise-actions .ui-button:hover:not(:disabled) .ri-arrow-left-line {
+    transform: translateX(-2px) scale(1.04);
+  }
+
+  .enterprise-actions .ui-button:hover:not(:disabled) .ri-pencil-line {
+    transform: rotate(-8deg) scale(1.08);
+  }
+
+  .enterprise-actions .ui-button:hover:not(:disabled) .ri-shield-check-line {
+    transform: translateY(-1px) rotate(6deg) scale(1.06);
+  }
+
+  .enterprise-actions .ui-button:hover:not(:disabled) .ri-delete-bin-6-line {
+    transform: translateY(-1px) rotate(-4deg) scale(1.06);
+  }
+
+  .tx-submit-btn .ui-button:hover:not(:disabled) .ri-add-line {
+    transform: rotate(90deg) scale(1.08);
+  }
+
+  .enterprise-identity-strip {
+    justify-content: space-between;
+    flex-wrap: wrap; /* A8: actions flow to their own row instead of overflowing the card */
+    gap: var(--space-3) var(--space-6);
+    min-height: 0;
+    padding: var(--space-3) var(--space-5);
+    animation: customer-detail-card-rise var(--detail-enter-duration) var(--detail-enter-ease) both;
+    animation-delay: 80ms;
+  }
+
+  .identity-main,
+  .enterprise-identity-skeleton {
+    gap: var(--space-4);
+  }
+
+  .identity-main {
+    flex: 1 1 280px;
+    min-width: min(100%, 260px);
+  }
+
+  /* A8: the "Record date: …" stamp reads as ONE unit; the badges row wraps instead. On very
+     narrow phones (≤420px) it may wrap normally rather than risk clipping. */
+  .identity-meta {
+    white-space: nowrap;
+
+    @media (width <= 420px) {
+      white-space: normal;
+    }
+  }
+
+  .identity-badges {
+    flex-wrap: wrap;
+    row-gap: var(--space-2);
+  }
+
+  .identity-core,
+  .metric-item,
+  .data-list-col,
+  .tx-creator-copy {
+    display: grid;
+    gap: var(--space-2);
+    min-width: 0;
+  }
+
+  .detail-group {
+    --detail-border-accent: var(--detail-field-accent, var(--color-primary));
+    --detail-hover-border-color: color-mix(in srgb, var(--detail-border-accent) 34%, var(--color-border));
+    --detail-hover-border-glow: color-mix(in srgb, var(--detail-border-accent) 34%, #fff);
+    --detail-hover-border-tip: color-mix(in srgb, var(--detail-border-accent) 68%, #fff);
+
+    position: relative;
+    display: grid;
+    gap: var(--space-2);
+    min-width: 0;
+    min-height: 62px;
+    align-content: center;
+    padding: var(--space-4) var(--space-5);
+    box-sizing: border-box;
+    overflow: hidden;
+    border: 1px solid color-mix(in srgb, var(--detail-field-accent, var(--color-primary)) 16%, var(--color-border));
+    border-radius: var(--radius-field);
+    background:
+      linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--detail-field-accent, var(--color-primary)) 10%, transparent),
+        transparent 74%
+      ),
+      color-mix(in srgb, var(--detail-field-accent, var(--color-primary)) 3%, var(--color-surface));
+    box-shadow: var(--shadow-card-inset-highlight);
+  }
+
+  .identity-name {
+    margin: 0;
+    color: var(--color-text);
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-bold);
+    line-height: 1.1;
+  }
+
+  .identity-badges,
+  .identity-meta {
+    color: var(--color-text-muted);
+    font-size: var(--font-size-sm);
+  }
+
+  .identity-details {
+    /* One consistent tint for the whole identity/KPI strip (design review b): these four are profile
+       FIELDS, not category-distinct facts, so they share a single calm data hue instead of four random
+       pastels. The KPI balance keeps its own --color-primary value; this group reads as one set. */
+    --detail-field-accent: var(--color-info);
+
+    display: grid;
+    grid-template-columns: minmax(0, 1.55fr) minmax(0, 0.58fr) minmax(0, 1.15fr) minmax(0, 0.95fr);
+    flex: 1 1 697px;
+    align-items: stretch;
+    gap: var(--space-4);
+    min-width: min(100%, 697px);
+    max-width: 100%;
+  }
+
+  .detail-label,
+  .metric-label,
+  .enterprise-panel__title,
+  .tx-filter-title {
+    color: var(--color-text-muted);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .detail-value,
+  .data-list-text,
+  .meter-value {
+    color: var(--color-text);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+  }
+
+  .detail-value {
+    display: block;
+    min-width: 0;
+    overflow: hidden;
+    line-height: 1.35;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .detail-value.font-mono {
+    display: block;
+    align-items: center;
+    width: 100%;
+    max-width: 100%;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    color: color-mix(in srgb, var(--detail-field-accent, var(--color-primary)) 54%, var(--color-text));
+    font-family: var(--font-family-numeric);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    transition:
+      border-color var(--detail-hover-duration) var(--motion-ease-standard),
+      background-color var(--detail-hover-duration) var(--motion-ease-standard),
+      color var(--detail-hover-duration) var(--motion-ease-standard),
+      transform var(--detail-hover-duration) var(--motion-ease-standard);
+  }
+
+  .detail-group:hover .detail-value.font-mono {
+    border-color: transparent;
+    background: transparent;
+    color: var(--color-text);
+    transform: none;
+  }
+
+  .enterprise-identity-skeleton {
+    justify-content: space-between;
+    height: 100%;
+    min-height: 0;
+    padding: var(--space-3) var(--space-5);
+    animation: customer-detail-skeleton-in var(--motion-slow) var(--detail-enter-ease) both;
+    animation-delay: 80ms;
+  }
+
+  app-ui-skeleton {
+    animation: customer-detail-skeleton-in var(--motion-normal) var(--detail-enter-ease) both;
+  }
+
+  app-ui-skeleton .ui-skeleton {
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-border) 38%, transparent);
+  }
+
+  .identity-avatar,
+  .identity-badges > *,
+  .identity-meta i,
+  .detail-group {
+    transition:
+      background-color var(--detail-hover-duration) var(--motion-ease-standard),
+      border-color var(--detail-hover-duration) var(--motion-ease-standard),
+      box-shadow var(--detail-hover-duration) var(--motion-ease-standard),
+      color var(--detail-hover-duration) var(--motion-ease-standard),
+      transform var(--detail-hover-duration) var(--motion-ease-standard);
+  }
+
+  .identity-main:hover .identity-avatar {
+    transform: scale(1.035);
+  }
+
+  .identity-badges > *:hover,
+  .detail-group:hover,
+  .identity-meta:hover i {
+    transform: translateY(-1px);
+  }
+
+  .detail-group:hover {
+    border-color: color-mix(in srgb, var(--detail-field-accent, var(--color-primary)) 30%, var(--color-border));
+    background:
+      linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--detail-field-accent, var(--color-primary)) 14%, transparent),
+        transparent 76%
+      ),
+      color-mix(in srgb, var(--detail-field-accent, var(--color-primary)) 5%, var(--color-surface));
+    box-shadow: var(--shadow-xs);
+  }
+
+  .identity-meta:hover i {
+    color: var(--color-primary);
+  }
+
+  .enterprise-metrics-bar {
+    --detail-border-accent: var(--color-success);
+
+    /* SINGLE LINE: all metrics + the masked identity strip stay on one row. Labels never wrap and
+       values ellipsis, so nothing clips vertically; if a narrow viewport can't fit everything the
+       bar scrolls horizontally (still one line) rather than wrapping to a second row. */
+    flex-wrap: nowrap;
+    gap: var(--space-4);
+    min-height: 72px;
+    overflow: auto visible;
+    padding: var(--space-3) var(--space-5);
+    animation: customer-detail-card-rise var(--detail-enter-duration) var(--detail-enter-ease) both;
+    animation-delay: 140ms;
+  }
+
+  /* Keep the bar a tidy single row: labels don't wrap, values truncate, tiles stay short. */
+  .enterprise-metrics-bar .detail-label,
+  .enterprise-metrics-bar .metric-label {
+    white-space: nowrap;
+  }
+
+  .enterprise-metrics-bar > * {
+    animation: customer-detail-metric-rise var(--motion-slow) var(--detail-enter-ease) both;
+    animation-delay: var(--metric-delay, 160ms);
+  }
+
+  .enterprise-metrics-bar > *:nth-child(1) {
+    --metric-delay: 160ms;
+    --metric-value-delay: 220ms;
+  }
+
+  .enterprise-metrics-bar > *:nth-child(2) {
+    --metric-delay: 205ms;
+    --metric-value-delay: 265ms;
+  }
+
+  .enterprise-metrics-bar > *:nth-child(3) {
+    --metric-delay: 250ms;
+    --metric-value-delay: 310ms;
+  }
+
+  .enterprise-metrics-bar > *:nth-child(4) {
+    --metric-delay: 295ms;
+    --metric-value-delay: 355ms;
+  }
+
+  .enterprise-metrics-bar > *:nth-child(5) {
+    --metric-delay: 340ms;
+    --metric-value-delay: 400ms;
+  }
+
+  .metric-item {
+    flex: 0 0 auto;
+    min-width: 92px;
+    transition:
+      color var(--detail-hover-duration) var(--motion-ease-standard),
+      transform var(--detail-hover-duration) var(--motion-ease-standard);
+  }
+
+  .metric-item:first-child {
+    min-width: 140px;
+  }
+
+  .metric-item:hover {
+    transform: translateY(-2px);
+  }
+
+  .metric-value {
+    color: var(--color-text);
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-bold);
+    line-height: 1;
+    animation: customer-detail-value-in var(--motion-slow) var(--detail-enter-ease) both;
+    animation-delay: var(--metric-value-delay, 220ms);
+  }
+
+  .metric-value--primary {
+    color: var(--color-primary);
+  }
+
+  .metric-currency {
+    margin-left: var(--space-1);
+    color: var(--color-text-muted);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+  }
+
+  .metric-divider {
+    flex: 0 0 1px;
+    width: 1px;
+    height: 42px;
+    background: var(--color-border);
+  }
+
+  .metric-divider--identity {
+    margin-left: auto;
+  }
+
+  .enterprise-metrics-bar .identity-details {
+    flex: 1 1 auto;
+    min-width: 0;
+    gap: var(--space-3);
+    max-width: 770px;
+  }
+
+  .enterprise-metrics-bar .detail-group {
+    min-height: 48px;
+    padding: var(--space-2) var(--space-3);
+  }
+
+  .enterprise-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(340px, 360px);
+    gap: var(--detail-grid-gap);
+    align-items: start;
+  }
+
+  .enterprise-column-main,
+  .enterprise-column-side {
+    gap: var(--detail-grid-gap);
+  }
+
+  .enterprise-panel {
+    overflow: hidden;
+
+    /* Each panel colours its pager (the transactions table pager + the KYC/Risk list pagers)
+       to its OWN accent hue, so every pagination matches its host card's colour. */
+    --ui-pagination-accent: var(--detail-border-accent);
+  }
+
+  /* KYC / Risk list pager: right-aligned footer; self-collapses when the pager is hidden
+     (≤1 page) so no empty bordered strip remains. */
+  .enterprise-panel__pager {
+    display: flex;
+    justify-content: flex-end;
+    padding: var(--space-4) var(--detail-panel-padding-inline);
+    border-top: 1px solid var(--color-border);
+  }
+
+  .enterprise-panel__pager:not(:has(.ui-pagination)) {
+    display: none;
+  }
+
+  #customer-detail-transactions-card {
+    --detail-border-accent: var(--color-info);
+  }
+
+  #customer-detail-wallet-limits-card {
+    --detail-border-accent: var(--color-success);
+  }
+
+  #customer-detail-kyc-history-card {
+    --detail-border-accent: var(--color-warning);
+  }
+
+  #customer-detail-web3-risk-card {
+    --detail-border-accent: var(--color-danger);
+  }
+
+  .enterprise-panel:hover .enterprise-panel__header {
+    background: color-mix(in srgb, var(--detail-border-accent) 5%, var(--color-surface-2));
+  }
+
+  .enterprise-panel__header {
+    justify-content: space-between;
+    gap: var(--space-4);
+    min-height: 56px;
+    padding: var(--space-5) var(--detail-panel-padding-inline);
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-surface-2);
+    transition:
+      background-color var(--detail-hover-duration) var(--motion-ease-standard),
+      border-color var(--detail-hover-duration) var(--motion-ease-standard);
+  }
+
+  .enterprise-panel__title {
+    position: relative;
+    display: inline-flex;
+    margin: 0;
+    color: var(--color-text);
+  }
+
+  .enterprise-panel__title::after {
+    content: "";
+    position: absolute;
+    right: 0;
+    bottom: -8px;
+    left: 0;
+    height: 2px;
+    border-radius: var(--radius-pill);
+    background: var(--detail-border-accent);
+    opacity: 0.42;
+    transform: scaleX(0.24);
+    transform-origin: left center;
+    transition:
+      opacity var(--detail-hover-duration) var(--motion-ease-standard),
+      transform var(--detail-hover-duration) var(--motion-ease-standard);
+  }
+
+  .enterprise-panel:hover .enterprise-panel__title::after {
+    opacity: 0.9;
+    transform: scaleX(1);
+  }
+
+  .enterprise-tx-creator {
+    /* Tighter vertical rhythm (design review d): trim the creator's block padding + header→form gap so
+       the creator + filter toolbar no longer push the transactions table far down the column. */
+    display: grid;
+    position: relative;
+    gap: var(--space-5);
+    padding: var(--space-6) var(--detail-panel-padding-inline);
+    border-bottom: 1px solid var(--color-border);
+    background:
+      linear-gradient(135deg, color-mix(in srgb, var(--color-primary) 8%, transparent), transparent 58%),
+      var(--color-surface);
+    animation: customer-detail-card-rise var(--motion-slow) var(--detail-enter-ease) both;
+    animation-delay: 230ms;
+    transition:
+      background-color var(--detail-hover-duration) var(--motion-ease-standard),
+      border-color var(--detail-hover-duration) var(--motion-ease-standard);
+  }
+
+  .enterprise-tx-creator:hover {
+    border-bottom-color: color-mix(in srgb, var(--color-primary) 18%, var(--color-border));
+    background:
+      linear-gradient(135deg, color-mix(in srgb, var(--color-primary) 12%, transparent), transparent 62%),
+      var(--color-surface);
+  }
+
+  .tx-creator-top,
+  .tx-creator-info {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-4);
+    min-width: 0;
+  }
+
+  .tx-creator-top {
+    justify-content: space-between;
+    min-height: 44px;
+    padding-right: 168px;
+  }
+
+  .tx-creator-icon {
+    display: grid;
+    width: 44px;
+    height: 44px;
+    flex: 0 0 auto;
+    place-items: center;
+    border: 1px solid color-mix(in srgb, var(--color-primary) 18%, var(--color-border));
+    border-radius: var(--radius-md);
+    background: var(--color-primary-soft);
+    color: var(--color-primary);
+    font-size: var(--font-size-lg);
+    transition:
+      border-color var(--detail-hover-duration) var(--motion-ease-standard),
+      box-shadow var(--detail-hover-duration) var(--motion-ease-standard),
+      color var(--detail-hover-duration) var(--motion-ease-standard),
+      transform var(--detail-hover-duration) var(--motion-ease-standard);
+  }
+
+  .tx-creator-icon i,
+  .tx-creator-warning i,
+  .sim-warning i,
+  app-ui-button .ui-button__icon {
+    transition:
+      color var(--detail-hover-duration) var(--motion-ease-standard),
+      transform var(--detail-hover-duration) var(--motion-ease-standard);
+  }
+
+  .enterprise-tx-creator:hover .tx-creator-icon {
+    border-color: color-mix(in srgb, var(--color-primary) 36%, var(--color-border));
+    box-shadow: 0 10px 22px color-mix(in srgb, var(--color-primary) 18%, transparent);
+    transform: translateY(-2px) rotate(-3deg);
+  }
+
+  .enterprise-tx-creator:hover .tx-creator-icon i {
+    transform: scale(1.08) rotate(6deg);
+  }
+
+  .tx-creator-warning:hover i,
+  .sim-warning:hover i {
+    transform: translateY(-1px) scale(1.08);
+  }
+
+  .tx-creator-title {
+    color: var(--color-text);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+  }
+
+  .tx-creator-subtitle,
+  .data-list-date {
+    color: var(--color-text-muted);
+    font-size: var(--font-size-xs);
+  }
+
+  .tx-creator-currency-chip {
+    display: inline-flex;
+    align-items: center;
+    min-height: 20px;
+    margin-left: var(--space-1);
+    padding: 0 var(--space-2);
+    border-radius: var(--radius-pill);
+    background: var(--color-primary-soft);
+    color: var(--color-primary);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-bold);
+  }
+
+  .tx-creator-warning {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    color: var(--color-warning);
+    font-size: var(--font-size-sm);
+  }
+
+  .tx-creator-form {
+    display: block;
+    min-width: 0;
+  }
+
+  /* Filter wrapper (A6, bugfix-backlog-2026-07): Clear sits ON the input row as its last cell —
+     a row flex whose button bottom-aligns with the field controls (labels ride above), instead of
+     the old stacked-below `align-self: flex-end` placement. ≤860px falls back to the stacked
+     full-width behavior (see the media block below). */
+  .filter-form-wrapper {
+    display: flex;
+    gap: var(--detail-field-gap);
+    align-items: end;
+    min-width: 0;
+  }
+
+  .filter-form-wrapper app-ui-form {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .tx-creator-form app-ui-form {
+    min-width: 0;
+  }
+
+  .tx-creator-form .enterprise-tx-form {
+    display: grid;
+    grid-template-columns: minmax(180px, 0.85fr) minmax(180px, 0.75fr) minmax(280px, 1.45fr);
+    gap: var(--detail-row-gap) var(--detail-field-gap);
+    width: 100%;
+    align-items: start;
+  }
+
+  .filter-form-wrapper .enterprise-filter-form {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: var(--detail-row-gap) var(--detail-field-gap);
+    width: 100%;
+    align-items: start;
+  }
+
+  .enterprise-tx-form,
+  .enterprise-filter-form {
+    .ui-form__field,
+    .ui-form__control-row {
+      min-width: 0;
+    }
+
+    .ui-form__field {
+      animation: customer-detail-metric-rise var(--motion-slow) var(--detail-enter-ease) both;
+      animation-delay: var(--field-delay, 260ms);
+    }
+
+    .ui-form__field:nth-child(2) {
+      --field-delay: 300ms;
+    }
+
+    .ui-form__field:nth-child(3) {
+      --field-delay: 340ms;
+    }
+
+    .ui-form__field:nth-child(4) {
+      --field-delay: 380ms;
+    }
+
+    .ui-form__field:nth-child(n + 5) {
+      --field-delay: 420ms;
+    }
+
+    .ui-form__field.wide {
+      grid-column: auto;
+    }
+
+    .ui-form__label {
+      margin-bottom: var(--space-2);
+      color: var(--color-text-muted);
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-semibold);
+    }
+
+    .ui-input,
+    .ui-select {
+      min-height: 44px;
+      border-radius: var(--radius-md);
+      font-size: var(--font-size-sm);
+      transition:
+        background-color var(--detail-hover-duration) var(--motion-ease-standard),
+        border-color var(--detail-hover-duration) var(--motion-ease-standard),
+        box-shadow var(--detail-hover-duration) var(--motion-ease-standard),
+        transform var(--detail-hover-duration) var(--motion-ease-standard);
+    }
+
+    .ui-input:hover:not(:disabled),
+    .ui-select:hover:not(:disabled),
+    .ui-input:focus,
+    .ui-select:focus {
+      transform: translateY(-1px);
+    }
+
+    .ui-form__error {
+      min-height: 14px;
+      margin-top: var(--space-2);
+      font-size: 11px;
+    }
+  }
+
+  .enterprise-filter-form {
+    .ui-input,
+    .ui-select {
+      min-height: 44px;
+      background: var(--color-surface);
+    }
+  }
+
+  .tx-submit-btn,
+  .filter-clear-btn {
+    white-space: nowrap;
+  }
+
+  .tx-submit-btn {
+    /* Tracks the creator's trimmed top padding (design review d) so the submit button stays level
+       with the header/form after the rhythm tighten. */
+    position: absolute;
+    top: var(--space-6);
+    right: var(--detail-panel-padding-inline);
+    min-height: 44px;
+  }
+
+  .enterprise-tx-filters {
+    /* Compact filter toolbar (design review d): a snug block padding + a tighter title→inputs gap keep
+       the filters from adding a tall band above the table. */
+    display: grid;
+    position: relative;
+    gap: var(--space-4);
+    padding: var(--space-5) var(--detail-panel-padding-inline);
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-surface-2);
+    animation: customer-detail-card-rise var(--motion-slow) var(--detail-enter-ease) both;
+    animation-delay: 280ms;
+    transition:
+      background-color var(--detail-hover-duration) var(--motion-ease-standard),
+      border-color var(--detail-hover-duration) var(--motion-ease-standard);
+  }
+
+  .enterprise-tx-filters:hover {
+    border-bottom-color: color-mix(in srgb, var(--color-primary) 14%, var(--color-border));
+    background: color-mix(in srgb, var(--color-primary) 3%, var(--color-surface-2));
+  }
+
+  .tx-filter-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .transaction-filter-skeleton {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: var(--detail-field-gap);
+    align-items: end;
+    animation: customer-detail-skeleton-in var(--motion-slow) var(--detail-enter-ease) both;
+  }
+
+  .filter-clear-btn {
+    /* Level with the 44px filter CONTROLS: every ui-form field reserves an error strip below its
+       control (text-xs line ≈ 1rem + the field's 5px gap, kept via visibility:hidden so errors
+       never shift layout) — offset the button by that strip so its bottom meets the input row. */
+    min-height: 44px;
+    margin-top: -24px;
+  }
+
+  .enterprise-table-wrapper {
+    background: var(--color-surface);
+    animation: customer-detail-card-rise var(--motion-slow) var(--detail-enter-ease) both;
+    animation-delay: 330ms;
+  }
+
+  .enterprise-table-wrapper app-ui-table {
+    table {
+      border: 0 !important;
+      border-radius: 0 !important;
+    }
+
+    th {
+      border-bottom: 1px solid var(--color-border) !important;
+      background: var(--color-surface) !important;
+      font-size: var(--font-size-xs);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    td {
+      font-size: var(--font-size-sm);
+      transition:
+        background-color var(--detail-hover-duration) var(--motion-ease-standard),
+        color var(--detail-hover-duration) var(--motion-ease-standard);
+    }
+
+    tbody tr:hover td {
+      background: color-mix(in srgb, var(--color-primary) 4%, var(--color-surface)) !important;
+    }
+  }
+
+  .enterprise-limit-meter,
+  .enterprise-limit-form,
+  .data-list-row {
+    padding: var(--space-6) var(--detail-panel-padding-inline);
+  }
+
+  .enterprise-limit-meter,
+  .data-list-row {
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .meter-labels {
+    justify-content: space-between;
+    margin-bottom: var(--space-3);
+  }
+
+  .meter-label {
+    color: var(--color-text-muted);
+    font-size: var(--font-size-sm);
+  }
+
+  .meter-track {
+    position: relative;
+    height: 6px;
+    overflow: hidden;
+    border-radius: var(--radius-pill);
+    background: var(--color-surface-2);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-border) 60%, transparent);
+  }
+
+  .meter-bar {
+    --meter-bar-color: var(--color-success);
+
+    position: relative;
+    height: 100%;
+    background: var(--meter-bar-color);
+    overflow: hidden;
+    transform-origin: left center;
+    animation: ui-grow-x var(--motion-expressive) var(--detail-enter-ease) both;
+    animation-delay: 360ms;
+    transition:
+      background-color var(--detail-hover-duration) var(--motion-ease-standard),
+      width var(--motion-slow) var(--motion-ease-standard);
+  }
+
+  .meter-bar--success {
+    --meter-bar-color: var(--color-success);
+  }
+
+  .meter-bar--info {
+    --meter-bar-color: var(--color-info);
+  }
+
+  .meter-bar--warning {
+    --meter-bar-color: var(--color-warning);
+  }
+
+  .meter-bar--danger {
+    --meter-bar-color: var(--color-danger);
+  }
+
+  .meter-bar::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    width: 42%;
+
+    /* Decorative specular sweep — an intentional translucent-white glint over the colored meter fill
+       (same idiom as the shared hero/card sheens); kept raw because no semantic colour token applies
+       and a surface-token mix would invert it in dark mode. */
+    background: linear-gradient(90deg, transparent, rgb(255 255 255 / 42%), transparent);
+    animation: customer-detail-meter-sweep var(--motion-expressive) var(--detail-enter-ease) both;
+    animation-delay: 520ms;
+  }
+
+  .enterprise-limit-meter:hover .meter-bar {
+    background: color-mix(in srgb, var(--meter-bar-color) 88%, #fff);
+  }
+
+  .enterprise-limit-form .compact-form-col {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+
+  .enterprise-limit-form .compact-form-col .ui-input,
+  .enterprise-limit-form .compact-form-col .ui-select {
+    transition:
+      background-color var(--detail-hover-duration) var(--motion-ease-standard),
+      border-color var(--detail-hover-duration) var(--motion-ease-standard),
+      box-shadow var(--detail-hover-duration) var(--motion-ease-standard),
+      transform var(--detail-hover-duration) var(--motion-ease-standard);
+  }
+
+  .enterprise-limit-form .compact-form-col .ui-input:hover:not(:disabled),
+  .enterprise-limit-form .compact-form-col .ui-select:hover:not(:disabled),
+  .enterprise-limit-form .compact-form-col .ui-input:focus,
+  .enterprise-limit-form .compact-form-col .ui-select:focus {
+    transform: translateY(-1px);
+  }
+
+  .enterprise-limit-form .compact-form-col .ui-form__field {
+    animation: customer-detail-metric-rise var(--motion-slow) var(--detail-enter-ease) both;
+    animation-delay: var(--field-delay, 300ms);
+  }
+
+  .enterprise-limit-form .compact-form-col .ui-form__field:nth-child(2) {
+    --field-delay: 340ms;
+  }
+
+  .enterprise-limit-form .compact-form-col .ui-form__field:nth-child(n + 3) {
+    --field-delay: 380ms;
+  }
+
+  .enterprise-form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--space-3);
+    margin-top: var(--space-6);
+  }
+
+  .enterprise-error-block {
+    margin-top: var(--space-2);
+    padding: var(--space-2);
+    border-left: 2px solid var(--color-danger);
+
+    /* Token-driven danger surface (design review e) — theme-aware, replaces a hardcoded rgb(255 0 0 …). */
+    background: var(--color-danger-bg);
+    color: var(--color-danger);
+    font-size: var(--font-size-sm);
+  }
+
+  .data-list-row {
+    justify-content: space-between;
+    animation: customer-detail-row-in var(--motion-normal) var(--detail-enter-ease) both;
+    animation-delay: var(--row-delay, 280ms);
+    transition:
+      background-color var(--detail-hover-duration) var(--motion-ease-standard),
+      border-color var(--detail-hover-duration) var(--motion-ease-standard),
+      transform var(--detail-hover-duration) var(--motion-ease-standard);
+
+    &:last-child {
+      border-bottom: 0;
+    }
+
+    &:hover {
+      background: color-mix(in srgb, var(--color-primary) 4%, var(--color-surface-2));
+      border-bottom-color: color-mix(in srgb, var(--color-primary) 14%, var(--color-border));
+      transform: translateX(2px);
+    }
+
+    /* Simulated AML rows keep a faint amber wash (read-only / labelled), now token-driven + theme-aware
+       (design review e) instead of a hardcoded rgb(255 193 7 …). The visible sim-warning chip + label
+       carry the meaning; this tint is only a soft backdrop. */
+    &.is-simulated {
+      background: color-mix(in srgb, var(--color-warning) 6%, var(--color-surface));
+    }
+  }
+
+  .data-list-row:nth-child(2) {
+    --row-delay: 320ms;
+  }
+
+  .data-list-row:nth-child(3) {
+    --row-delay: 360ms;
+  }
+
+  .data-list-row:nth-child(4) {
+    --row-delay: 400ms;
+  }
+
+  .data-list-row:nth-child(n + 5) {
+    --row-delay: 440ms;
+  }
+
+  .sim-warning {
+    color: var(--color-warning);
+    font-size: var(--font-size-xs);
+  }
+
+  .enterprise-empty-state {
+    padding: var(--space-8);
+    color: var(--color-text-muted);
+    font-size: var(--font-size-sm);
+    text-align: center;
+    animation: customer-detail-card-rise var(--motion-slow) var(--detail-enter-ease) both;
+    animation-delay: 260ms;
+  }
+
+  .enterprise-loading-state {
+    display: grid;
+    gap: var(--space-6);
+    animation: customer-detail-card-rise var(--motion-slow) var(--detail-enter-ease) both;
+    animation-delay: 80ms;
+  }
+
+  .loading-card,
+  .loading-grid > * {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-xs);
+  }
+
+  .loading-card {
+    display: grid;
+    gap: var(--space-5);
+    padding: var(--space-8);
+  }
+
+  .loading-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-6);
+  }
+
+  .enterprise-not-found {
+    --detail-card-delay: 120ms;
+    --detail-border-accent: var(--color-info);
+
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: start;
+    gap: var(--space-7);
+    max-width: 880px;
+    margin-inline: auto;
+    padding: var(--space-9);
+    overflow: visible;
+    background:
+      linear-gradient(135deg, color-mix(in srgb, var(--color-info) 7%, transparent), transparent 58%),
+      var(--color-surface);
+  }
+
+  .not-found-visual {
+    display: grid;
+    width: 68px;
+    height: 68px;
+    place-items: center;
+    border: 1px solid color-mix(in srgb, var(--color-info) 24%, var(--color-border));
+    border-radius: var(--radius-lg);
+    background: var(--color-info-bg);
+    color: var(--color-info);
+  }
+
+  .not-found-visual i {
+    font-size: 32px;
+    line-height: 1;
+  }
+
+  .not-found-copy {
+    min-width: 0;
+  }
+
+  .not-found-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    min-height: 24px;
+    margin-bottom: var(--space-2);
+    padding: 0 var(--space-3);
+    border: 1px solid var(--color-info-border);
+    border-radius: var(--radius-pill);
+    background: color-mix(in srgb, var(--color-info-bg) 72%, var(--color-surface));
+    color: var(--color-info-text);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-bold);
+  }
+
+  .enterprise-not-found h2 {
+    margin: 0;
+    color: var(--color-text-strong);
+    font-size: var(--font-size-2xl);
+    font-weight: var(--font-weight-bold);
+    line-height: 1.2;
+  }
+
+  .enterprise-not-found p {
+    max-width: 620px;
+    margin: var(--space-2) 0 0;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-md);
+    line-height: 1.5;
+  }
+
+  .not-found-clues {
+    display: grid;
+    grid-column: 2;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-4);
+  }
+
+  .not-found-clue {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    min-width: 0;
+    min-height: 44px;
+    padding: var(--space-3) var(--space-4);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: color-mix(in srgb, var(--color-surface) 80%, var(--color-surface-2));
+    color: var(--color-text-muted);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+  }
+
+  .not-found-clue i {
+    flex: 0 0 auto;
+    color: var(--color-info);
+    font-size: 18px;
+    line-height: 1;
+  }
+
+  .not-found-actions {
+    display: flex;
+    grid-column: 2;
+    justify-content: flex-start;
+  }
+
+  .not-found-actions app-ui-button {
+    width: auto;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    &,
+    .enterprise-header,
+    .enterprise-panel,
+    .enterprise-not-found,
+    .enterprise-identity-skeleton,
+    .enterprise-identity-strip,
+    .enterprise-metrics-bar,
+    .enterprise-metrics-bar > *,
+    .metric-value,
+    .metric-item,
+    .enterprise-tx-creator,
+    .enterprise-tx-filters,
+    .enterprise-table-wrapper,
+    .enterprise-empty-state,
+    .enterprise-loading-state,
+    .data-list-row,
+    .detail-group,
+    .detail-value.font-mono,
+    .identity-avatar,
+    .tx-creator-icon,
+    app-ui-button,
+    app-ui-button .ui-button,
+    app-ui-button .ui-button__icon,
+    app-ui-skeleton,
+    .enterprise-tx-form .ui-form__field,
+    .enterprise-filter-form .ui-form__field,
+    .enterprise-limit-form .compact-form-col .ui-form__field,
+    .meter-bar {
+      animation: none !important;
+      transition: none !important;
+      transform: none !important;
+    }
+
+    .meter-bar::after {
+      display: none;
+    }
+
+    .enterprise-header::before,
+    .enterprise-panel::before,
+    .enterprise-metrics-bar::before,
+    .enterprise-not-found::before,
+    .detail-group::before {
+      display: none;
+    }
+
+    .enterprise-header:hover,
+    .enterprise-panel:hover,
+    .enterprise-metrics-bar:hover {
+      border-color: var(--detail-hover-border-color);
+    }
+
+    .detail-group:hover {
+      border-color: color-mix(in srgb, var(--detail-field-accent, var(--color-primary)) 30%, var(--color-border));
+    }
+
+    .enterprise-panel__title::after {
+      opacity: 0.42;
+      transform: scaleX(0.24);
+    }
+  }
+
+  @media (width <= 1320px) {
+    .tx-creator-form .enterprise-tx-form {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    }
+
+    .tx-creator-form .enterprise-tx-form .ui-form__field.wide {
+      grid-column: 1 / -1;
+    }
+  }
+
+  @media (width <= 1024px) {
+    .enterprise-layout {
+      grid-template-columns: 1fr;
+    }
+
+    .enterprise-header,
+    .enterprise-identity-strip,
+    .enterprise-identity-skeleton {
+      height: auto;
+      min-height: 77px;
+      align-items: flex-start;
+      flex-wrap: wrap;
+    }
+
+    .identity-details {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      flex-basis: 100%;
+      min-width: 100%;
+    }
+  }
+
+  @media (width <= 860px) {
+    .tx-creator-top,
+    .tx-filter-top {
+      min-height: auto;
+      padding-right: 0;
+    }
+
+    .tx-submit-btn {
+      position: static;
+      width: 100%;
+      margin-top: var(--space-3);
+    }
+
+    /* A6: narrow screens keep the original stacked, full-width Clear. */
+    .filter-form-wrapper {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .filter-clear-btn {
+      position: static;
+      width: 100%;
+      margin-top: var(--space-3);
+      margin-bottom: 0;
+    }
+
+    .tx-creator-form .enterprise-tx-form {
+      grid-template-columns: 1fr;
+    }
+
+    .tx-creator-form .enterprise-tx-form .ui-form__field.wide {
+      grid-column: auto;
+    }
+  }
+
+  @media (width <= 760px) {
+    --detail-page-padding-block: var(--space-6);
+    --detail-page-padding-inline: var(--space-5);
+    --detail-panel-padding-block: var(--space-6);
+    --detail-panel-padding-inline: var(--space-5);
+    --detail-section-gap: var(--space-7);
+    --detail-grid-gap: var(--space-7);
+
+    .enterprise-header__top {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+
+    .enterprise-actions {
+      justify-content: flex-start;
+      width: 100%;
+    }
+
+    .identity-details {
+      grid-template-columns: 1fr;
+    }
+
+    .enterprise-metrics-bar .identity-details {
+      grid-column: 1 / -1;
+    }
+
+    .enterprise-metrics-bar {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      height: auto;
+      min-height: 77px;
+      overflow: visible;
+    }
+
+    .enterprise-metrics-bar .detail-group {
+      min-height: 62px;
+      padding: var(--space-4) var(--space-5);
+    }
+
+    .loading-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .enterprise-not-found {
+      grid-template-columns: 1fr;
+      gap: var(--space-5);
+      padding: var(--space-7);
+    }
+
+    .not-found-visual {
+      width: 56px;
+      height: 56px;
+    }
+
+    .not-found-visual i {
+      font-size: 28px;
+    }
+
+    .not-found-clues,
+    .not-found-actions {
+      grid-column: auto;
+    }
+
+    .not-found-clues {
+      grid-template-columns: 1fr;
+    }
+
+    .metric-divider {
+      display: none;
+    }
+
+    .transaction-filter-skeleton,
+    .filter-form-wrapper .enterprise-filter-form {
+      grid-template-columns: 1fr;
+    }
+
+    .filter-clear-btn {
+      margin-top: 0;
+    }
+  }
+}

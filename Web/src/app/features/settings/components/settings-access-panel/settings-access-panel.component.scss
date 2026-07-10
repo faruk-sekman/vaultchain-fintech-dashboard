@@ -1,0 +1,336 @@
+/*
+ * Copyright (c) 2026 Fintech Dashboard contributors.
+ * Access panel (redesign v3 — reference 1b): summary rail + granted-permission table.
+ */
+@use '../settings-panel.shared' as *;
+
+/* The panel host is transparent: the section participates directly in the shell's panel area. */
+:host {
+  display: contents;
+}
+
+.access-layout {
+  display: grid;
+  grid-template-columns: 212px minmax(0, 1fr);
+  align-items: stretch;
+  gap: 24px;
+  min-width: 0;
+}
+
+/* The rail is a column so the category legend pins to its foot (reference margin-top:auto). */
+.access-aside {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.access-fact {
+  display: grid;
+  gap: 3px;
+  padding-block: 14px;
+  border-block-start: 1px solid var(--color-border);
+
+  &:first-child {
+    padding-block-start: 2px;
+    border-block-start: 0;
+  }
+}
+
+.access-fact__value {
+  font-size: 26px;
+  font-weight: 800;
+  line-height: 1.05;
+  color: var(--color-text-strong);
+}
+
+.access-fact__label {
+  font-size: var(--text-caption);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-muted);
+}
+
+.access-fact__line {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13px;
+  font-weight: var(--font-weight-bold);
+}
+
+.access-fact__line--ok {
+  color: var(--color-success-text);
+
+  .access-fact__dot {
+    background: var(--color-success-strong);
+    animation: settings-pulse 2.4s infinite;
+  }
+}
+
+.access-fact__line--warn {
+  color: var(--color-warning-text);
+
+  .access-fact__dot {
+    background: var(--color-warning-strong);
+  }
+}
+
+.access-fact__dot {
+  flex-shrink: 0;
+  inline-size: 8px;
+  block-size: 8px;
+  border-radius: var(--radius-pill);
+}
+
+/* Live-session pulse (reference vcPulse) on the session dot. Duplicated from the shell stylesheet
+   on purpose: Angular scopes @keyframes names per component under Emulated encapsulation, so each
+   component animating with it must carry its own copy. */
+@keyframes settings-pulse {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-success) 55%, transparent);
+  }
+
+  70% {
+    box-shadow: 0 0 0 6px transparent;
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .access-fact__line--ok .access-fact__dot {
+    animation: none;
+  }
+}
+
+/* Category legend — pinned to the rail foot; names the table's row-square colours. */
+.access-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-block-start: auto;
+  padding-block-start: 14px;
+  border-block-start: 1px solid var(--color-border);
+}
+
+.access-legend__title {
+  font-size: 10.5px;
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.access-legend__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 11.5px;
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-muted);
+}
+
+/* Category marks (reference: 3px-radius SQUARES, not circles) shared by legend + table rows.
+   Identity/KYC/financial inks map 1:1 onto existing tokens; the customer rose has no repo token
+   yet, so the reference ink is kept raw (light #D6336C / dark #FF8FA6). */
+.access-dot {
+  flex-shrink: 0;
+  inline-size: 8px;
+  block-size: 8px;
+  border-radius: 3px;
+}
+
+.access-dot--identity {
+  background: var(--color-link);
+}
+
+.access-dot--customer {
+  background: #d6336c;
+}
+
+:host-context(html[data-theme='dark']) .access-dot--customer {
+  background: #ff8fa6;
+}
+
+.access-dot--kyc {
+  background: var(--color-success-strong);
+}
+
+.access-dot--financial {
+  background: var(--color-warning-strong);
+}
+
+/* Granted-permission table (reference 1b row list): 16px-radius frame, muted header band,
+   hover-tinted rows. The wrap owns the horizontal scroll on narrow screens. */
+.access-table-wrap {
+  min-width: 0;
+  align-self: start;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  overflow-x: auto;
+}
+
+.access-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+
+  th {
+    padding: 10px 16px;
+    background: var(--color-surface-2);
+    border-block-end: 1px solid var(--color-border);
+    font-size: 10.5px;
+    font-weight: var(--font-weight-bold);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-align: start;
+    color: var(--color-text-muted);
+
+    &:first-child {
+      inline-size: 168px;
+    }
+  }
+
+  td {
+    padding: 11px 16px;
+    vertical-align: middle;
+  }
+
+  tbody tr + tr td {
+    border-block-start: 1px solid var(--color-border);
+  }
+
+  tbody tr {
+    transition: background-color var(--motion-fast) var(--motion-ease-standard);
+
+    &:hover {
+      background: var(--color-surface-2);
+    }
+  }
+}
+
+.access-table__num {
+  text-align: end;
+}
+
+.access-table__resource {
+  white-space: nowrap;
+
+  .access-dot {
+    display: inline-block;
+    inline-size: 9px;
+    block-size: 9px;
+    margin-inline-end: 9px;
+    vertical-align: middle;
+  }
+
+  code {
+    font-family: var(--font-mono, monospace);
+    font-size: 12.5px;
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text-strong);
+    background: none;
+  }
+}
+
+.access-scopes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-width: 0;
+}
+
+/* One granted scope (reference: 24px mono chip, check + action); the sensitive variant flips to
+   the amber pair and adds a trailing marker dot (full code + label ride the chip's title). */
+.access-scope {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  block-size: 24px;
+  padding-inline: 9px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-surface-2);
+  font-family: var(--font-mono, monospace);
+  font-size: 11px;
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
+  white-space: nowrap;
+
+  i {
+    font-size: 12px;
+    line-height: 1;
+    color: var(--color-success-strong);
+  }
+}
+
+.access-scope--sensitive {
+  border-color: color-mix(in srgb, var(--color-warning-strong) 30%, transparent);
+  background: var(--color-warning-bg);
+  color: var(--color-warning-text);
+
+  i {
+    color: var(--color-warning-strong);
+  }
+}
+
+.access-scope__flag {
+  flex-shrink: 0;
+  inline-size: 5px;
+  block-size: 5px;
+  border-radius: var(--radius-pill);
+  background: var(--color-warning-strong);
+}
+
+.access-count {
+  display: inline-grid;
+  place-items: center;
+  min-inline-size: 26px;
+  padding: 2px 8px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-2);
+  font-size: 11px;
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-muted);
+}
+
+/* Empty state shared by the access blocks. */
+.settings-access-empty {
+  margin: 0;
+  padding: var(--space-4) var(--space-5);
+  font-size: var(--text-caption);
+  color: var(--color-text-muted);
+}
+
+/* ── Responsive ─────────────────────────────────────────────────────────────── */
+
+@media (width <= 900px) {
+  .access-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  /* The rail compresses to a wrapping fact row above the table. */
+  .access-aside {
+    flex-flow: row wrap;
+    align-items: flex-start;
+    gap: 24px;
+  }
+
+  .access-fact {
+    padding-block: 0;
+    border-block-start: 0;
+
+    &:first-child {
+      padding-block-start: 0;
+    }
+  }
+
+  .access-legend {
+    margin-block-start: 0;
+    padding-block-start: 0;
+    border-block-start: 0;
+  }
+}

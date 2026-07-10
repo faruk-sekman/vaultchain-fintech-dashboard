@@ -1,0 +1,101 @@
+# Fintech Dashboard monorepo — Web/ (Angular) + Api/ (NestJS, designed).
+# Patterns are unanchored so they apply at the repo root AND in every package (Web/, Api/).
+# See https://docs.github.com/get-started/getting-started-with-git/ignoring-files
+
+# Dependencies
+node_modules/
+
+# Build output & framework caches
+dist/
+out-tsc/
+bazel-out/
+.angular/
+.nest/
+.sass-cache/
+/tmp/
+connect.lock
+typings/
+
+# Scratch / temporary typecheck configs + one-shot tooling (never committed)
+*.tmp.json
+*.tmp.mjs
+.tmp-*/
+.ftd-audit-tmp/
+
+# Test / coverage
+coverage/
+*.lcov
+Web/cypress/artifacts/
+# Cypress legacy default output paths (pre-cypress/artifacts layout). An empty legacy
+# Web/cypress/screenshots/ dir may still exist locally — safe for the operator to delete.
+Web/cypress/screenshots/
+Web/cypress/videos/
+Web/cypress/downloads/
+
+# Logs
+*.log
+
+# Local scan/audit artifacts — the committed evidence copy lives under docs/
+# (e.g. docs/security/dast-*, docs/audit/*); everything in /reports/ is scratch.
+/reports/
+
+# Environment & secrets — NEVER commit (fintech defense-in-depth)
+.env
+.env.*
+!.env.example
+!.env.docker.example
+*.pem
+*.key
+*.p12
+*.pfx
+*_rsa
+secrets/
+*.local
+
+# IDEs / editors
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.sublime-workspace
+.project
+.classpath
+.settings/
+.c9/
+*.launch
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Local AI / editor assistant tooling (machine-specific; not part of the product)
+/.ai/
+/.agents/
+/.claude/
+/.codex/
+/.cursor/
+/.cursorrules
+/.windsurf/
+/.antigravity/
+/.mcp.json
+/AGENTS.md
+/CLAUDE.md
+/GEMINI.md
+/project-control/
+/tasks/
+/.github/copilot-instructions.md
+/.github/workflows/policy-gate.yml
+scripts/check-ai-skill-drift.mjs
+scripts/check-aios-health.mjs
+scripts/check-codex-*.mjs
+scripts/check-implementer-authority.mjs
+scripts/codex-*.mjs
+scripts/task-board.mjs
+scripts/test-claude-hooks.mjs
+scripts/test-codex-*.mjs
+scripts/lib/json-schema-lite.mjs
+
+# Local design-reference artifacts — kept out of the repo (owner-made design policy).
+# The redesign evolves the in-repo Visual Design Language v2; external reference
+# mockups/screenshots are not committed.
+/Vaultchain*.html
+/ss/

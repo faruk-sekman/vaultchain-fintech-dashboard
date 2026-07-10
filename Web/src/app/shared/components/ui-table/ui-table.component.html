@@ -1,0 +1,163 @@
+<div class="ui-table" [class.ui-table--compact]="density === 'compact'">
+  <div
+    class="ui-table__scroll"
+    tabindex="0"
+    role="region"
+    [attr.aria-label]="scrollLabelKey | translate"
+  >
+    <table
+      class="ui-table__table"
+      [ngClass]="loading ? 'table-fixed' : ''"
+      [attr.aria-busy]="loading"
+    >
+      <thead>
+        <tr>
+          @for (c of columns; track c.key) {
+            <th scope="col" class="ui-table__head" [ngClass]="c.widthClass ?? ''">
+              {{ c.headerKey | translate }}
+            </th>
+          }
+          @if (showRowActions) {
+            <th scope="col" class="ui-table__head">
+              {{ 'common.actions' | translate }}
+            </th>
+          }
+        </tr>
+        @if (showFilters) {
+          <ng-content select="[table-filters]"></ng-content>
+        }
+      </thead>
+
+      @if (!loading) {
+        <tbody class="motion-stagger motion-stagger--rise">
+          @if (error) {
+            <tr>
+              <td
+                class="ui-table__empty"
+                role="alert"
+                [attr.colspan]="columns.length + (showRowActions ? 1 : 0)"
+              >
+                <span class="inline-flex flex-wrap items-center justify-center gap-3">
+                  <span class="inline-flex items-center gap-2">
+                    <i class="ri-error-warning-line" aria-hidden="true"></i>
+                    {{ errorKey | translate }}
+                  </span>
+                  <app-ui-button size="sm" variant="ghost" type="button" (click)="retry.emit()">
+                    <i class="ri-refresh-line ui-button__icon" aria-hidden="true"></i>
+                    {{ retryLabelKey | translate }}
+                  </app-ui-button>
+                </span>
+              </td>
+            </tr>
+          } @else {
+            @for (row of data; track trackRow(row, $index)) {
+              <tr>
+                @for (c of columns; track c.key) {
+                  <td
+                    class="ui-table__cell"
+                    [ngClass]="c.widthClass ?? ''"
+                    [attr.data-label]="c.headerKey | translate"
+                  >
+                    @if (c.cellTemplate) {
+                      <ng-container
+                        [ngTemplateOutlet]="c.cellTemplate"
+                        [ngTemplateOutletContext]="cellContext(c, row)"
+                      ></ng-container>
+                    } @else if (c.type === 'badge') {
+                      <app-ui-badge
+                        [text]="displayCell(c, row)"
+                        [color]="badgeColor(c, row)"
+                        [icon]="badgeIcon(c, row)"
+                      ></app-ui-badge>
+                    } @else if (c.type === 'toggle') {
+                      <div class="ui-table__toggle-wrap">
+                        <span
+                          class="ui-table__toggle"
+                          [class.ui-table__toggle--on]="toggleOn(c, row)"
+                        >
+                          <span class="ui-table__toggle-knob" aria-hidden="true"></span>
+                        </span>
+                        <span class="ui-table__toggle-label">{{ displayCell(c, row) }}</span>
+                      </div>
+                    } @else {
+                      <span>{{ displayCell(c, row) }}</span>
+                    }
+                  </td>
+                }
+                @if (showRowActions) {
+                  <td class="ui-table__cell" [attr.data-label]="'common.actions' | translate">
+                    @if (rowActionsTemplate) {
+                      <ng-container
+                        [ngTemplateOutlet]="rowActionsTemplate"
+                        [ngTemplateOutletContext]="{ $implicit: row }"
+                      ></ng-container>
+                    } @else {
+                      <!-- v2 §4: table row-actions are the pill outline button. -->
+                      <app-ui-button
+                        size="sm"
+                        variant="pill"
+                        type="button"
+                        (click)="rowAction.emit(row)"
+                      >
+                        <i class="ri-eye-line ui-button__icon" aria-hidden="true"></i>
+                        {{ rowActionLabelKey | translate }}
+                      </app-ui-button>
+                    }
+                  </td>
+                }
+              </tr>
+            }
+
+            @if (data.length === 0) {
+              <tr>
+                <td
+                  class="ui-table__empty"
+                  [attr.colspan]="columns.length + (showRowActions ? 1 : 0)"
+                >
+                  {{ 'common.noData' | translate }}
+                </td>
+              </tr>
+            }
+          }
+        </tbody>
+      } @else {
+        <tbody>
+          @for (i of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]; track i) {
+            <tr>
+              @for (c of columns; track c.key) {
+                <td
+                  class="ui-table__cell"
+                  [ngClass]="c.widthClass ?? ''"
+                  [attr.data-label]="c.headerKey | translate"
+                >
+                  <div class="ui-table__skeleton ui-table__skeleton--line"></div>
+                </td>
+              }
+              @if (showRowActions) {
+                <td class="ui-table__cell" [attr.data-label]="'common.actions' | translate">
+                  <div class="ui-table__skeleton ui-table__skeleton--button"></div>
+                </td>
+              }
+            </tr>
+          }
+        </tbody>
+      }
+    </table>
+  </div>
+
+  <div class="ui-table__footer">
+    <div class="ui-table__total">
+      {{ 'common.total' | translate }}: <b>{{ total }}</b>
+    </div>
+
+    <div class="ui-table__pager">
+      <app-ui-pagination
+        [page]="page"
+        [pageSize]="pageSize"
+        [total]="total"
+        [pageWindow]="pageWindow"
+        (pageChange)="onPageChange($event)"
+      />
+    </div>
+  </div>
+</div>

@@ -1,0 +1,22 @@
+<div class="ui-empty {{ class() }}" [attr.id]="id() || null">
+  <i class="ui-empty__icon {{ icon() }}" aria-hidden="true"></i>
+
+  @if (title()) {
+    <p class="ui-empty__title">{{ title() }}</p>
+  }
+  @if (message()) {
+    <p class="ui-empty__message">{{ message() }}</p>
+  }
+
+  <div class="ui-empty__actions">
+    @if (actionLabel()) {
+      <button type="button" class="ui-empty__action motion-pressable" (click)="onAction()">
+        @if (actionIcon()) {
+          <i class="{{ actionIcon() }}" aria-hidden="true"></i>
+        }
+        <span>{{ actionLabel() }}</span>
+      </button>
+    }
+    <ng-content select="[empty-action]"></ng-content>
+  </div>
+</div>

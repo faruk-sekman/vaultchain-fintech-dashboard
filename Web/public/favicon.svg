@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Vaultchain">
+  <!-- Vaultchain mark: connected blocks + chain (1:1 with assets/img/Vaultchain_Logo.svg), centred.
+       The glyph paints in currentColor and swaps tint by tab theme so it stays legible on a light
+       tab bar (brand blue) and a dark one (brightened blue). -->
+  <style>
+    svg { color: #1E66F5; }
+    @media (prefers-color-scheme: dark) { svg { color: #C9D6FF; } }
+  </style>
+  <line x1="15" y1="45" x2="32" y2="32" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
+  <line x1="32" y1="32" x2="49" y2="19" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
+  <rect x="6" y="38" width="18" height="18" rx="4.5" fill="currentColor"/>
+  <rect x="23" y="23" width="18" height="18" rx="4.5" fill="currentColor" opacity=".74"/>
+  <rect x="40" y="8" width="18" height="18" rx="4.5" fill="currentColor" opacity=".5"/>
+</svg>

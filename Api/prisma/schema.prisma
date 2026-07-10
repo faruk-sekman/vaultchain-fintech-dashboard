@@ -1,0 +1,720 @@
+// Fintech Dashboard — Prisma schema (foundation).
+//
+// Uses PostgreSQL 16 (native PG enums for closed business sets, app-layer
+// UUIDv7 ids) and the field-level design in ../../docs/data/data-dictionary.md + the ERD
+// (../../docs/data/erd.md). This is the FOUNDATION schema; it is
+// NOT migrated here (no `prisma migrate` is run against any database). Domain features and
+// their migrations land with the later domain-feature work.
+//
+// Conventions: ids are UUIDv7 generated in the application layer (no DB default); money is
+// integer minor-units (BigInt); timestamps are timestamptz. `ledger_entries.leg`,
+// `transaction_categories.direction`, and `idempotency_keys.state` use text + CHECK (added
+// via migration) rather than native enums.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ---------- Enums (native PG enums) ----------
+
+enum KycStatus {
+  NOT_STARTED
+  PENDING
+  IN_REVIEW
+  VERIFIED
+  REJECTED
+  EXPIRED
+
+  @@map("kyc_status")
+}
+
+enum RiskLevel {
+  LOW
+  MEDIUM
+  HIGH
+  BLOCKED
+
+  @@map("risk_level")
+}
+
+enum CustomerStatus {
+  ACTIVE
+  INACTIVE
+  CLOSED
+
+  @@map("customer_status")
+}
+
+enum AccountStatus {
+  ACTIVE
+  DORMANT
+  CLOSED
+
+  @@map("account_status")
+}
+
+enum AccountType {
+  CHECKING
+  SAVINGS
+  WALLET
+
+  @@map("account_type")
+}
+
+enum WalletStatus {
+  ACTIVE
+  FROZEN
+  CLOSED
+
+  @@map("wallet_status")
+}
+
+enum TransactionKind {
+  DEPOSIT
+  WITHDRAWAL
+  TRANSFER
+  FEE
+  ADJUSTMENT
+  REVERSAL
+
+  @@map("transaction_kind")
+}
+
+enum TransactionStatus {
+  PENDING
+  POSTED
+  FAILED
+  REVERSED
+
+  @@map("transaction_status")
+}
+
+enum RiskDecision {
+  ALLOW
+  REVIEW
+  BLOCK
+
+  @@map("risk_decision")
+}
+
+enum RiskSignalSeverity {
+  low
+  medium
+  high
+
+  @@map("risk_signal_severity")
+}
+
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+  LOCKED
+  DELETED
+
+  @@map("user_status")
+}
+
+// Closed business sets for the operator notification domain modeled
+// as native PG enums. `NotificationType` categorizes the event; OperatorSettings toggles map
+// onto it (securityAlerts → SECURITY_ALERT/ACCOUNT, productUpdates/weeklyDigest → SYSTEM). `severity`
+// drives the FE badge/icon. Both are closed + stable, so native enums (not text+CHECK) are appropriate.
+enum NotificationType {
+  SECURITY_ALERT
+  KYC_EVENT
+  CUSTOMER_EVENT
+  SYSTEM
+  ACCOUNT
+
+  @@map("notification_type")
+}
+
+enum NotificationSeverity {
+  info
+  success
+  warning
+  critical
+
+  @@map("notification_severity")
+}
+
+// A15/A16 (bugfix-backlog-2026-07): lifecycle of an admin-approval password-reset request. A CLOSED,
+// stable set → native enum. Values are ORDERED so the natural enum sort puts PENDING first —
+// the admin list's `orderBy status asc` yields actionable requests on top for free.
+enum PasswordResetRequestStatus {
+  PENDING
+  APPROVED
+  DENIED
+  EXPIRED
+
+  @@map("password_reset_request_status")
+}
+
+// MFA challenge intent. LOGIN gates an interactive sign-in; ENROLL confirms a freshly
+// created TOTP enrollment. Kept as text + CHECK (not a native enum) so the closed set can widen
+// without a migration, matching how `ledger_entries.leg` / `idempotency_keys.state` are modeled.
+
+// ---------- Identity (authn / authz) ----------
+// `failed_login_count` / `locked_until` columns exist here, but the lockout LOGIC that
+// uses them is added later. `email` is text + app-layer lowercasing (citext deferred to
+// avoid the extension dependency). Refresh tokens / login attempts land later.
+//
+// Opt-in MFA: `mfa_enabled` is the per-user switch (default false →
+// existing users keep password-only sign-in, no backfill); `mfa_confirmed_at` records when the
+// first TOTP code verified an enrollment; `totp_secret_enc` is the RFC-6238 shared secret AFTER
+// envelope encryption (LocalKeyEncryptor) — SECRET, never returned/logged; the raw secret
+// is never persisted. `last_used_totp_step` is the highest accepted RFC-6238 time-step counter and
+// blocks intra-window replay (a code is accepted at most once). Whether MFA is *mandatory* is an
+// app-level env flag (MFA_REQUIRED, default false), NOT a column — the opt-in default stands.
+
+model User {
+  id               String     @id @db.Uuid
+  email            String     @unique // stored lowercase (app-normalized)
+  passwordHash     String     @map("password_hash") // argon2id — SECRET, never returned/logged
+  displayName      String?    @map("display_name")
+  phone            String?
+  status           UserStatus @default(ACTIVE)
+  lastLoginAt      DateTime?  @map("last_login_at") @db.Timestamptz
+  failedLoginCount Int        @default(0) @map("failed_login_count")
+  lockedUntil      DateTime?  @map("locked_until") @db.Timestamptz
+  mfaEnabled       Boolean    @default(false) @map("mfa_enabled")
+  mfaConfirmedAt   DateTime?  @map("mfa_confirmed_at") @db.Timestamptz
+  totpSecretEnc    String?    @map("totp_secret_enc") // envelope-encrypted TOTP secret — SECRET, never returned/logged
+  lastUsedTotpStep Int?       @map("last_used_totp_step") // highest accepted RFC-6238 step — replay guard
+  // Bumped on every RBAC change affecting this user (role assign/revoke, or a permission change on a
+  // role they hold). Access tokens embed the value they were minted with; PermissionsGuard rejects a
+  // stale-versioned token, so a revoke takes effect immediately instead of only at token TTL (audit F9).
+  permissionVersion Int      @default(0) @map("permission_version")
+  createdAt        DateTime   @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt        DateTime   @updatedAt @map("updated_at") @db.Timestamptz
+
+  userRoles               UserRole[]
+  refreshTokens           RefreshToken[]
+  loginAttempts           LoginAttempt[]
+  auditLogs               AuditLog[]
+  mfaChallenges           MfaChallenge[]
+  passwordResetChallenges PasswordResetChallenge[]
+  passwordResetRequests   PasswordResetRequest[]
+  backupCodes             BackupCode[]
+  rememberedDevices       RememberedDevice[]
+  operatorSettings        OperatorSettings?
+  notifications           Notification[]
+
+  @@map("users")
+}
+
+// O-7 (audit fix): a REAL schema home for mutable operator UI settings — operator-entered job title
+// + notification toggles. Previously these were (mis)persisted INTO the append-only tamper-evident
+// audit log (`audit_logs`) and read back via findFirst, conflating the immutable governance trail with
+// mutable application state. This 1:1-with-User table owns that state with column-level defaults; the
+// audit log now records only THAT a change happened, not the value read back. ADDITIVE (new table), so
+// the migration that introduced it is non-destructive. `userId` is the PK *and* FK (one settings row
+// per operator).
+// Booleans carry the same defaults the service used (productUpdates/securityAlerts on, weeklyDigest off)
+// so an absent/never-saved operator still resolves to those defaults at the DB layer.
+model OperatorSettings {
+  userId         String   @id @map("user_id") @db.Uuid
+  jobTitle       String?  @map("job_title")
+  productUpdates Boolean  @default(true) @map("product_updates")
+  securityAlerts Boolean  @default(true) @map("security_alerts")
+  weeklyDigest   Boolean  @default(false) @map("weekly_digest")
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("operator_settings")
+}
+
+// A REAL, per-recipient notification domain (realtime; audit O-7 lineage) that
+// REPLACES the audit-log-derived feed. The audit log (`audit_logs`) stays the single tamper-evident
+// governance trail — `NotificationService.emit()` writes HERE, never duplicating an audit row. Each
+// row is owned by exactly one recipient (`recipientUserId`); reads/mark-read are recipient-scoped in
+// the service (a user can only see/mark their own). `titleKey`/`bodyKey` are i18n keys the FE renders
+// (the BE owns no copy); `paramsJson` carries ONLY allowlisted, non-PII interpolation values — an
+// emit-layer guard rejects national_id/email/ip/token/raw PII. `readAt` is the true read-state (null =
+// unread) that the audit-shadow feed never had. `id` is UUIDv7 (time-ordered). Composite index
+// (recipientUserId, readAt, createdAt desc) serves the primary "my unread, newest first" query and the
+// unread-count. Retention (90d / last 200 per recipient) is enforced by NotificationPruneScheduler.
+//
+// Account-deletion FK behavior: ON DELETE CASCADE — a notification is meaningless without its recipient,
+// it carries no governance value (that lives in `audit_logs`, which is independent), and a deleted
+// operator's private feed must not linger. (Contrast: AuditLog.actor is SetNull/optional to preserve the
+// immutable trail. Here cascade is correct precisely because this is mutable, recipient-private state.)
+model Notification {
+  id              String               @id @db.Uuid
+  recipientUserId String               @map("recipient_user_id") @db.Uuid
+  type            NotificationType
+  severity        NotificationSeverity @default(info)
+  titleKey        String               @map("title_key") // i18n key rendered by the FE (BE owns no copy)
+  bodyKey         String               @map("body_key") // i18n key rendered by the FE
+  paramsJson      Json?                @map("params_json") // allowlisted, non-PII interpolation values only
+  resourceType    String               @map("resource_type") // e.g. customer | user | session
+  resourceId      String?              @map("resource_id") @db.Uuid // optional deep-link target
+  readAt          DateTime?            @map("read_at") @db.Timestamptz // null = unread (true read-state)
+  createdAt       DateTime             @default(now()) @map("created_at") @db.Timestamptz
+
+  recipient User @relation(fields: [recipientUserId], references: [id], onDelete: Cascade)
+
+  // Serves "my notifications, unread-first, newest-first" + the unread count in one composite index.
+  @@index([recipientUserId, readAt, createdAt(sort: Desc)])
+  @@map("notifications")
+}
+
+model Role {
+  id   String @id @db.Uuid
+  name String @unique
+
+  userRoles       UserRole[]
+  rolePermissions RolePermission[]
+
+  @@map("roles")
+}
+
+model Permission {
+  id   String @id @db.Uuid
+  code String @unique // e.g. customers.read (the permission dictionary)
+
+  rolePermissions RolePermission[]
+
+  @@map("permissions")
+}
+
+model UserRole {
+  userId String @map("user_id") @db.Uuid
+  roleId String @map("role_id") @db.Uuid
+
+  user User @relation(fields: [userId], references: [id])
+  role Role @relation(fields: [roleId], references: [id])
+
+  @@id([userId, roleId])
+  @@map("user_roles")
+}
+
+model RolePermission {
+  roleId       String @map("role_id") @db.Uuid
+  permissionId String @map("permission_id") @db.Uuid
+
+  role       Role       @relation(fields: [roleId], references: [id])
+  permission Permission @relation(fields: [permissionId], references: [id])
+
+  @@id([roleId, permissionId])
+  @@map("role_permissions")
+}
+
+// Refresh token. `id` is the lookup key embedded in the issued token (`rt_<id>.<secret>`); the
+// secret is verified against `token_hash` (argon2id). `session_id` is the device/session family
+// (revoked together on logout / reuse). `replaced_by_token_id` is the rotation-chain breadcrumb.
+// (Data-dictionary lists PK = token_hash; an `id` lookup key is added so argon2id stays usable.)
+model RefreshToken {
+  id           String    @id @db.Uuid
+  tokenHash    String    @map("token_hash") // argon2id of the token secret — SECRET, never returned/logged
+  userId       String    @map("user_id") @db.Uuid
+  sessionId    String    @map("session_id") @db.Uuid
+  expiresAt    DateTime  @map("expires_at") @db.Timestamptz
+  revokedAt    DateTime? @map("revoked_at") @db.Timestamptz
+  replacedById String?   @map("replaced_by_token_id") @db.Uuid
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([sessionId])
+  @@map("refresh_tokens")
+}
+
+// The second-factor challenge issued between a verified password and a
+// granted session. Mirrors RefreshToken — `id` is the lookup key embedded in the opaque challenge
+// token (`mfa_<id>.<secret>`) carried in the httpOnly `ftd_mfa` cookie; the secret is verified
+// against `token_hash` (argon2id) — SECRET, never returned/logged. SINGLE-USE: `consumed_at` is
+// stamped on the first successful verify (and on definitive failure) so a challenge cannot be
+// replayed. `purpose` is LOGIN | ENROLL (text + CHECK). `attempt_count` / `max_attempts`
+// fail the challenge closed after too many bad codes; `created_ip_hash` / `ua_hash` are sha256
+// fingerprints (no raw IP/UA). Expired/consumed rows are swept; `expires_at` is indexed for the sweep.
+model MfaChallenge {
+  id            String    @id @db.Uuid
+  tokenHash     String    @map("token_hash") // argon2id of the challenge secret — SECRET, never returned/logged
+  userId        String    @map("user_id") @db.Uuid
+  purpose       String // LOGIN | ENROLL — text + CHECK
+  expiresAt     DateTime  @map("expires_at") @db.Timestamptz
+  consumedAt    DateTime? @map("consumed_at") @db.Timestamptz
+  attemptCount  Int       @default(0) @map("attempt_count")
+  maxAttempts   Int       @map("max_attempts")
+  createdIpHash String?   @map("created_ip_hash") // sha256(client ip)
+  uaHash        String?   @map("ua_hash") // sha256(user-agent)
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("mfa_challenges")
+}
+
+// The self-service password-reset challenge — a near-verbatim clone of
+// MfaChallenge. It is the second-factor gate issued between an "I forgot my password" request and a
+// credential change for an MFA-enrolled operator (NO email, NO JWT). `id` is the lookup key embedded
+// in the opaque token (`pwr_<id>.<secret>`) carried in the httpOnly `ftd_pwreset` cookie; the secret
+// is verified against `token_hash` (argon2id) — SECRET, never returned/logged. SINGLE-USE:
+// `consumed_at` is stamped on the successful reset so a challenge cannot be replayed. `purpose` is the
+// single value PASSWORD_RESET (text + CHECK, not a native enum). `attempt_count` /
+// `max_attempts` fail the challenge closed after too many bad codes — bounded PER-CHALLENGE so a victim
+// account is NEVER locked by reset attempts. `created_ip_hash` / `ua_hash` are sha256 fingerprints
+// bound at issue and re-checked at verify (no raw IP/UA). `expires_at` is indexed for the sweep.
+model PasswordResetChallenge {
+  id               String    @id @db.Uuid
+  tokenHash        String    @map("token_hash") // argon2id of the challenge secret — SECRET, never returned/logged
+  userId           String    @map("user_id") @db.Uuid
+  purpose          String // PASSWORD_RESET — text + CHECK
+  expiresAt        DateTime  @map("expires_at") @db.Timestamptz
+  consumedAt       DateTime? @map("consumed_at") @db.Timestamptz
+  attemptCount     Int       @default(0) @map("attempt_count")
+  maxAttempts      Int       @map("max_attempts")
+  createdIpHash    String?   @map("created_ip_hash") // sha256(client ip)
+  uaHash           String?   @map("ua_hash") // sha256(user-agent)
+  // The 2nd factor is now verified at POST /auth/password/reset/verify-code,
+  // which stamps `factor_verified_at` (+ the method) ONCE; the later password-only /verify is gated on
+  // this stamp (Auth.ResetFactorRequired when null). Both nullable + additive — existing rows and the
+  // admin-reset path are unaffected. `factor_method` is text + nullable like `purpose` (no native enum).
+  factorVerifiedAt DateTime? @map("factor_verified_at") @db.Timestamptz
+  factorMethod     String?   @map("factor_method")
+  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("password_reset_challenges")
+}
+
+// A15/A16 (bugfix-backlog-2026-07): an "ask an administrator to reset my password" request — the
+// fallback for an operator who CANNOT self-serve the MFA-gated reset (no authenticator). The requesting
+// BROWSER is bound to its request by the httpOnly `ftd_pwreq` cookie carrying the opaque token
+// `pwq_<id>.<secret>`; only the argon2id hash of the secret is stored (`token_hash` — SECRET, never
+// returned/logged), cloning the PasswordResetChallenge pattern. `user_id` is NOT nullable — an unknown
+// email never creates a row (the endpoint answers with a decoy cookie instead; enumeration-safe).
+// `ip_hash` is sha256(ip) (same policy as audit_logs.ip_hash), `ip_prefix` a coarse /24-style prefix
+// for admin display (raw IP never stored), `user_agent` the raw UA service-truncated to ≤400 chars.
+// `expires_at` = created + PWRESET_REQUEST_TTL and covers BOTH the pending-decision and the
+// approved-unclaimed windows; expiry is enforced LAZILY on read (no scheduler) — readers flip an
+// over-age open row to EXPIRED. `decided_by` is a plain uuid column with NO relation (precedent:
+// KycVerification.decidedBy). `challenge_id` points at the LATEST claimed set-password challenge (plain
+// column, no FK); `completed_at` is stamped when that challenge is consumed by /verify. At most ONE
+// open (PENDING) request per account — enforced transactionally in the service (authoritative) plus a
+// partial unique index in prisma/sql/integrity.sql (prod backstop).
+model PasswordResetRequest {
+  id          String                     @id @db.Uuid
+  userId      String                     @map("user_id") @db.Uuid
+  tokenHash   String                     @map("token_hash") // argon2id of the ftd_pwreq secret — SECRET, never returned/logged
+  status      PasswordResetRequestStatus @default(PENDING)
+  ipHash      String?                    @map("ip_hash") // sha256(client ip) — same policy as audit_logs.ip_hash
+  ipPrefix    String?                    @map("ip_prefix") // coarse network prefix for admin display, not a full IP
+  userAgent   String?                    @map("user_agent") // raw UA, service-truncated to <=400 chars
+  expiresAt   DateTime                   @map("expires_at") @db.Timestamptz
+  decidedBy   String?                    @map("decided_by") @db.Uuid // plain uuid, NO relation (KycVerification precedent)
+  decidedAt   DateTime?                  @map("decided_at") @db.Timestamptz
+  challengeId String?                    @map("challenge_id") @db.Uuid // latest claimed set-password challenge (no FK)
+  completedAt DateTime?                  @map("completed_at") @db.Timestamptz
+  createdAt   DateTime                   @default(now()) @map("created_at") @db.Timestamptz
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Admin list: PENDING first (enum order), newest first inside a status group.
+  @@index([status, createdAt(sort: Desc)])
+  @@index([userId, status])
+  @@index([expiresAt])
+  @@map("password_reset_requests")
+}
+
+// One-time recovery codes minted at TOTP enrollment, used when the
+// authenticator is unavailable. `code_hash` is the argon2id hash of a single backup code — SECRET,
+// never returned/logged; the plaintext codes are shown to the user ONCE at generation and never
+// stored. SINGLE-USE: `used_at` is stamped on redemption so a code cannot be reused. A fresh set is
+// issued on regeneration (old rows revoked/deleted by the service).
+model BackupCode {
+  id        String    @id @db.Uuid
+  userId    String    @map("user_id") @db.Uuid
+  codeHash  String    @map("code_hash") // argon2id of one backup code — SECRET, never returned/logged
+  usedAt    DateTime? @map("used_at") @db.Timestamptz
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@map("backup_codes")
+}
+
+// Optional "remember this device" so a known device can skip the TOTP
+// prompt until expiry (feature default OFF via MFA_REMEMBER_DEVICE_ENABLED). `token_hash` is the
+// argon2id hash of the device-token secret — SECRET, never returned/logged. `ua_hash` is a
+// sha256(user-agent) fingerprint and `ip_prefix` is a coarse network prefix (NOT a full IP) bound
+// at issue to limit token portability. `revoked_at` supports per-device revocation; `expires_at`
+// bounds the trust window.
+model RememberedDevice {
+  id        String    @id @db.Uuid
+  userId    String    @map("user_id") @db.Uuid
+  tokenHash String    @map("token_hash") // argon2id of the device-token secret — SECRET, never returned/logged
+  uaHash    String    @map("ua_hash") // sha256(user-agent)
+  ipPrefix  String    @map("ip_prefix") // coarse network prefix, not a full IP
+  expiresAt DateTime  @map("expires_at") @db.Timestamptz
+  revokedAt DateTime? @map("revoked_at") @db.Timestamptz
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@map("remembered_devices")
+}
+
+model LoginAttempt {
+  id            String   @id @db.Uuid
+  userId        String?  @map("user_id") @db.Uuid // null for an unknown email
+  emailHash     String?  @map("email_hash") // sha256(lowercased email) when the user is unknown
+  success       Boolean
+  failureReason String?  @map("failure_reason")
+  ipHash        String?  @map("ip_hash") // sha256(client ip)
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  user User? @relation(fields: [userId], references: [id])
+
+  @@index([userId, createdAt])
+  @@map("login_attempts")
+}
+
+// Event-recording audit trail for governance actions (RBAC changes etc.).
+// `masked_context_json` carries NO raw PII/secret. The tamper-evident hash chain:
+// `prev_hash` = the previous row's `entry_hash` (genesis seed for row 0); `entry_hash` =
+// SHA-256(prev_hash | canonical(payload)). Appends serialize on a pg advisory lock (AuditService).
+model AuditLog {
+  id                String   @id @db.Uuid
+  actorUserId       String?  @map("actor_user_id") @db.Uuid // null = system-originated event (no known subject)
+  action            String // e.g. role.grant_permission
+  resourceType      String   @map("resource_type")
+  resourceId        String?  @map("resource_id") @db.Uuid
+  outcome           String // SUCCESS | DENIED | FAIL
+  maskedContextJson Json?    @map("masked_context_json")
+  ipHash            String?  @map("ip_hash")
+  correlationId     String?  @map("correlation_id") @db.Uuid
+  prevHash          String   @map("prev_hash")
+  entryHash         String   @map("entry_hash")
+  createdAt         DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  actor User? @relation(fields: [actorUserId], references: [id])
+
+  @@index([actorUserId, createdAt])
+  @@index([resourceType, resourceId])
+  @@map("audit_logs")
+}
+
+// ---------- Reference ----------
+
+model Currency {
+  code     String  @id @db.Char(3) // ISO-4217 natural PK
+  name     String
+  scale    Int     @default(2)
+  isActive Boolean @default(true) @map("is_active")
+
+  @@map("currencies")
+}
+
+// ---------- Customer / KYC ----------
+
+model Customer {
+  id              String         @id @db.Uuid
+  fullName        String         @map("full_name")
+  email           String
+  phone           String?
+  nationalIdEnc   Bytes?         @map("national_id_enc") // column-encrypted
+  nationalIdLast4 String?        @map("national_id_last4") @db.Char(4)
+  // Keyed blind index (HMAC-SHA256, HKDF'd from the master key) of the national ID — deterministic so a
+  // partial UNIQUE index can enforce one active customer per national ID over the randomized ciphertext (QA).
+  nationalIdHash  String?        @map("national_id_hash")
+  dateOfBirth     DateTime?      @map("date_of_birth") @db.Date
+  addressCountry  String?        @map("address_country")
+  addressCity     String?        @map("address_city")
+  addressPostal   String?        @map("address_postal_code")
+  addressLine1    String?        @map("address_line1")
+  walletNumber    String?        @map("wallet_number")
+  kycStatus       KycStatus      @default(NOT_STARTED) @map("kyc_status")
+  riskLevel       RiskLevel      @default(LOW) @map("risk_level")
+  status          CustomerStatus @default(ACTIVE)
+  contractSigned  Boolean        @default(false) @map("contract_signed") // (not a KYC state)
+  createdAt       DateTime       @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt       DateTime       @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt       DateTime?      @map("deleted_at") @db.Timestamptz
+  rowVersion      BigInt         @default(0) @map("row_version")
+
+  accounts         Account[]
+  kycVerifications KycVerification[]
+  riskAssessments  RiskAssessment[]
+
+  @@index([updatedAt])
+  @@map("customers")
+}
+
+model KycVerification {
+  id         String    @id @db.Uuid
+  customerId String    @map("customer_id") @db.Uuid
+  status     KycStatus
+  method     String
+  reasonCode String?   @map("reason_code")
+  decidedAt  DateTime? @map("decided_at") @db.Timestamptz
+  decidedBy  String?   @map("decided_by") @db.Uuid
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz
+
+  customer Customer @relation(fields: [customerId], references: [id])
+
+  @@index([customerId, createdAt])
+  @@map("kyc_verifications")
+}
+
+// ---------- Accounts / Wallets ----------
+
+model Account {
+  id         String        @id @db.Uuid
+  customerId String        @map("customer_id") @db.Uuid
+  type       AccountType
+  status     AccountStatus @default(ACTIVE)
+  currency   String        @db.Char(3)
+  createdAt  DateTime      @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt  DateTime      @updatedAt @map("updated_at") @db.Timestamptz
+
+  customer Customer @relation(fields: [customerId], references: [id])
+  wallets  Wallet[]
+
+  @@index([customerId])
+  @@map("accounts")
+}
+
+model Wallet {
+  id                String       @id @db.Uuid
+  accountId         String       @map("account_id") @db.Uuid
+  currency          String       @db.Char(3)
+  dailyLimitMinor   BigInt       @default(0) @map("daily_limit_minor")
+  monthlyLimitMinor BigInt       @default(0) @map("monthly_limit_minor")
+  status            WalletStatus @default(ACTIVE)
+  // External/clearing/revenue legs post against a system wallet (additive, default false →
+  // existing customer wallets stay non-system, no backfill). `systemPurpose` is CLEARING|REVENUE
+  // (text+CHECK) and is null for customer wallets; lookup key is (currency, system_purpose).
+  isSystem          Boolean      @default(false) @map("is_system")
+  systemPurpose     String?      @map("system_purpose")
+  createdAt         DateTime     @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt         DateTime     @updatedAt @map("updated_at") @db.Timestamptz
+  rowVersion        BigInt       @default(0) @map("row_version")
+
+  account       Account        @relation(fields: [accountId], references: [id])
+  balance       WalletBalance?
+  ledgerEntries LedgerEntry[]
+
+  @@index([accountId])
+  @@map("wallets")
+}
+
+model WalletBalance {
+  walletId              String   @id @map("wallet_id") @db.Uuid
+  balanceMinor          BigInt   @default(0) @map("balance_minor")
+  availableBalanceMinor BigInt   @default(0) @map("available_balance_minor")
+  updatedAt             DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  wallet Wallet @relation(fields: [walletId], references: [id])
+
+  @@map("wallet_balances")
+}
+
+// ---------- Ledger ----------
+
+model Transaction {
+  id             String            @id @db.Uuid
+  publicRef      String?           @unique @map("public_ref")
+  idempotencyKey String            @map("idempotency_key")
+  kind           TransactionKind
+  status         TransactionStatus @default(PENDING)
+  accountId      String            @map("account_id") @db.Uuid
+  categoryId     String?           @map("category_id") @db.Uuid
+  description    String?
+  correlationId  String?           @map("correlation_id") @db.Uuid
+  // On a REVERSAL this points at the reversed transaction's id; UNIQUE = reverse-once.
+  reversalOf     String?           @unique @map("reversal_of") @db.Uuid
+  occurredAt     DateTime          @map("occurred_at") @db.Timestamptz
+  postedAt       DateTime?         @map("posted_at") @db.Timestamptz
+  createdAt      DateTime          @default(now()) @map("created_at") @db.Timestamptz
+
+  entries LedgerEntry[]
+
+  // UNIQUE so one idempotency key posts at most ONE transaction row even if the application-level
+  // idempotency record were bypassed — the DB-level replay backstop (audit F1, CWE-362 / CWE-841).
+  @@unique([idempotencyKey])
+  @@index([accountId, occurredAt(sort: Desc)])
+  @@map("transactions")
+}
+
+// Append-only: no updatedAt; UPDATE/DELETE revoked via grants.
+model LedgerEntry {
+  id            String   @id @db.Uuid
+  transactionId String   @map("transaction_id") @db.Uuid
+  walletId      String   @map("wallet_id") @db.Uuid
+  accountId     String   @map("account_id") @db.Uuid
+  leg           String // CHECK (leg IN ('DEBIT','CREDIT')) — text+CHECK
+  amountMinor   BigInt   @map("amount_minor") // CHECK (amount_minor > 0)
+  currency      String   @db.Char(3)
+  entrySeq      BigInt   @map("entry_seq")
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  transaction Transaction @relation(fields: [transactionId], references: [id])
+  wallet      Wallet      @relation(fields: [walletId], references: [id])
+
+  // UNIQUE (not just indexed) so a per-wallet entry_seq can never duplicate even if the MAX()+1
+  // read-modify-write raced — correctness no longer depends solely on the FOR UPDATE lock (audit M8).
+  @@unique([walletId, entrySeq])
+  @@index([transactionId])
+  @@map("ledger_entries")
+}
+
+model IdempotencyKey {
+  key                String   @id
+  clientId           String   @map("client_id")
+  requestFingerprint String   @map("request_fingerprint")
+  state              String   @default("IN_PROGRESS") // CHECK (state IN ('IN_PROGRESS','COMPLETED'))
+  responseStatus     Int?     @map("response_status")
+  responseBodyJson   Json?    @map("response_body_json")
+  createdAt          DateTime @default(now()) @map("created_at") @db.Timestamptz
+  expiresAt          DateTime @map("expires_at") @db.Timestamptz
+
+  @@index([expiresAt])
+  @@map("idempotency_keys")
+}
+
+// ---------- Risk ----------
+
+model RiskAssessment {
+  id           String       @id @db.Uuid
+  customerId   String       @map("customer_id") @db.Uuid
+  address      String
+  decision     RiskDecision
+  isSimulated  Boolean      @map("is_simulated")
+  providerName String       @map("provider_name")
+  createdAt    DateTime     @default(now()) @map("created_at") @db.Timestamptz
+  createdBy    String?      @map("created_by") @db.Uuid
+
+  customer Customer     @relation(fields: [customerId], references: [id])
+  signals  RiskSignal[]
+
+  @@index([customerId, createdAt])
+  @@map("risk_assessments")
+}
+
+model RiskSignal {
+  id               String             @id @db.Uuid
+  riskAssessmentId String             @map("risk_assessment_id") @db.Uuid
+  key              String
+  hit              Boolean
+  severity         RiskSignalSeverity
+
+  assessment RiskAssessment @relation(fields: [riskAssessmentId], references: [id])
+
+  @@index([riskAssessmentId])
+  @@map("risk_signals")
+}

@@ -1,0 +1,677 @@
+// =============================================================
+// Motion system — implements docs/design/motion-system.md.
+// CSS transitions/keyframes only; @angular/animations is reserved
+// for the route transition (route-animations.ts). Tokens live in
+// _tokens.scss (--motion-*: durations, easings, distances).
+// No bounce, no spring, no decorative loops (shimmer 1200ms is the
+// one sanctioned loop, §2).
+// =============================================================
+
+// ---- Keyframes ------------------------------------------------
+
+// Skeleton shimmer — the one sanctioned loop (1200ms, linear, §2/§4).
+@keyframes ui-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+@keyframes ui-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(var(--motion-distance-md));
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Rise distance is a per-consumer custom property (defaults to md = 8px);
+// menus/tooltips use xs (2px), empty/error states use sm (4px) — §10/§11.
+@keyframes ui-rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(var(--motion-rise-distance, var(--motion-distance-md)));
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Modal/dialog panel enter — fade + 0.98→1, no overshoot (§10).
+@keyframes ui-scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes ui-slide-in-left {
+  from {
+    opacity: 0;
+    transform: translateX(calc(-1 * var(--motion-distance-lg)));
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes ui-backdrop-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+// Horizontal grow for chart / progress bars (origin set by consumer).
+@keyframes ui-grow-x {
+  from {
+    transform: scaleX(0);
+  }
+
+  to {
+    transform: scaleX(1);
+  }
+}
+
+// Baseline grow for bar charts (transform-origin bottom set by consumer, §7).
+@keyframes ui-grow-y {
+  from {
+    transform: scaleY(0);
+  }
+
+  to {
+    transform: scaleY(1);
+  }
+}
+
+// Inline-loading spinner rotation (900ms linear loop while pending, §3).
+@keyframes ui-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// Line-chart draw via normalized stroke-dash (pathLength="1", §7).
+@keyframes ui-chart-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+// KPI value swap (§5): old value exits up 6px (sm+xs) over 120ms exit-ease,
+// new value enters from 6px below over 180ms enter-ease (40% = 120/300).
+// Replaces the removed count-up; triggered as a one-shot class.
+@keyframes ui-value-swap {
+  0% {
+    opacity: 1;
+    transform: translateY(0);
+    animation-timing-function: var(--motion-ease-exit);
+  }
+
+  40% {
+    opacity: 0;
+    transform: translateY(calc(-1 * (var(--motion-distance-sm) + var(--motion-distance-xs))));
+  }
+
+  41% {
+    opacity: 0;
+    transform: translateY(calc(var(--motion-distance-sm) + var(--motion-distance-xs)));
+    animation-timing-function: var(--motion-ease-enter);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// ---- Entrance utilities --------------------------------------
+
+.motion-fade-up {
+  animation: ui-fade-up var(--motion-slow) var(--motion-ease-enter) both;
+}
+
+.motion-rise {
+  animation: ui-rise-in var(--motion-normal) var(--motion-ease-enter) both;
+}
+
+.motion-scale-in {
+  animation: ui-scale-in var(--motion-normal) var(--motion-ease-enter) both;
+}
+
+.motion-slide-in-left {
+  animation: ui-slide-in-left var(--motion-slow) var(--motion-ease-enter) both;
+}
+
+.motion-backdrop {
+  animation: ui-backdrop-in var(--motion-normal) var(--motion-ease-enter) both;
+}
+
+// ---- KPI value update (§5) -----------------------------------
+// Toggled as a one-shot by ValueSwapDirective when an already-rendered
+// KPI value changes; never plays on first render.
+
+.value-updating {
+  animation: ui-value-swap calc(var(--motion-fast) + var(--motion-normal)) linear both;
+}
+
+// ---- Orchestrated stagger ------------------------------------
+// Add `motion-stagger` to a container: its direct children cascade in
+// with `ui-fade-up`, each delayed by `--stagger-step` (default 40ms,
+// contract range 40–70ms). Stagger is meaningful for ≤8 children (§6/§9):
+// children 9+ appear together with the 8th.
+
+.motion-stagger > * {
+  animation: ui-fade-up var(--motion-slow) var(--motion-ease-enter) both;
+}
+
+.motion-stagger--rise > * {
+  animation-name: ui-rise-in;
+  animation-duration: var(--motion-normal);
+}
+
+@for $i from 1 through 8 {
+  .motion-stagger > *:nth-child(#{$i}) {
+    animation-delay: calc(var(--stagger-base, 0ms) + #{$i - 1} * var(--stagger-step, 40ms));
+  }
+}
+
+.motion-stagger > *:nth-child(n + 9) {
+  animation-delay: calc(var(--stagger-base, 0ms) + 7 * var(--stagger-step, 40ms));
+}
+
+// ---- Chart / bar grow ----------------------------------------
+// Origin-left horizontal grow; pair with `overflow: hidden` parent.
+
+.motion-grow-bar {
+  transform-origin: left center;
+  animation: ui-grow-x var(--motion-slow) var(--motion-ease-enter) both;
+  animation-delay: var(--grow-delay, var(--motion-fast));
+}
+
+// ---- Interaction utilities -----------------------------------
+
+.motion-pressable {
+  transition:
+    box-shadow var(--motion-fast) var(--motion-ease-standard),
+    background-color var(--motion-fast) var(--motion-ease-standard),
+    border-color var(--motion-fast) var(--motion-ease-standard),
+    color var(--motion-fast) var(--motion-ease-standard);
+}
+
+.motion-pressable:hover {
+  transform: none;
+}
+
+.motion-pressable:active {
+  transform: none;
+}
+
+// Shared action button icon choreography. Kept global so every page gets the
+// same micro-interactions without bloating each component stylesheet budget.
+app-ui-button .ui-button:hover:not(:disabled) {
+  --button-icon-transform: translateY(-1px) scale(1.06);
+}
+
+app-ui-button .ui-button:hover:not(:disabled) .ui-button__icon {
+  transform: var(--button-icon-transform);
+}
+
+app-ui-button .ui-button:hover:not(:disabled) :where(.ri-arrow-left-line) {
+  --button-icon-transform: translateX(-2px) scale(1.04);
+}
+
+app-ui-button .ui-button:hover:not(:disabled) :where(.ri-arrow-right-line) {
+  --button-icon-transform: translateX(2px) scale(1.04);
+}
+
+app-ui-button
+  .ui-button:hover:not(:disabled)
+  :where(.ri-add-line, .ri-user-add-line, .ri-refresh-line, .ri-loop-left-line) {
+  --button-icon-transform: rotate(90deg) scale(1.08);
+}
+
+app-ui-button .ui-button:hover:not(:disabled) :where(.ri-pencil-line, .ri-edit-line) {
+  --button-icon-transform: rotate(-8deg) scale(1.08);
+}
+
+app-ui-button .ui-button:hover:not(:disabled) :where(.ri-delete-bin-6-line, .ri-delete-bin-line) {
+  --button-icon-transform: translateY(-1px) rotate(-4deg) scale(1.06);
+}
+
+app-ui-button
+  .ui-button:hover:not(:disabled)
+  :where(.ri-filter-3-line, .ri-filter-off-line, .ri-shield-check-line, .ri-fingerprint-line) {
+  --button-icon-transform: translateY(-1px) rotate(6deg) scale(1.06);
+}
+
+app-ui-button
+  .ui-button:hover:not(:disabled)
+  :where(.ri-save-3-line, .ri-save-line, .ri-eye-line, .ri-search-eye-line) {
+  --button-icon-transform: translateY(-1px) scale(1.08);
+}
+
+// ---- Click pop (icon controls) -------------------------------
+// One-shot feedback added by the `appIconPop` directive: the control punches in
+// scale while its glyph "redraws" left-to-right. Reduced motion is handled by the
+// global block below (animation-duration collapses to ~1ms).
+@keyframes ui-icon-pop {
+  0% {
+    transform: scale(0.82);
+  }
+
+  55% {
+    transform: scale(1.1);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes ui-icon-redraw {
+  0% {
+    clip-path: inset(0 100% 0 0);
+    opacity: 0.45;
+  }
+
+  100% {
+    clip-path: inset(0 0 0 0);
+    opacity: 1;
+  }
+}
+
+.is-popping {
+  animation: ui-icon-pop var(--motion-normal) var(--motion-ease-emphasized);
+}
+
+.is-popping i,
+.is-popping app-ui-avatar {
+  animation: ui-icon-redraw var(--motion-normal) var(--motion-ease-standard);
+}
+
+// ---- Reduced motion (§12) ------------------------------------
+// Honor the OS setting: collapse every animation/transition to an
+// instant state change, stop loops (shimmer/spin run once at 1ms ≈
+// static), and neutralize transform-based entrances so nothing
+// starts hidden or offset. Value swaps become direct swaps.
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 1ms !important;
+  }
+
+  .motion-fade-up,
+  .motion-rise,
+  .motion-scale-in,
+  .motion-slide-in-left,
+  .motion-stagger > *,
+  .motion-grow-bar,
+  .value-updating {
+    transform: none !important;
+  }
+}
+
+/* ---------- login screen: exact motion ported 1:1 from the approved design ----------
+   Global so the rich login motion stays out of the component's style budget; reduced motion is
+   handled by the global block above. Values mirror the source design's vc-* keyframes exactly. */
+@keyframes login-wash {
+  from {
+    opacity: 0;
+    transform: scale(1.05);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes login-fade {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes login-rise {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes login-rise-sm {
+  from {
+    opacity: 0;
+    transform: translateY(9px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes login-slide-right {
+  from {
+    opacity: 0;
+    transform: translateX(46px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes login-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+
+  62% {
+    opacity: 1;
+    transform: scale(1.07);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes login-ring {
+  0% {
+    transform: scale(0.6);
+    opacity: 0;
+  }
+
+  14% {
+    opacity: 0.55;
+  }
+
+  100% {
+    transform: scale(2.5);
+    opacity: 0;
+  }
+}
+
+@keyframes login-caret {
+  50% {
+    opacity: 0;
+  }
+}
+
+@keyframes login-d1 {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+
+  50% {
+    transform: translate3d(36px, -26px, 0) scale(1.1);
+  }
+
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes login-d2 {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+
+  50% {
+    transform: translate3d(-30px, 22px, 0) scale(1.08);
+  }
+
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes login-d3 {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+
+  33% {
+    transform: translate3d(22px, 16px, 0);
+  }
+
+  66% {
+    transform: translate3d(-16px, -20px, 0);
+  }
+
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes login-d4 {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+
+  50% {
+    transform: translate3d(-40px, -18px, 0) scale(1.12);
+  }
+
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes login-d5 {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+
+  50% {
+    transform: translate3d(28px, 30px, 0) scale(1.06);
+  }
+
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes login-chart-scroll {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes login-sheen {
+  from {
+    transform: translateX(-130%);
+  }
+
+  to {
+    transform: translateX(130%);
+  }
+}
+
+@keyframes login-shell-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes login-ping {
+  0% {
+    box-shadow: 0 0 0 0 rgb(255 255 255 / 50%);
+  }
+
+  70% {
+    box-shadow: 0 0 0 13px rgb(255 255 255 / 0%);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 rgb(255 255 255 / 0%);
+  }
+}
+
+@keyframes login-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* demo-card click ripple (design's vc-ripple) */
+@keyframes login-ripple {
+  0% {
+    opacity: 0;
+    transform: scale(0.55);
+  }
+
+  28% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(1.05);
+  }
+}
+
+/* ---------- reset-password flow: step transitions + micro-motion ----------
+   Global so the wizard motion stays out of the component style budget; the reduced-motion block
+   above (universal selector) collapses all of these. Transform-only on the step slides so content
+   is never opacity-hidden mid-transition. */
+@keyframes reset-step-in-right {
+  from {
+    transform: translateX(26px);
+  }
+
+  to {
+    transform: none;
+  }
+}
+
+@keyframes reset-step-in-left {
+  from {
+    transform: translateX(-26px);
+  }
+
+  to {
+    transform: none;
+  }
+}
+
+/* gentle glow loop around the CURRENT step dot */
+@keyframes reset-step-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgb(30 102 245 / 0%);
+  }
+
+  50% {
+    box-shadow: 0 0 0 5px rgb(30 102 245 / 22%);
+  }
+}
+
+/* completion flash on the OTP row once all 6 digits are present */
+@keyframes reset-otp-done {
+  0% {
+    box-shadow: 0 0 0 0 rgb(30 102 245 / 28%);
+  }
+
+  100% {
+    box-shadow: 0 0 0 10px rgb(30 102 245 / 0%);
+  }
+}
+
+/* success tick draws itself in (paired with stroke-dasharray on the path) */
+@keyframes reset-check-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* field error shake */
+@keyframes reset-shake {
+  10%,
+  90% {
+    transform: translateX(-1px);
+  }
+
+  20%,
+  80% {
+    transform: translateX(2px);
+  }
+
+  30%,
+  50%,
+  70% {
+    transform: translateX(-4px);
+  }
+
+  40%,
+  60% {
+    transform: translateX(4px);
+  }
+}
+
+/* success badge halo — primary-tinted (the generic login-ping is white, which vanishes on the
+   reset screen's light surface); radiates from the 60px disc out to 20px. */
+@keyframes reset-success-ping {
+  0% {
+    box-shadow: 0 0 0 0 rgb(30 102 245 / 32%);
+  }
+
+  70% {
+    box-shadow: 0 0 0 20px rgb(30 102 245 / 0%);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 rgb(30 102 245 / 0%);
+  }
+}

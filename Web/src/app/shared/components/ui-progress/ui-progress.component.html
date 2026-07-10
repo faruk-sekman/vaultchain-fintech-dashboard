@@ -1,0 +1,24 @@
+<div class="ui-progress ui-progress--{{ color() }} {{ class() }}" [attr.id]="id() || null">
+  @if (label() || (showValue() && !indeterminate())) {
+    <div class="ui-progress__head">
+      @if (label()) {
+        <span class="ui-progress__label">{{ label() }}</span>
+      }
+      @if (showValue() && !indeterminate()) {
+        <span class="ui-progress__value">{{ clampedValue }}%</span>
+      }
+    </div>
+  }
+
+  <div
+    class="ui-progress__track"
+    [class.ui-progress__track--indeterminate]="indeterminate()"
+    role="progressbar"
+    [attr.aria-label]="ariaLabel() || label() || null"
+    [attr.aria-valuemin]="indeterminate() ? null : 0"
+    [attr.aria-valuemax]="indeterminate() ? null : 100"
+    [attr.aria-valuenow]="indeterminate() ? null : clampedValue"
+  >
+    <div class="ui-progress__fill" [ngStyle]="fillStyle"></div>
+  </div>
+</div>

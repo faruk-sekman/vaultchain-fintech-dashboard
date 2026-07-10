@@ -1,0 +1,38 @@
+<!--
+###### UI Badge Component ######
+Usage:
+<app-ui-badge
+  [id]="optional-id"
+  [text]="optional-text"
+  [badgeClass]="optional-badge-classes"
+  [icon]="optional-icon-class"
+  [iconPosition]="'left' | 'right'"
+  [iconClass]="optional-icon-classes"
+  [dot]="true | false"
+  [dotClass]="optional-dot-classes"
+></app-ui-badge>
+
+<app-ui-badge text="Badge" color="gray"></app-ui-badge>
+<app-ui-badge text="Alert" color="red" icon="ri-error-warning-line"></app-ui-badge>
+<app-ui-badge text="Active" color="green" dot></app-ui-badge>
+<app-ui-badge text="Done" color="blue" icon="ri-check-line" iconPosition="right"></app-ui-badge>
+
+#################################
+-->
+
+<span [class]="badgeClassString" [ngClass]="badgeClass()" [attr.id]="id() || null">
+  @if (dot()) {
+    <span [class]="dotClassString" [ngClass]="dotClass()" aria-hidden="true"></span>
+  }
+  @if (icon() && iconPosition() === 'left') {
+    <i [class]="iconClassString" [ngClass]="iconClass()" aria-hidden="true"></i>
+  }
+  @if (hasText) {
+    <span class="ui-badge__text">{{ text() }}</span>
+  } @else {
+    <ng-content></ng-content>
+  }
+  @if (icon() && iconPosition() === 'right') {
+    <i [class]="iconClassString" [ngClass]="iconClass()" aria-hidden="true"></i>
+  }
+</span>

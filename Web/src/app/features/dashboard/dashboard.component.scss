@@ -1,0 +1,451 @@
+:host {
+  display: block;
+}
+
+/*
+ * v2.1 §5 dashboard rows: 12-col / 30px-gutter grid on the 1110 canvas —
+ * row splits A = 730/350 (spans 8/4) and B = 445/635 (spans 5/7); section titles live
+ * OUTSIDE the cards (`.v2-section`, G1); cards in a row share the same height (G4
+ * ≈235/322/276 — contract geometry, raw px allowed). Tablet reflows 2-col, mobile 1-col.
+ */
+.dashboard {
+  --dash-gutter: 16px;
+
+  display: grid;
+  gap: var(--dash-gutter);
+
+  &__row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--dash-gutter);
+    align-items: stretch;
+  }
+
+  // Row 0 — KPI pills (G2): 1-col mobile → 2×2 → 4 across on desktop.
+  &__kpis {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--dash-gutter);
+  }
+
+  @media (width >= 640px) {
+    &__kpis {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  // Tablet reflow (§3.3): rows go 2-col; row 1 stacks full width (a half-width
+  // hero pair would crush the gradient cards below their ≈350px design width).
+  @media (width >= 768px) {
+    --dash-gutter: 25px;
+
+    &__row {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    &__row--r1 > * {
+      grid-column: span 2 / span 2;
+    }
+  }
+
+  // Desktop canvas (§3.3): 12-col grid, 30px gutters (8/4 = 730/350 · 5/7 = 445/635 on 1110).
+  @media (width >= 1280px) {
+    --dash-gutter: 30px;
+
+    row-gap: 22px; // tighter vertical rhythm between rows (columns keep the 30px gutter)
+
+    // Three distinct secondary KPIs (total moved to the Row-1 hero) → an even 3-up strip.
+    &__kpis {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    &__row,
+    &__row--r1 {
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+    }
+
+    &__row > .dashboard__col-8,
+    &__row--r1 > .dashboard__col-8 {
+      grid-column: span 8 / span 8;
+    }
+
+    &__row > .dashboard__col-4,
+    &__row--r1 > .dashboard__col-4 {
+      grid-column: span 4 / span 4;
+    }
+
+    &__row > .dashboard__col-5 {
+      grid-column: span 5 / span 5;
+    }
+
+    &__row > .dashboard__col-7 {
+      grid-column: span 7 / span 7;
+    }
+
+    // Full-bleed section (the Row-2 KYC distribution bar spans the whole 12-col grid).
+    &__row > .dashboard__col-12 {
+      grid-column: 1 / -1;
+    }
+
+    // G4 reference heights — same-height cards per row (contract geometry).
+    &__row--r1 .dashboard__card,
+    &__row--r1 .dashboard__hero-pair {
+      min-height: 235px;
+    }
+
+    &__row--r2 .dashboard__card {
+      min-height: 300px;
+    }
+
+    &__row--r3 .dashboard__card {
+      min-height: 220px;
+    }
+  }
+
+  // G1/G4 plumbing: the section's card stretches to fill the remaining row height.
+  .v2-section {
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+
+  &__card {
+    display: grid; // host wraps a single .ui-card child → it stretches both axes
+    min-width: 0;
+    height: 100%;
+    border-radius: var(--radius-card); // give the lifted host a matching round footprint
+    transition:
+      transform var(--motion-normal) var(--motion-ease-emphasized),
+      box-shadow var(--motion-normal) var(--motion-ease-emphasized);
+  }
+
+  // Calm, consistent hover lift on the overview's white cards (list · charts ·
+  // quick-actions · trend). The host rises ≈2px; redefining --shadow-card lets the
+  // inner app-ui-card deepen its own shadow through the cascade (no encapsulation
+  // piercing). Hero cards lift via .dashboard__hero below. No bounce (motion §6).
+  &__card:hover {
+    --shadow-card: var(--shadow-card-hover);
+
+    transform: translateY(-2px);
+  }
+
+  // Charts fill their card (G5): the bar plot stretches with the host height.
+  &__card--chart app-ui-chart-bar {
+    display: grid;
+    min-width: 0;
+    height: 100%;
+  }
+
+  // ── Row 1 hero pair (G6): two ≈350px cards inside the 730 column ─────────
+  &__hero-pair {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--dash-gutter);
+
+    @media (width >= 640px) {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  &__hero {
+    display: grid; // stretch the inner .hero-card to the shared row height
+    min-width: 0;
+    border-radius: var(--radius-card);
+    transition:
+      transform var(--motion-normal) var(--motion-ease-emphasized),
+      box-shadow var(--motion-normal) var(--motion-ease-emphasized);
+  }
+
+  // Hero pair gets the same subtle lift (the gradient + outline hero both read
+  // --shadow-card, so the override deepens each on hover). Matches the row.
+  &__hero:hover {
+    --shadow-card: var(--shadow-card-hover);
+
+    transform: translateY(-2px);
+  }
+
+  // ── Honest freshness stamp (the shell header owns the H1) ────────────────
+  &__as-of {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-3);
+    justify-self: end;
+    font-size: var(--text-caption);
+    color: var(--color-text-muted);
+
+    i {
+      font-size: var(--text-body);
+    }
+  }
+
+  // ── "Recent Customers" list rows (G3: 50px tile · two-line text · badge) ───
+  .recent-list {
+    display: grid;
+    gap: 14px; // G3 row gap (contract geometry)
+    align-content: start;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+
+    // Calm row reveal cadence when the list carries `.motion-stagger--rise`
+    // (template hook): a small fade+rise per row, ~50ms apart, capped by the
+    // utility at 8 rows. Reduced motion is neutralised globally + below.
+    &.motion-stagger {
+      --stagger-step: 50ms;
+    }
+  }
+
+  .recent-row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-6);
+    min-width: 0;
+    min-height: 55px; // G3 row height (contract geometry)
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-md);
+    transition: background-color var(--motion-fast) var(--motion-ease-standard);
+
+    &:hover {
+      background: var(--color-surface-2);
+    }
+
+    &__tile {
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+      width: 50px;
+      height: 50px;
+      border-radius: var(--radius-tile);
+      background: var(--gradient-brand);
+      color: var(--color-on-brand);
+      font-size: var(--font-size-xl);
+      box-shadow: 0 6px 16px color-mix(in srgb, var(--brand-500) 30%, transparent);
+    }
+
+    &__main {
+      display: grid;
+      gap: var(--space-1);
+      flex: 1;
+      min-width: 0;
+    }
+
+    &__name,
+    &__email {
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    &__name {
+      font-size: var(--text-body);
+      font-weight: var(--font-weight-medium);
+      color: var(--color-text-strong);
+    }
+
+    &__email {
+      font-size: var(--text-body-sm);
+      color: var(--color-text-muted);
+    }
+
+    &__meta {
+      display: grid;
+      gap: var(--space-3);
+      justify-items: end;
+      flex-shrink: 0;
+    }
+
+    &__date {
+      font-size: var(--text-caption);
+      color: var(--color-text-muted);
+      white-space: nowrap;
+    }
+  }
+
+  // ── "Quick Actions" action rows (icon tile + label + chevron; REAL routes) ──
+  &__actions {
+    display: grid;
+    gap: var(--space-4);
+    align-content: center;
+  }
+
+  .action-row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    width: 100%;
+    height: 44px;
+    min-height: 44px;
+    padding: 0 var(--space-5);
+    border: 0;
+    border-radius: var(--radius-field);
+    background: transparent;
+    color: var(--color-text-strong);
+    text-align: start;
+    cursor: pointer;
+    transition:
+      background-color var(--motion-duration-fast) var(--motion-ease-standard),
+      transform var(--motion-duration-fast) var(--motion-ease-standard);
+
+    &:hover {
+      background: var(--color-surface-2);
+      transform: translateY(-1px);
+    }
+
+    &:focus-visible {
+      outline: none;
+      box-shadow: var(--shadow-focus);
+    }
+
+    &__tile {
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+      width: 34px;
+      height: 34px;
+      border-radius: var(--radius-md);
+      font-size: 1rem;
+      transition: transform var(--motion-duration-fast) var(--motion-ease-standard);
+
+      &--blue {
+        background: var(--tile-blue);
+        color: var(--color-link);
+      }
+
+      &--teal {
+        background: var(--tile-teal);
+        color: var(--color-accent-teal);
+      }
+
+      &--pink {
+        background: var(--tile-pink);
+        color: var(--badge-pink-text);
+      }
+    }
+
+    &__label {
+      flex: 1;
+      min-width: 0;
+      font-size: var(--text-body);
+      font-weight: var(--font-weight-medium);
+    }
+
+    &__chevron {
+      flex-shrink: 0;
+      font-size: 1rem;
+      color: var(--color-text-muted);
+      transition: transform var(--motion-duration-fast) var(--motion-ease-standard);
+    }
+
+    &:hover &__tile {
+      transform: translateY(-1px) scale(1.04);
+    }
+
+    &:hover &__chevron {
+      transform: translateX(2px);
+    }
+  }
+
+  // ── Trend card: compact honest-empty fills the card, note pinned below ───
+  &__trend {
+    display: grid;
+    grid-template-rows: minmax(0, 1fr) auto;
+    height: 100%;
+  }
+
+  &__note {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin-top: var(--space-6);
+    padding: var(--space-5) var(--space-6);
+    border-radius: var(--radius-md);
+    background: var(--color-surface-2);
+    font-size: var(--text-caption);
+    color: var(--color-text-muted);
+
+    i {
+      flex-shrink: 0;
+      font-size: var(--text-body);
+      color: var(--color-text-subtle);
+    }
+  }
+
+  // ── Per-region error + retry (region-scoped, unchanged behaviour) ────────
+  &__region-error {
+    display: grid;
+    place-items: center;
+    gap: var(--space-5);
+    padding: var(--space-11) var(--space-8);
+    text-align: center;
+  }
+
+  &__region-error-icon {
+    font-size: var(--text-display);
+    color: var(--color-danger);
+  }
+
+  &__region-error-text {
+    font-size: var(--text-body-sm);
+    color: var(--color-text-subtle);
+  }
+
+  &__retry {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-4);
+    height: 44px;
+    min-width: 44px;
+    padding-inline: var(--space-9);
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius-field);
+    background: var(--color-surface);
+    color: var(--color-text);
+    font-size: var(--text-body-sm);
+    font-weight: var(--font-weight-semibold);
+    cursor: pointer;
+    transition:
+      background-color var(--motion-duration-fast) var(--motion-ease-standard),
+      border-color var(--motion-duration-fast) var(--motion-ease-standard),
+      box-shadow var(--motion-duration-fast) var(--motion-ease-standard),
+      transform var(--motion-duration-fast) var(--motion-ease-standard);
+
+    i {
+      width: 1rem;
+      height: 1rem;
+      font-size: 1rem;
+      line-height: 1;
+      transition: transform var(--motion-duration-fast) var(--motion-ease-standard);
+    }
+
+    &:hover {
+      background: var(--color-surface-2);
+      border-color: var(--color-primary);
+      transform: translateY(-1px);
+    }
+
+    &:hover i {
+      transform: rotate(90deg) scale(1.08);
+    }
+
+    &:focus-visible {
+      outline: none;
+      box-shadow: var(--shadow-focus);
+    }
+  }
+}
+
+// Reduced motion (motion-system §12): drop the hover-lift transforms on the
+// overview cards/hero and the row/list stagger. Shadow deepening on hover stays
+// (it is an instant, non-transform cue), and all content remains fully visible.
+@media (prefers-reduced-motion: reduce) {
+  .dashboard {
+    &__card,
+    &__hero {
+      transition: none;
+    }
+
+    &__card:hover,
+    &__hero:hover {
+      transform: none;
+    }
+  }
+}

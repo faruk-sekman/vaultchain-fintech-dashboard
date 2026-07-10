@@ -1,0 +1,148 @@
+/*
+ * Copyright (c) 2026 Fintech Dashboard contributors.
+ * Security panel: the MFA card with its inline re-auth form and one-time backup-code
+ * grid, plus the trusted-devices list.
+ */
+@use '../settings-panel.shared' as *;
+
+/* The panel host is transparent: the section participates directly in the shell's panel area. */
+:host {
+  display: contents;
+}
+
+/* --- Security: MFA card ------------------------------------------ */
+.settings-actions--split {
+  justify-content: space-between;
+}
+
+.settings-mfa-reauth {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  margin-top: var(--space-4);
+}
+
+.settings-backup-codes {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-2);
+  padding: var(--space-4);
+  margin: var(--space-3) 0;
+  list-style: none;
+  background: var(--color-surface-2, var(--color-surface));
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+}
+
+.settings-backup-code {
+  padding: var(--space-2);
+  font-family: var(--font-mono, monospace);
+  font-size: 0.95rem;
+  color: var(--color-text);
+  text-align: center;
+  letter-spacing: 0.04em;
+  background: var(--color-surface);
+  border-radius: var(--radius-field);
+}
+
+/* --- Security: Trusted devices ---------------- */
+.settings-devices {
+  margin-top: var(--space-6);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--color-border);
+
+  &__head {
+    margin-bottom: var(--space-4);
+  }
+
+  &__title {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--color-text-strong, var(--color-text));
+  }
+
+  &__sub {
+    margin: var(--space-1) 0 0;
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+  }
+
+  &__loading {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  &__empty {
+    display: flex;
+    gap: var(--space-2);
+    align-items: center;
+    padding: var(--space-4);
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+    background: var(--color-surface-2, var(--color-surface));
+    border: 1px dashed var(--color-border);
+    border-radius: var(--radius-card);
+  }
+
+  &__list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    padding: 0;
+    margin: 0;
+    list-style: none;
+  }
+}
+
+.settings-device {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-surface-2, var(--color-surface));
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+
+  &__icon {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    font-size: 1.1rem;
+    color: var(--color-text-muted);
+    background: var(--color-surface);
+    border-radius: var(--radius-field);
+  }
+
+  &__text {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  &__network {
+    display: flex;
+    gap: var(--space-1);
+    align-items: center;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--color-text);
+  }
+
+  &__meta {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+  }
+}
+
+@media (width <= 560px) {
+  .settings-device {
+    flex-wrap: wrap;
+  }
+}

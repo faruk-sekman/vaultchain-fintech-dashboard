@@ -1,0 +1,80 @@
+<section
+  class="settings-panel motion-stagger"
+  role="tabpanel"
+  data-testid="settings-panel-notifications"
+  [attr.id]="panelId"
+  [attr.aria-labelledby]="labelledBy"
+>
+  <header class="settings-panel__head">
+    <span class="settings-medallion settings-medallion--blue" aria-hidden="true">
+      <i class="ri-notification-3-line"></i>
+    </span>
+    <div class="settings-panel__heading">
+      <h2 class="settings-panel__title">{{ 'settings.notifications.title' | translate }}</h2>
+      <p class="settings-panel__sub">{{ 'settings.notifications.subtitle' | translate }}</p>
+    </div>
+  </header>
+
+  <div class="settings-rows">
+    <div class="settings-row">
+      <div class="settings-row__text">
+        <span class="settings-row__label" id="set-notif-product-label">
+          {{ 'settings.notifications.productUpdates' | translate }}
+        </span>
+        <span class="settings-row__hint">
+          {{ 'settings.notifications.productUpdatesHint' | translate }}
+        </span>
+      </div>
+      <app-ui-switch
+        id="set-notif-product"
+        [control]="notificationsForm.controls.productUpdates"
+        [ariaLabel]="'settings.notifications.productUpdates' | translate"
+      ></app-ui-switch>
+    </div>
+
+    <div class="settings-row">
+      <div class="settings-row__text">
+        <span class="settings-row__label" id="set-notif-security-label">
+          {{ 'settings.notifications.securityAlerts' | translate }}
+        </span>
+        <span class="settings-row__hint">
+          {{ 'settings.notifications.securityAlertsHint' | translate }}
+        </span>
+      </div>
+      <app-ui-switch
+        id="set-notif-security"
+        [control]="notificationsForm.controls.securityAlerts"
+        [ariaLabel]="'settings.notifications.securityAlerts' | translate"
+      ></app-ui-switch>
+    </div>
+
+    <div class="settings-row">
+      <div class="settings-row__text">
+        <span class="settings-row__label" id="set-notif-digest-label">
+          {{ 'settings.notifications.weeklyDigest' | translate }}
+        </span>
+        <span class="settings-row__hint">
+          {{ 'settings.notifications.weeklyDigestHint' | translate }}
+        </span>
+      </div>
+      <app-ui-switch
+        id="set-notif-digest"
+        data-testid="settings-notifications-digest"
+        [control]="notificationsForm.controls.weeklyDigest"
+        [ariaLabel]="'settings.notifications.weeklyDigest' | translate"
+      ></app-ui-switch>
+    </div>
+  </div>
+
+  <p class="settings-local-note">
+    <i class="ri-cloud-line" aria-hidden="true"></i>
+    {{ 'settings.serverBacked' | translate }}
+  </p>
+
+  <div class="settings-actions">
+    <app-ui-button variant="ghost" type="button" (click)="viewAllNotifications.emit()">
+      <i class="ri-notification-3-line ui-button__icon" aria-hidden="true"></i>
+      {{ 'settings.notifications.viewAll' | translate }}
+    </app-ui-button>
+  </div>
+</section>

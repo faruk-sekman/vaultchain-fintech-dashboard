@@ -1,0 +1,140 @@
+.ui-drawer__scrim {
+  @apply fixed inset-0 flex justify-end;
+
+  z-index: var(--z-drawer);
+  background: var(--color-overlay);
+  backdrop-filter: blur(var(--blur-backdrop));
+
+  // §10: backdrop fades over --motion-normal (180ms), as the modal scrim.
+  animation: ui-backdrop-in var(--motion-normal) var(--motion-ease-enter) both;
+
+  &--start {
+    justify-content: flex-start;
+  }
+}
+
+.ui-drawer__panel {
+  @apply flex h-full max-h-dvh w-full flex-col outline-none;
+
+  // v2 §4: card radius on the floating edge (the attached edge stays square).
+  border-start-start-radius: var(--radius-card);
+  border-end-start-radius: var(--radius-card);
+  border-inline-start: 1px solid var(--color-border);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-xl);
+
+  // §10: slides from the edge over --motion-slow (240ms), transform only.
+  animation: ui-drawer-in-end var(--motion-slow) var(--motion-ease-enter) both;
+
+  &--start {
+    border-start-start-radius: 0;
+    border-end-start-radius: 0;
+    border-start-end-radius: var(--radius-card);
+    border-end-end-radius: var(--radius-card);
+    border-inline-start: none;
+    border-inline-end: 1px solid var(--color-border);
+    animation-name: ui-drawer-in-start;
+  }
+
+  &--sm {
+    @apply max-w-sm;
+  }
+
+  &--md {
+    @apply max-w-md;
+  }
+
+  &--lg {
+    @apply max-w-2xl;
+  }
+}
+
+.ui-drawer__header {
+  @apply flex items-start gap-3 border-b px-5 pt-5 pb-4;
+
+  border-bottom-color: var(--color-border);
+}
+
+.ui-drawer__title {
+  @apply m-0 min-w-0 flex-1;
+
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-tight);
+  color: var(--color-text);
+}
+
+.ui-drawer__close {
+  @apply ml-auto inline-grid flex-none cursor-pointer place-items-center border p-0 text-lg;
+
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-field);
+  border-color: var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text);
+  transition:
+    background-color var(--motion-duration-fast) var(--motion-ease-standard),
+    border-color var(--motion-duration-fast) var(--motion-ease-standard),
+    color var(--motion-duration-fast) var(--motion-ease-standard),
+    transform var(--motion-duration-fast) var(--motion-ease-standard);
+
+  &:hover {
+    background: var(--color-surface-2);
+    border-color: var(--color-border-strong);
+    color: var(--color-text);
+    transform: translateY(-1px);
+  }
+
+  &:focus-visible {
+    @apply outline-none;
+
+    box-shadow: var(--shadow-focus);
+  }
+}
+
+.ui-drawer__body {
+  @apply min-h-0 flex-1 overflow-y-auto p-5 text-sm;
+
+  overscroll-behavior: contain;
+  color: var(--color-text-subtle);
+  line-height: var(--line-height-base);
+}
+
+.ui-drawer__footer {
+  @apply flex flex-wrap justify-end gap-2 border-t px-5 pt-4 pb-5;
+
+  border-top-color: var(--color-border);
+
+  &:empty {
+    display: none;
+  }
+}
+
+// §10: transform-only slide (the scrim owns the fade; width never animates).
+@keyframes ui-drawer-in-end {
+  from {
+    transform: translateX(100%);
+  }
+
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes ui-drawer-in-start {
+  from {
+    transform: translateX(-100%);
+  }
+
+  to {
+    transform: translateX(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ui-drawer__scrim,
+  .ui-drawer__panel {
+    animation: none;
+  }
+}

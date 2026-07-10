@@ -1,0 +1,77 @@
+<a
+  class="ui-logo"
+  [class.ui-logo--compact]="!showWordmark()"
+  routerLink="/dashboard"
+  [attr.aria-label]="('app.brand' | translate) + ' — ' + ('nav.home' | translate)"
+>
+  <!--
+    The brand logo, used directly from assets/img/Vaultchain_Logo.svg (inlined so it can pick up
+    the Space Grotesk font, adapt the wordmark colour for dark theme, and animate via its own
+    vc-* classes). Geometry/colours are 1:1 with the source file. Collapsed rail (showWordmark
+    false) crops the viewBox to the mark and drops the text.
+  -->
+  <svg
+    class="ui-logo__svg"
+    [attr.viewBox]="showWordmark() ? '0 16 300 60' : '16 20 60 56'"
+    aria-hidden="true"
+    focusable="false"
+  >
+    <g class="ui-logo__mark" transform="translate(14,16)">
+      <line
+        class="vc-draw vc-l1"
+        x1="15"
+        y1="45"
+        x2="32"
+        y2="32"
+        stroke="#1E66F5"
+        stroke-width="4"
+        stroke-linecap="round"
+        pathLength="1"
+      ></line>
+      <line
+        class="vc-draw vc-l2"
+        x1="32"
+        y1="32"
+        x2="49"
+        y2="19"
+        stroke="#1E66F5"
+        stroke-width="4"
+        stroke-linecap="round"
+        pathLength="1"
+      ></line>
+      <rect class="vc-pop vc-b1" x="6" y="38" width="18" height="18" rx="4.5" fill="#1E66F5"></rect>
+      <rect
+        class="vc-pop vc-b2"
+        x="23"
+        y="23"
+        width="18"
+        height="18"
+        rx="4.5"
+        fill="#1E66F5"
+        opacity=".74"
+      ></rect>
+      <rect
+        class="vc-pop vc-b3"
+        x="40"
+        y="8"
+        width="18"
+        height="18"
+        rx="4.5"
+        fill="#1E66F5"
+        opacity=".5"
+      ></rect>
+    </g>
+    @if (showWordmark()) {
+      <!--
+        Wordmark + tagline reveal word-by-word (see .scss): "Vaultchain", then "FINTECH", then
+        "OPERATIONS". The tagline is split into two <tspan>s so each word animates on its own; the
+        second carries dx (a fixed word gap) so the words never collide regardless of font load.
+      -->
+      <text class="vc-name vc-word" x="85" y="50" fill="#0B1F3A">Vaultchain</text>
+      <text class="vc-tag" x="86" y="70" fill="#1E66F5">
+        <tspan class="vc-word vc-tag-w1">FINTECH</tspan>
+        <tspan class="vc-word vc-tag-w2" dx="7">OPERATIONS</tspan>
+      </text>
+    }
+  </svg>
+</a>

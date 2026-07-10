@@ -1,0 +1,39 @@
+<!--
+  UI Segmented control — §5.18
+  <app-ui-segmented [items]="ranges" [value]="range" (valueChange)="range = $event" ariaLabel="Range" />
+  items: { value, labelKey?, label?, icon?, ariaLabel?, disabled? }[]
+-->
+<div
+  class="ui-segmented"
+  [class.ui-segmented--sm]="size() === 'sm'"
+  [class.ui-segmented--md]="size() === 'md'"
+  [class.ui-segmented--brand]="variant() === 'brand'"
+  role="radiogroup"
+  [attr.id]="id() || null"
+  [attr.aria-label]="ariaLabel() || null"
+>
+  @for (item of items(); track trackByValue($index, item)) {
+    <button
+      type="button"
+      class="ui-segmented__item"
+      role="radio"
+      [class.ui-segmented__item--active]="isSelected(item)"
+      [attr.id]="segmentId(item.value)"
+      [attr.aria-checked]="isSelected(item)"
+      [attr.aria-label]="accessibleName(item)"
+      [attr.tabindex]="tabIndexFor(item)"
+      [disabled]="item.disabled || null"
+      (click)="select(item)"
+      (keydown)="onKeydown($event, item)"
+    >
+      @if (item.icon) {
+        <i class="ui-segmented__icon {{ item.icon }}" aria-hidden="true"></i>
+      }
+      @if (item.labelKey) {
+        <span class="ui-segmented__label">{{ item.labelKey | translate }}</span>
+      } @else if (item.label) {
+        <span class="ui-segmented__label">{{ item.label }}</span>
+      }
+    </button>
+  }
+</div>

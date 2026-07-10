@@ -1,0 +1,14 @@
+# Trivy allowlist (F5 / CWE-1104).
+#
+# CI enforces HIGH/CRITICAL findings: .github/workflows/ci.yml `security` job runs Trivy with
+# `exit-code: '1'` + `ignore-unfixed: true`, and `ci-gate` needs it — so a fixable HIGH/CRITICAL blocks
+# the merge gate. This file is the ONLY sanctioned escape valve.
+#
+# To accept a finding: add one CVE id per line below, with a justification comment and a review date.
+# Only ignore after a deliberate risk decision (no safe fix, not reachable, compensating control, …).
+# Do NOT silence the gate wholesale by relaxing exit-code back to '0'.
+#
+# Format:
+#   CVE-2025-12345   # why it is accepted — owner — review-by YYYY-MM-DD
+#
+# --- Accepted exceptions (none yet) ---

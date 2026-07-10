@@ -1,0 +1,46 @@
+<!--
+###### UI Pagination ######
+v2 §4: Previous/Next render as --color-link text links with chevrons; pages are
+44×44 buttons — current = solid --color-primary (white text, 10px radius),
+others --color-link with a soft tile hover. Public API unchanged.
+#################################
+-->
+
+<!-- Standard threshold: the pager only appears when there is more than one page
+     (Transactions pageSize 10 ⇒ shows >10 rows; KYC/Risk pageSize 5 ⇒ shows >5 rows). -->
+@if (totalPages > 1) {
+  <div class="ui-pagination">
+    <button type="button" class="ui-pagination__nav" (click)="prev()" [disabled]="page() <= 1">
+      <i class="ri-arrow-left-s-line ui-pagination__nav-icon--prev" aria-hidden="true"></i>
+      {{ 'common.prev' | translate }}
+    </button>
+
+    <div class="ui-pagination__pages">
+      @for (p of pages; track p; let i = $index) {
+        @if (i > 0 && p - pages[i - 1] > 1) {
+          <span class="ui-pagination__ellipsis" aria-hidden="true">...</span>
+        }
+        <button
+          type="button"
+          class="ui-pagination__page"
+          [class.ui-pagination__page--current]="page() === p"
+          [attr.aria-current]="page() === p ? 'page' : null"
+          [attr.aria-label]="('common.page' | translate) + ' ' + p"
+          (click)="goTo(p)"
+        >
+          {{ p }}
+        </button>
+      }
+    </div>
+
+    <button
+      type="button"
+      class="ui-pagination__nav"
+      (click)="next()"
+      [disabled]="page() >= totalPages"
+    >
+      {{ 'common.next' | translate }}
+      <i class="ri-arrow-right-s-line ui-pagination__nav-icon--next" aria-hidden="true"></i>
+    </button>
+  </div>
+}

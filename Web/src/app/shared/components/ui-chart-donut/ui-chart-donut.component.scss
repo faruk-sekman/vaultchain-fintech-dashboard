@@ -1,0 +1,258 @@
+:host {
+  display: block;
+}
+
+.chart-donut {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-7);
+
+  // ── Donut plot (SVG + centred total) ──────────────────────────────────────
+  &__plot {
+    position: relative;
+    display: inline-flex;
+  }
+
+  // Rotate so segments begin at 12 o'clock instead of 3 o'clock.
+  // §7: the ring reveals as ONE conic sweep (the `&__sweep` mask draws on
+  // clockwise); the SVG itself just fades up gently underneath. Updates
+  // leave the mask fully drawn and only transition the arc angles.
+  &__svg {
+    display: block;
+    transform: rotate(-90deg);
+    animation: ui-backdrop-in var(--motion-fast) var(--motion-ease-enter) both;
+  }
+
+  // §7 conic-sweep mask ring — white (alpha) stroke normalized to pathLength=1,
+  // drawing on clockwise over ~360ms to unveil the coloured segments as one
+  // sweep. Rests fully drawn (offset 0) so data updates show the whole ring.
+  &__sweep {
+    fill: none;
+    stroke: #fff;
+    stroke-dasharray: 1;
+    stroke-dashoffset: 0;
+    animation: ui-chart-draw var(--donut-sweep-duration, 360ms) var(--motion-ease-emphasized) both;
+  }
+
+  &__track {
+    fill: none;
+    stroke: var(--color-surface-2);
+
+    // The full ring sits behind the dashed segments — keep it out of hover so the
+    // inter-segment gaps don't steal pointer events from the slices.
+    pointer-events: none;
+  }
+
+  // v2 §4: butt caps keep the slight slice separation crisp.
+  // §7: data updates transition the arc angles over --motion-slow (240ms).
+  &__segment {
+    fill: none;
+    stroke-linecap: round;
+    transition:
+      stroke-dashoffset var(--motion-slow) var(--motion-ease-standard),
+      stroke-dasharray var(--motion-slow) var(--motion-ease-standard),
+      filter var(--motion-fast) var(--motion-ease-standard);
+  }
+
+  // Hovered slice deepens a touch (matches the line/area + bar hover).
+  &__segment--active {
+    filter: brightness(0.9);
+  }
+
+  // v2 §4: inline % labels — white 16/600 on the coloured slices.
+  // §7: labels fade in AFTER the sweep finishes drawing the ring.
+  &__slice-label {
+    fill: var(--color-on-primary);
+    font-weight: var(--font-weight-semibold);
+    pointer-events: none;
+    animation: ui-backdrop-in var(--motion-fast) var(--motion-ease-enter) both;
+    animation-delay: var(--donut-sweep-duration, 360ms);
+  }
+
+  &__center {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    pointer-events: none;
+  }
+
+  &__total {
+    font-size: var(--text-metric);
+    line-height: var(--text-metric-lh);
+    font-weight: var(--font-weight-bold);
+    letter-spacing: 0;
+    color: var(--color-text);
+    font-feature-settings: var(--font-feature-numeric);
+    font-variant-numeric: tabular-nums;
+  }
+
+  &__caption {
+    margin-top: var(--space-1);
+    font-size: var(--text-caption);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--color-text-muted);
+  }
+
+  // ── Legend (swatch + label + value + %) ───────────────────────────────────
+  &__legend {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  &__legend-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-md);
+    font-size: var(--text-body-sm);
+    transition: background-color var(--motion-fast) var(--motion-ease-standard);
+
+    &:hover {
+      background: var(--color-surface-2);
+    }
+  }
+
+  &__swatch {
+    flex: none;
+    width: 12px;
+    height: 12px;
+    border-radius: var(--radius-pill);
+  }
+
+  &__legend-label {
+    color: var(--color-text-subtle);
+    font-weight: var(--font-weight-medium);
+  }
+
+  &__legend-value {
+    margin-inline-start: auto;
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text-strong);
+    font-variant-numeric: tabular-nums;
+  }
+
+  &__legend-percent {
+    min-width: 4ch;
+    padding: 2px var(--space-3);
+    border-radius: var(--radius-pill);
+    background: var(--color-surface-2);
+    text-align: center;
+    font-size: var(--text-caption);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  // ── Empty state (full muted ring + "No data", §6.8) ───────────────────────
+  &__empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-5);
+    width: 100%;
+  }
+
+  &__empty-ring {
+    display: block;
+
+    circle {
+      fill: none;
+      stroke: var(--color-surface-2);
+    }
+  }
+
+  &__empty-text {
+    font-size: var(--text-body-sm);
+    color: var(--color-text-muted);
+  }
+
+  // ── Loading skeleton (ring + 3 legend lines) ──────────────────────────────
+  &__skeleton {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-7);
+    width: 100%;
+  }
+
+  &__sk-ring {
+    width: 140px;
+    height: 140px;
+    border-radius: var(--radius-pill);
+    background: linear-gradient(90deg, var(--color-skeleton-from), var(--color-skeleton-to) 50%, var(--color-skeleton-from));
+    background-size: 200% 100%;
+    animation: ui-shimmer 1200ms linear infinite;
+  }
+
+  &__sk-legend {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    width: 100%;
+  }
+
+  &__sk-line {
+    height: var(--space-6);
+    border-radius: var(--radius-sm);
+    background: linear-gradient(90deg, var(--color-skeleton-from), var(--color-skeleton-to) 50%, var(--color-skeleton-from));
+    background-size: 200% 100%;
+    animation: ui-shimmer 1200ms linear infinite;
+  }
+
+  // ── Visually-hidden accessible data table ─────────────────────────────────
+  &__sr-table {
+    // display:block so the 1px sr-only clip applies to the <table> (it ignores 1px under
+    // display:table and would otherwise inflate the scroll area). See ui-chart-line for detail.
+    display: block;
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+  }
+}
+
+// §12: NO sweep — the whole ring fades in (180ms) and rests fully revealed;
+// arc updates are direct swaps. The sweep mask is pinned fully drawn so the
+// coloured segments can never stay hidden behind it.
+@media (prefers-reduced-motion: reduce) {
+  .chart-donut__segment {
+    transition: none;
+  }
+
+  .chart-donut__sweep {
+    animation: none;
+    stroke-dashoffset: 0;
+  }
+
+  // Fade-only reveal (§12); the global 1ms collapse makes it effectively instant.
+  .chart-donut__svg {
+    animation: ui-backdrop-in var(--motion-normal) var(--motion-ease-enter) both;
+  }
+
+  .chart-donut__slice-label {
+    animation: none;
+  }
+
+  .chart-donut__sk-ring,
+  .chart-donut__sk-line {
+    animation: none;
+  }
+}

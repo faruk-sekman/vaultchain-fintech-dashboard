@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 372 96" width="372" height="96" role="img" aria-label="Vaultchain — Fintech Operations">
+  
+
+  <g transform="translate(14,16)">
+    <line class="vc-draw vc-l1" x1="15" y1="45" x2="32" y2="32" stroke="#1E66F5" stroke-width="4" stroke-linecap="round" pathLength="1"></line>
+    <line class="vc-draw vc-l2" x1="32" y1="32" x2="49" y2="19" stroke="#1E66F5" stroke-width="4" stroke-linecap="round" pathLength="1"></line>
+    <rect class="vc-pop vc-b1" x="6" y="38" width="18" height="18" rx="4.5" fill="#1E66F5"></rect>
+    <rect class="vc-pop vc-b2" x="23" y="23" width="18" height="18" rx="4.5" fill="#1E66F5" opacity=".74"></rect>
+    <rect class="vc-pop vc-b3" x="40" y="8" width="18" height="18" rx="4.5" fill="#1E66F5" opacity=".5"></rect>
+  </g>
+
+  <text class="vc-name" x="85" y="50" fill="#0B1F3A">Vaultchain</text>
+  <text class="vc-tag" x="86" y="70" fill="#1E66F5">FINTECH OPERATIONS</text>
+</svg>

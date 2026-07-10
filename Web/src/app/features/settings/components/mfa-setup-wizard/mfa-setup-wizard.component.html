@@ -1,0 +1,217 @@
+<!--
+  Hosted as the CONTENT of the Settings app-ui-drawer (the drawer owns the header/title,
+  scroll, focus-trap, scrim + blur). No page-shell/card wrapper here — just the wizard body. The Settings
+  shell stays rendered behind the scrim; finish()/cancel() raise outputs the shell handles.
+-->
+<div class="mfa-setup">
+  <p class="mfa-setup__subtitle">{{ 'mfa.setup.pageSubtitle' | translate }}</p>
+
+  <!-- Step indicator: active/done announced to AT via aria-current AND a non-colour cue (glyph + a
+       visually-hidden state label) so the state is never carried by colour alone. -->
+  <ol class="mfa-setup__steps" [attr.aria-label]="'mfa.setup.stepsLabel' | translate">
+    @for (s of steps; track s; let i = $index) {
+      <li
+        class="mfa-setup__step"
+        [class.is-active]="step() === s"
+        [class.is-done]="i < stepIndex() - 1"
+        [attr.aria-current]="step() === s ? 'step' : null"
+      >
+        <span class="mfa-setup__step-num" aria-hidden="true">
+          @if (i < stepIndex() - 1) {
+            <i class="ri-check-line"></i>
+          } @else {
+            {{ i + 1 }}
+          }
+        </span>
+        <span class="mfa-setup__step-label">
+          {{ 'mfa.setup.step.' + s | translate }}
+        </span>
+        @if (i < stepIndex() - 1) {
+          <span class="sr-only">{{ 'mfa.setup.stepIndicatorDoneLabel' | translate }}</span>
+        } @else if (step() === s) {
+          <span class="sr-only">{{ 'mfa.setup.stepIndicatorActiveLabel' | translate }}</span>
+        }
+      </li>
+    }
+  </ol>
+
+  @if (errorKey(); as key) {
+    <app-ui-alert
+      class="mfa-setup__alert"
+      type="danger"
+      [id]="errorId"
+      icon="ri-error-warning-line"
+      [message]="key | translate"
+    ></app-ui-alert>
+  }
+
+  @switch (step()) {
+    <!-- ===================== Step 1: password ===================== -->
+    @case ('password') {
+      <section class="mfa-setup__panel" aria-labelledby="mfa-step1-title">
+        <h2 id="mfa-step1-title" class="mfa-setup__panel-title">
+          {{ 'mfa.setup.step1Title' | translate }}
+        </h2>
+        <p class="mfa-setup__panel-hint">{{ 'mfa.setup.reauthHint' | translate }}</p>
+
+        <form [formGroup]="passwordForm" (ngSubmit)="startSetup()" novalidate>
+          <div class="mfa-setup__field">
+            <label class="mfa-setup__label" for="mfa-setup-password">
+              {{ 'mfa.setup.reauthLabel' | translate }}
+            </label>
+            <input
+              id="mfa-setup-password"
+              data-testid="mfa-setup-password-input"
+              class="mfa-setup__input"
+              type="password"
+              formControlName="password"
+              autocomplete="current-password"
+              [attr.aria-invalid]="
+                passwordForm.controls.password.touched && passwordForm.controls.password.invalid
+              "
+              [attr.aria-describedby]="errorKey() ? errorId : null"
+            />
+          </div>
+
+          <div class="mfa-setup__actions">
+            <app-ui-button variant="ghost" type="button" (click)="cancel()">
+              {{ 'common.cancel' | translate }}
+            </app-ui-button>
+            <app-ui-button
+              type="submit"
+              data-testid="mfa-setup-password-submit"
+              [loading]="submitting()"
+            >
+              {{ 'mfa.setup.continue' | translate }}
+            </app-ui-button>
+          </div>
+        </form>
+      </section>
+    }
+
+    <!-- ===================== Step 2: scan + confirm ===================== -->
+    @case ('confirm') {
+      <section class="mfa-setup__panel" aria-labelledby="mfa-step2-title">
+        <h2 id="mfa-step2-title" class="mfa-setup__panel-title">
+          {{ 'mfa.setup.confirmTitle' | translate }}
+        </h2>
+        <p class="mfa-setup__panel-hint">{{ 'mfa.setup.scanHint' | translate }}</p>
+
+        @if (qrDataUrl(); as qr) {
+          <div class="mfa-setup__qr">
+            <img
+              class="mfa-setup__qr-img"
+              [src]="qr"
+              [alt]="'mfa.setup.qrAlt' | translate"
+              width="180"
+              height="180"
+            />
+          </div>
+        }
+
+        @if (otpauthUri(); as uri) {
+          <div class="mfa-setup__manual">
+            <span class="mfa-setup__manual-label">{{
+              'mfa.setup.manualKeyLabel' | translate
+            }}</span>
+            <code class="mfa-setup__manual-key">{{ uri }}</code>
+          </div>
+        }
+
+        <form [formGroup]="confirmForm" (ngSubmit)="confirmSetup()" novalidate>
+          <div class="mfa-setup__field">
+            <label class="mfa-setup__label" for="mfa-setup-code">
+              {{ 'mfa.setup.confirmCodeLabel' | translate }}
+            </label>
+            <input
+              id="mfa-setup-code"
+              data-testid="mfa-setup-code-input"
+              class="mfa-setup__input"
+              type="text"
+              formControlName="code"
+              inputmode="numeric"
+              autocomplete="one-time-code"
+              maxlength="6"
+              spellcheck="false"
+              [placeholder]="'mfa.setup.confirmCodePlaceholder' | translate"
+              [attr.aria-invalid]="
+                confirmForm.controls.code.touched && confirmForm.controls.code.invalid
+              "
+              [attr.aria-describedby]="errorKey() ? errorId : null"
+            />
+          </div>
+
+          <div class="mfa-setup__actions">
+            <app-ui-button variant="ghost" type="button" (click)="cancel()">
+              {{ 'common.cancel' | translate }}
+            </app-ui-button>
+            <app-ui-button
+              type="submit"
+              data-testid="mfa-setup-verify-submit"
+              [loading]="submitting()"
+            >
+              {{ 'mfa.setup.activate' | translate }}
+            </app-ui-button>
+          </div>
+        </form>
+      </section>
+    }
+
+    <!-- ===================== Step 3: backup codes (once) ===================== -->
+    @case ('backup') {
+      <section class="mfa-setup__panel" aria-labelledby="mfa-step3-title">
+        <h2 id="mfa-step3-title" #backupHeading tabindex="-1" class="mfa-setup__panel-title">
+          {{ 'mfa.setup.backupTitle' | translate }}
+        </h2>
+        <app-ui-alert
+          type="warning"
+          icon="ri-alert-line"
+          [message]="'mfa.setup.backupSaveHint' | translate"
+        ></app-ui-alert>
+
+        <ul
+          class="mfa-setup__codes"
+          role="list"
+          [attr.aria-label]="'mfa.setup.backupTitle' | translate"
+        >
+          @for (code of backupCodes(); track code) {
+            <li class="mfa-setup__code">{{ code }}</li>
+          }
+        </ul>
+
+        <div class="mfa-setup__code-actions">
+          <app-ui-button variant="ghost" type="button" (click)="copyCodes()">
+            <i class="ri-file-copy-line ui-button__icon" aria-hidden="true"></i>
+            {{ 'mfa.setup.copy' | translate }}
+          </app-ui-button>
+          <app-ui-button variant="ghost" type="button" (click)="downloadCodes()">
+            <i class="ri-download-2-line ui-button__icon" aria-hidden="true"></i>
+            {{ 'mfa.setup.download' | translate }}
+          </app-ui-button>
+        </div>
+
+        <label class="mfa-setup__saved" data-testid="mfa-setup-codes-saved">
+          <input
+            type="checkbox"
+            data-testid="mfa-setup-codes-saved-checkbox"
+            [checked]="savedConfirmed()"
+            (change)="toggleSaved()"
+            [attr.aria-label]="'mfa.setup.savedConfirm' | translate"
+          />
+          <span>{{ 'mfa.setup.savedConfirm' | translate }}</span>
+        </label>
+
+        <div class="mfa-setup__actions">
+          <app-ui-button
+            type="button"
+            data-testid="mfa-setup-finish"
+            [disabled]="!savedConfirmed()"
+            (click)="finish()"
+          >
+            {{ 'mfa.setup.done' | translate }}
+          </app-ui-button>
+        </div>
+      </section>
+    }
+  }
+</div>

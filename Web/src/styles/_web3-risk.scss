@@ -1,0 +1,878 @@
+@keyframes web3-screen-in {
+  from {
+    opacity: 0;
+    transform: translateY(var(--motion-distance-sm));
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes web3-card-rise {
+  from {
+    opacity: 0;
+    transform: translateY(var(--motion-distance-lg)) scale(0.99);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes web3-item-in {
+  from {
+    opacity: 0;
+    transform: translateY(var(--motion-distance-md));
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.web3-risk {
+  --web3-section-gap: var(--space-8);
+  --web3-card-padding: var(--space-6);
+  --web3-grid-gap: var(--space-8);
+  --web3-icon-size: 1rem;
+  --web3-enter-duration: var(--motion-page);
+  --web3-enter-ease: var(--motion-ease-enter);
+  --web3-hover-duration: var(--motion-normal);
+
+  display: grid;
+  align-content: start;
+  gap: var(--web3-section-gap);
+  animation: web3-screen-in var(--web3-enter-duration) var(--web3-enter-ease) both;
+}
+
+/* ---- Toolbar (the shell header owns the H1) ---- */
+.web3-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-5);
+  padding: var(--space-6) var(--space-7);
+  animation: web3-card-rise var(--web3-enter-duration) var(--web3-enter-ease) both;
+  animation-delay: 40ms;
+}
+
+.web3-toolbar__main,
+.web3-toolbar__meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+.web3-toolbar__meta {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.web3-toolbar__copy {
+  display: grid;
+  gap: var(--space-1);
+  min-width: 0;
+
+  p {
+    margin: 0;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-sm);
+    line-height: 1.45;
+  }
+}
+
+/* ---- v2.1 §5 rows: split A ≈730/350 on the 12-col canvas.
+   The [730] column stacks the screening input over the facts panel (auto/1fr) so the
+   facts panel stretches and the row shares one height (§3.3); 30px = contract gutter.
+   (The duplicate G2 KPI pill row was removed — see §7 data-dedup; the live facts now
+   render once inside the REAL-labelled panel.) ---- */
+.web3-main,
+.web3-main__primary {
+  display: grid;
+  min-width: 0;
+  gap: var(--web3-grid-gap);
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.web3-main__primary {
+  grid-template-rows: auto 1fr;
+}
+
+@media (width >= 1280px) {
+  .web3-main {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+  }
+
+  .web3-main__primary {
+    grid-column: span 8;
+  }
+
+  .web3-main__side {
+    grid-column: span 4;
+  }
+}
+
+/* ---- Cards & section heads (v2 §4 chrome on the global .card base) ---- */
+.web3-card {
+  position: relative;
+  min-width: 0;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-xs);
+  transition:
+    border-color var(--web3-hover-duration) var(--motion-ease-standard),
+    box-shadow var(--web3-hover-duration) var(--motion-ease-standard),
+    transform var(--web3-hover-duration) var(--motion-ease-standard),
+    background-color var(--web3-hover-duration) var(--motion-ease-standard);
+}
+
+.web3-main .web3-card,
+.web3-split .web3-card,
+.web3-risk > .web3-sim {
+  animation: web3-card-rise var(--web3-enter-duration) var(--web3-enter-ease) both;
+  animation-delay: var(--web3-card-delay, 160ms);
+}
+
+.web3-main__primary > .web3-card:nth-child(2) {
+  --web3-card-delay: 210ms;
+}
+
+.web3-main__side {
+  --web3-card-delay: 230ms;
+}
+
+.web3-risk > .web3-sim {
+  --web3-card-delay: 290ms;
+}
+
+.web3-split .web3-card:nth-child(1) {
+  --web3-card-delay: 340ms;
+}
+
+.web3-split .web3-card:nth-child(2) {
+  --web3-card-delay: 380ms;
+}
+
+.web3-card:hover {
+  border-color: color-mix(in srgb, var(--color-primary) 22%, var(--color-border));
+  box-shadow: var(--shadow-sm);
+  transform: translateY(-2px);
+}
+
+html[data-theme="dark"] .web3-risk .web3-card {
+  border-color: var(--color-border);
+}
+
+.web3-split {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--web3-grid-gap);
+
+  @media (width >= 900px) {
+    @apply grid-cols-2;
+  }
+}
+
+.web3-card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+.web3-head-titles {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+.web3-ico {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: var(--radius-md);
+  transition:
+    box-shadow var(--web3-hover-duration) var(--motion-ease-standard),
+    transform var(--web3-hover-duration) var(--motion-ease-standard);
+
+  i {
+    width: var(--web3-icon-size);
+    height: var(--web3-icon-size);
+    font-size: var(--web3-icon-size);
+    line-height: 1;
+  }
+
+  .web3-card:hover &,
+  .web3-toolbar:hover & {
+    box-shadow: 0 10px 22px color-mix(in srgb, currentcolor 16%, transparent);
+    transform: translateY(-2px) rotate(-3deg);
+  }
+
+  &--green {
+    background: var(--badge-green-bg);
+    color: var(--badge-green-text);
+  }
+
+  &--amber {
+    background: var(--badge-yellow-bg);
+    color: var(--badge-yellow-text);
+  }
+
+  &--purple {
+    background: var(--badge-purple-bg);
+    color: var(--badge-purple-text);
+  }
+
+  &--blue {
+    background: var(--badge-blue-bg);
+    color: var(--badge-blue-text);
+  }
+
+  &--slate {
+    background: var(--color-surface-2);
+    color: var(--color-text-strong);
+  }
+}
+
+.web3-sim-tag {
+  @apply inline-flex items-center gap-1;
+}
+
+.web3-risk app-ui-badge {
+  max-width: 100%;
+}
+
+.web3-risk app-ui-badge .ui-badge {
+  max-width: 100%;
+}
+
+.web3-muted app-ui-badge .ui-badge {
+  align-items: flex-start;
+  white-space: normal;
+}
+
+.web3-muted app-ui-badge .ui-badge__text {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.web3-risk :where(
+  app-ui-button .ui-button__icon,
+  .web3-link i,
+  .web3-info i,
+  .web3-verdict__icon i,
+  .web3-empty-state i
+) {
+  display: inline-grid;
+  width: var(--web3-icon-size);
+  height: var(--web3-icon-size);
+  flex: 0 0 var(--web3-icon-size);
+  place-items: center;
+  font-size: var(--web3-icon-size);
+  line-height: 1;
+}
+
+.web3-risk app-ui-button .ui-button {
+  transition:
+    background-color var(--web3-hover-duration) var(--motion-ease-standard),
+    border-color var(--web3-hover-duration) var(--motion-ease-standard),
+    box-shadow var(--web3-hover-duration) var(--motion-ease-standard),
+    color var(--web3-hover-duration) var(--motion-ease-standard),
+    transform var(--web3-hover-duration) var(--motion-ease-standard);
+}
+
+.web3-risk app-ui-button .ui-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.web3-risk app-ui-button .ui-button:active:not(:disabled) {
+  transform: translateY(0) scale(0.98);
+}
+
+.web3-risk app-ui-button .ui-button:hover:not(:disabled) .ui-button__icon {
+  transform: translateY(-1px) scale(1.06);
+}
+
+.web3-risk app-ui-button .ui-button:hover:not(:disabled) .ri-arrow-left-line {
+  transform: translateX(-2px) scale(1.04);
+}
+
+.web3-risk app-ui-button .ui-button:hover:not(:disabled) .ri-search-eye-line {
+  transform: rotate(-7deg) scale(1.06);
+}
+
+.web3-risk app-ui-button .ui-button:hover:not(:disabled) .ri-check-line,
+.web3-risk app-ui-button .ui-button:hover:not(:disabled) .ri-eye-line,
+.web3-risk app-ui-button .ui-button:hover:not(:disabled) .ri-forbid-line {
+  transform: translateY(-1px) scale(1.08);
+}
+
+/* ---- Key/value ---- */
+.web3-kv {
+  display: grid;
+  gap: var(--space-4);
+  margin-top: var(--space-5);
+}
+
+.web3-kv > *,
+.web3-fact,
+.web3-checklist .web3-check,
+.web3-summary__meta > * {
+  animation: web3-item-in var(--motion-slow) var(--web3-enter-ease) both;
+  animation-delay: var(--web3-item-delay, 180ms);
+}
+
+.web3-kv > *:nth-child(2),
+.web3-fact:nth-child(2),
+.web3-checklist .web3-check:nth-child(2),
+.web3-summary__meta > *:nth-child(2) {
+  --web3-item-delay: 220ms;
+}
+
+.web3-kv > *:nth-child(3),
+.web3-fact:nth-child(3),
+.web3-checklist .web3-check:nth-child(3) {
+  --web3-item-delay: 260ms;
+}
+
+.web3-kv > *:nth-child(n + 4),
+.web3-checklist .web3-check:nth-child(n + 4) {
+  --web3-item-delay: 300ms;
+}
+
+.web3-label {
+  font-size: var(--font-size-xxs);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.web3-value {
+  @apply mt-1 text-sm;
+
+  color: var(--color-text);
+}
+
+.web3-mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.web3-chip-mono {
+  @apply inline-block max-w-full rounded-md border px-2 py-1 text-xs;
+
+  border-color: var(--color-border);
+  background: var(--color-surface-2);
+  transition:
+    border-color var(--web3-hover-duration) var(--motion-ease-standard),
+    background-color var(--web3-hover-duration) var(--motion-ease-standard),
+    color var(--web3-hover-duration) var(--motion-ease-standard),
+    transform var(--web3-hover-duration) var(--motion-ease-standard);
+}
+
+.web3-chip-mono:hover {
+  border-color: color-mix(in srgb, var(--color-primary) 28%, var(--color-border));
+  background: color-mix(in srgb, var(--color-primary) 6%, var(--color-surface-2));
+  color: var(--color-text);
+  transform: translateY(-1px);
+}
+
+.web3-truncate {
+  @apply inline-block max-w-full overflow-hidden text-ellipsis whitespace-nowrap align-bottom;
+}
+
+/* ---- Screening input ---- */
+.web3-screen {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: var(--space-4);
+  margin-top: var(--space-5);
+
+  &__input {
+    @apply min-w-0 flex-1;
+  }
+
+  app-ui-button {
+    @apply flex-none;
+  }
+}
+
+/* ---- On-chain facts (REAL) ---- */
+.web3-facts {
+  display: grid;
+  gap: var(--space-4);
+  margin-top: var(--space-5);
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+}
+
+/* v2 stat-tile look for the REAL facts (they stay INSIDE the REAL-labelled panel so the
+   real-vs-simulated separation keeps its badges and boundaries verbatim). */
+.web3-fact {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-5);
+  border-radius: var(--radius-field);
+  background: var(--color-surface-2);
+  transition:
+    background-color var(--web3-hover-duration) var(--motion-ease-standard),
+    transform var(--web3-hover-duration) var(--motion-ease-standard);
+}
+
+.web3-fact:hover {
+  background: color-mix(in srgb, var(--color-primary) 4%, var(--color-surface-2));
+  transform: translateY(-2px);
+}
+
+.web3-fact-strong {
+  @apply mt-0 text-lg;
+
+  font-weight: var(--font-weight-extrabold);
+}
+
+.web3-network {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  margin-top: var(--space-5);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-border);
+  font-size: var(--font-size-xs);
+  color: var(--color-text);
+}
+
+.web3-network--empty {
+  color: var(--color-text-muted);
+}
+
+/* Live "on-chain" pulse next to the REAL badge. */
+.web3-live {
+  @apply inline-flex items-center gap-1.5;
+}
+
+.web3-live-dot {
+  @apply h-2 w-2 rounded-full;
+
+  background: var(--color-success-strong);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-success) 14%, transparent);
+}
+
+/* ---- Risk intelligence (SIMULATED) ---- */
+
+/* Header right cluster: risk-score badge + simulated tag, wraps on narrow widths. */
+.web3-risk-head-right {
+  @apply inline-flex flex-wrap items-center gap-2;
+}
+
+/* "Flagged" banner sits directly under the simulated card head. */
+.web3-flagged {
+  @apply mt-3;
+}
+
+/* Risk-summary: SIMULATED score progress + decision meta. */
+.web3-summary {
+  display: grid;
+  gap: var(--space-5);
+  margin-top: var(--space-5);
+}
+
+.web3-risk app-ui-progress .ui-progress__fill {
+  transform-origin: left center;
+  animation: ui-grow-x var(--motion-expressive) var(--web3-enter-ease) both;
+  animation-delay: 220ms;
+}
+
+.web3-summary__meta {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: var(--space-5);
+}
+
+/* Signal checklist — compact rows replace the four identical full-width "clear" alert cards
+   (§7 dedup). Each row keeps icon + label + state word (never colour-only); a flagged signal is
+   additionally escalated to the alert banner above. Token-only colours → light/dark-correct. */
+.web3-checklist {
+  display: grid;
+  gap: var(--space-3);
+  margin-top: var(--space-5);
+}
+
+.web3-checklist__list {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.web3-check {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-2);
+  transition:
+    border-color var(--web3-hover-duration) var(--motion-ease-standard),
+    background-color var(--web3-hover-duration) var(--motion-ease-standard);
+
+  /* A fired signal gets a soft danger wash + ring so the row reads as flagged at a glance. */
+  &--hit {
+    border-color: var(--badge-red-ring);
+    background: var(--badge-red-bg);
+  }
+}
+
+.web3-check__icon {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  inline-size: 24px;
+  block-size: 24px;
+  border-radius: var(--radius-sm);
+  background: var(--badge-green-bg);
+  color: var(--badge-green-text);
+
+  i {
+    font-size: 14px;
+    line-height: 1;
+  }
+
+  &--hit {
+    background: color-mix(in srgb, var(--badge-red-text) 14%, transparent);
+    color: var(--badge-red-text);
+  }
+}
+
+.web3-check__label {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+  overflow-wrap: anywhere;
+}
+
+/* State word — a soft pill, not colour-only: it carries the literal "Clear"/"Flagged" label. */
+.web3-check__state {
+  flex: 0 0 auto;
+  padding: 2px var(--space-3);
+  border-radius: var(--radius-pill);
+  font-size: var(--font-size-xxs);
+  font-weight: var(--font-weight-bold);
+  white-space: nowrap;
+
+  &--clear {
+    color: var(--badge-green-text);
+    background: var(--badge-green-bg);
+  }
+
+  &--hit {
+    color: var(--badge-red-text);
+    background: var(--badge-red-bg);
+  }
+}
+
+.web3-explanation {
+  margin-top: var(--space-5);
+  padding: var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-2);
+
+  p {
+    @apply mt-1 mb-0 text-sm;
+
+    color: var(--color-text);
+  }
+}
+
+.web3-empty-state {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  margin-top: var(--space-5);
+  padding: var(--space-6);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-2);
+  color: var(--color-text-muted);
+  animation: web3-card-rise var(--motion-slow) var(--web3-enter-ease) both;
+}
+
+.web3-empty-state--sim {
+  background: color-mix(in srgb, var(--badge-yellow-bg) 42%, var(--color-surface-2));
+  border-color: color-mix(in srgb, var(--badge-yellow-text) 30%, var(--color-border));
+}
+
+/* ---- VC concept preview: terminal-style ---- */
+.web3-terminal {
+  margin-top: var(--space-5);
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-2);
+}
+
+.web3-terminal--loading {
+  animation: web3-card-rise var(--motion-slow) var(--web3-enter-ease) both;
+}
+
+.web3-terminal__bar {
+  @apply flex items-center gap-1 border-b px-2.5 py-1.5;
+
+  background: var(--color-surface-3);
+  border-bottom-color: var(--color-border);
+}
+
+.web3-terminal__dot {
+  @apply h-2.5 w-2.5 rounded-full;
+
+  background: var(--color-border-strong);
+}
+
+.web3-terminal__name {
+  @apply ml-1.5;
+
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: var(--font-size-xxs);
+  color: var(--color-text-muted);
+}
+
+.web3-vc-json {
+  @apply m-0 max-w-full overflow-x-auto p-3 leading-relaxed;
+
+  color: var(--color-text);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: var(--font-size-xxs);
+  overscroll-behavior-inline: contain;
+  white-space: pre;
+}
+
+.web3-vc-skeleton {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-5);
+}
+
+/* ---- Actions / attestation / verdict ---- */
+.web3-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-5);
+
+  app-ui-button {
+    @apply flex-none;
+  }
+}
+
+.web3-decision-actions {
+  align-items: stretch;
+  margin-top: var(--space-5);
+}
+
+.web3-attestation {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+  margin-top: var(--space-4);
+}
+
+.web3-verdict {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-5);
+  padding: var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  animation: web3-card-rise var(--motion-slow) var(--web3-enter-ease) both;
+
+  &__icon {
+    display: grid;
+    width: 36px;
+    height: 36px;
+    flex: 0 0 auto;
+    place-items: center;
+    border-radius: var(--radius-pill);
+    background: var(--color-surface);
+  }
+
+  &--allow {
+    background: var(--badge-green-bg);
+    border-color: var(--badge-green-ring);
+
+    .web3-verdict__icon {
+      color: var(--color-success);
+    }
+  }
+
+  &--review {
+    background: var(--badge-yellow-bg);
+    border-color: var(--badge-yellow-ring);
+
+    .web3-verdict__icon {
+      color: var(--badge-yellow-text);
+    }
+  }
+
+  &--block {
+    background: var(--badge-red-bg);
+    border-color: var(--badge-red-ring);
+
+    .web3-verdict__icon {
+      color: var(--color-danger);
+    }
+  }
+}
+
+.web3-link {
+  @apply mt-2 inline-flex items-center gap-1 text-sm no-underline;
+
+  color: var(--color-primary);
+  transition:
+    color var(--web3-hover-duration) var(--motion-ease-standard),
+    transform var(--web3-hover-duration) var(--motion-ease-standard);
+
+  &:hover {
+    @apply underline;
+
+    transform: translateY(-1px);
+  }
+}
+
+.web3-hint {
+  @apply mt-2;
+
+  font-size: var(--font-size-xxs);
+  color: var(--color-text-muted);
+}
+
+.web3-hint--action {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-2);
+}
+
+.web3-muted {
+  @apply mt-2 text-sm;
+
+  color: var(--color-text-muted);
+}
+
+.web3-error {
+  @apply mt-1.5 text-xs;
+
+  color: var(--color-danger);
+}
+
+.web3-info {
+  @apply inline-grid h-11 w-11 cursor-help place-items-center border p-0 leading-none;
+
+  border-radius: var(--radius-field);
+  border-color: var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  transition-property: background-color, border-color, color, box-shadow, transform;
+  transition-duration: var(--motion-duration-fast);
+  transition-timing-function: var(--motion-ease-standard);
+
+  &:hover {
+    background: var(--color-surface-2);
+    border-color: var(--color-border-strong);
+    color: var(--color-text);
+    transform: translateY(-1px);
+  }
+
+  &:focus-visible {
+    @apply outline-none;
+
+    box-shadow: var(--shadow-focus);
+  }
+}
+
+@media (width <= 640px) {
+  .web3-card-head,
+  .web3-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .web3-toolbar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .web3-toolbar__main,
+  .web3-toolbar__meta {
+    width: 100%;
+  }
+
+  .web3-toolbar__meta {
+    justify-content: flex-start;
+  }
+}
+
+/* ---- REAL vs SIMULATED boundary: colored rail (inset + rounded for the r25 card) ---- */
+.web3-real::before,
+.web3-sim::before {
+  content: "";
+
+  @apply pointer-events-none absolute left-0 w-1;
+
+  inset-block: 18px;
+  border-radius: var(--radius-pill);
+}
+
+.web3-real::before {
+  background: linear-gradient(var(--color-success), var(--color-success-strong));
+}
+
+.web3-sim::before {
+  background: repeating-linear-gradient(
+    180deg,
+    var(--badge-yellow-text),
+    var(--badge-yellow-text) 6px,
+    transparent 6px,
+    transparent 12px
+  );
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .web3-risk,
+  .web3-toolbar,
+  .web3-card,
+  .web3-kv > *,
+  .web3-fact,
+  .web3-checklist .web3-check,
+  .web3-summary__meta > *,
+  .web3-empty-state,
+  .web3-terminal--loading,
+  .web3-verdict,
+  .web3-risk app-ui-progress .ui-progress__fill,
+  .web3-risk app-ui-button .ui-button,
+  .web3-risk app-ui-button .ui-button__icon,
+  .web3-link,
+  .web3-info,
+  .web3-ico {
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
+  }
+}

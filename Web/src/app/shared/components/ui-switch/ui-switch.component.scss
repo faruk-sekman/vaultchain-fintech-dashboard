@@ -1,0 +1,86 @@
+:host {
+  display: inline-flex;
+}
+
+.ui-switch {
+  display: inline-flex;
+  align-items: center;
+
+  // v2 §4: 16px label in the body text colour, 10px control↔label gap.
+  gap: 10px;
+  min-height: 32px;
+  padding: 0 var(--space-2);
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--color-text);
+  font-size: var(--text-body-lg);
+  line-height: var(--line-height-base);
+  cursor: pointer;
+  border-radius: var(--radius-pill);
+  outline: none;
+  transition:
+    background-color var(--motion-duration-fast) var(--motion-ease-standard),
+    border-color var(--motion-duration-fast) var(--motion-ease-standard),
+    box-shadow var(--motion-duration-fast) var(--motion-ease-standard);
+
+  &:hover:not(:disabled) {
+    background: var(--color-surface-2);
+    border-color: var(--color-border);
+  }
+
+  &:focus-visible {
+    box-shadow: var(--shadow-focus);
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+}
+
+.ui-switch__track {
+  position: relative;
+  flex: none;
+  inline-size: 36px;
+  block-size: 20px;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border-strong);
+  transition:
+    background-color var(--motion-duration-fast) var(--motion-ease-standard),
+    border-color var(--motion-duration-fast) var(--motion-ease-standard);
+}
+
+.ui-switch__knob {
+  position: absolute;
+  inset-block-start: 1px;
+  inset-inline-start: 1px;
+  inline-size: 16px;
+  block-size: 16px;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-xs);
+  transition: transform var(--motion-duration-fast) var(--motion-ease-emphasized);
+}
+
+.ui-switch--on .ui-switch__track {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.ui-switch--on .ui-switch__knob {
+  transform: translateX(16px);
+  background: var(--color-on-primary);
+}
+
+.ui-switch__label {
+  user-select: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ui-switch,
+  .ui-switch__track,
+  .ui-switch__knob {
+    transition: none;
+  }
+}

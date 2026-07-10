@@ -1,0 +1,68 @@
+/* Shared lang + theme controls — values moved verbatim from the login screen so it stays identical.
+   `--ld-*` tokens inherited from the host screen (.login / .forgot); :host is the absolute cluster. */
+
+:host {
+  position: absolute;
+  top: 18px;
+  right: clamp(18px, 2.4vw, 30px);
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  animation: login-fade 0.62s ease 1s both;
+}
+
+.auth-controls__svg {
+  flex: none;
+}
+
+.auth-controls__lang {
+  display: flex;
+  padding: 3px;
+  border: 1px solid var(--ld-border);
+  border-radius: 11px;
+  background: var(--ld-bg-2);
+}
+
+.auth-controls__lang-btn {
+  padding: 6px 12px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--ld-faint);
+  cursor: pointer;
+  transition:
+    color 0.15s ease,
+    background-color 0.15s ease;
+
+  &.is-active {
+    background: var(--ld-card-bg);
+    color: var(--ld-text);
+    box-shadow: 0 1px 2px rgb(11 31 58 / 12%);
+  }
+}
+
+.auth-controls__theme {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border: 1px solid var(--ld-border);
+  border-radius: 11px;
+  background: var(--ld-bg-2);
+  color: var(--ld-muted);
+  cursor: pointer;
+  transition:
+    color 0.15s ease,
+    background-color 0.15s ease;
+
+  &:hover {
+    color: var(--ld-text);
+    background: var(--ld-card-hover);
+  }
+}

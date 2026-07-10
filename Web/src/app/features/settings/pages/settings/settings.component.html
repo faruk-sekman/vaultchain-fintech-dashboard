@@ -1,0 +1,269 @@
+<div class="page-shell settings">
+  @if (!ready()) {
+    <section class="settings-shell">
+      <div class="settings-shell-sk" aria-hidden="true">
+        <div class="settings-shell-sk__head">
+          <app-ui-skeleton
+            variant="block"
+            width="56px"
+            height="56px"
+            radius="999px"
+          ></app-ui-skeleton>
+          <div class="settings-shell-sk__stack">
+            <app-ui-skeleton variant="line" width="184px" height="16px"></app-ui-skeleton>
+            <app-ui-skeleton variant="line" width="240px" height="12px"></app-ui-skeleton>
+          </div>
+          <app-ui-skeleton
+            class="settings-shell-sk__chip"
+            variant="line"
+            width="104px"
+            height="30px"
+            radius="999px"
+          ></app-ui-skeleton>
+        </div>
+        <div class="settings-shell-sk__tabs">
+          @for (t of skeletonTabs; track t) {
+            <app-ui-skeleton
+              variant="line"
+              width="96px"
+              height="34px"
+              radius="10px"
+            ></app-ui-skeleton>
+          }
+        </div>
+        @for (r of skeletonRows; track r) {
+          <div class="settings-panel-sk__row">
+            <div class="settings-panel-sk__row-text">
+              <app-ui-skeleton variant="line" width="130px" height="13px"></app-ui-skeleton>
+              <app-ui-skeleton variant="line" width="210px" height="11px"></app-ui-skeleton>
+            </div>
+            <app-ui-skeleton
+              variant="line"
+              width="120px"
+              height="34px"
+              radius="999px"
+            ></app-ui-skeleton>
+          </div>
+        }
+      </div>
+    </section>
+  } @else {
+    <section class="settings-shell motion-fade-up">
+      <div class="settings-head-zone">
+        <header class="account-head">
+          <div class="account-head__lead">
+            <span class="account-head__avatar" aria-hidden="true">
+              <span class="account-head__avatar-face">
+                <span class="account-head__initials">{{ initials() }}</span>
+              </span>
+            </span>
+            <div class="account-head__stack">
+              <span class="account-head__name-row">
+                <span class="account-head__name">
+                  {{ identity().displayName || ('settings.identity.fallbackName' | translate) }}
+                </span>
+                <span class="account-head__role">{{ identityRoleKey() | translate }}</span>
+              </span>
+              <span class="account-head__email">{{ identity().email }}</span>
+            </div>
+          </div>
+
+          <div class="account-head__meta">
+            <span class="account-chip account-chip--ok" role="status">
+              <span class="account-chip__dot" aria-hidden="true"></span>
+              {{ 'settings.identity.sessionActive' | translate }}
+            </span>
+            @if (mfaEnabled()) {
+              <span class="account-chip account-chip--ok">
+                <i class="ri-shield-check-line" aria-hidden="true"></i>
+                {{ 'settings.identity.mfaLabel' | translate }}:
+                {{ 'settings.identity.mfaOn' | translate }}
+              </span>
+            } @else {
+              <span class="account-chip account-chip--warn">
+                <i class="ri-shield-flash-line" aria-hidden="true"></i>
+                {{ 'settings.identity.mfaLabel' | translate }}:
+                {{ 'settings.identity.mfaOff' | translate }}
+                <button
+                  type="button"
+                  class="account-chip__action"
+                  (click)="selectSection('security')"
+                >
+                  {{ 'settings.identity.mfaEnableAction' | translate }}
+                </button>
+              </span>
+            }
+            @if (lastLoginAt(); as lastLogin) {
+              <span class="account-head__last">
+                <i class="ri-time-line" aria-hidden="true"></i>
+                {{ 'settings.identity.lastLogin' | translate }}
+                {{ lastLogin | date: 'd MMM HH:mm' : undefined : locale() }}
+              </span>
+            }
+          </div>
+        </header>
+
+        <button
+          type="button"
+          class="settings-nav-trigger"
+          [class.is-open]="mobileNavOpen()"
+          data-testid="settings-mobile-nav-trigger"
+          aria-controls="settings-tabs"
+          [attr.aria-expanded]="mobileNavOpen()"
+          [attr.aria-label]="'settings.navLabel' | translate"
+          (click)="toggleMobileNav()"
+        >
+          <span class="settings-nav-trigger__icon" aria-hidden="true">
+            <i [class]="activeSectionIcon()"></i>
+          </span>
+          <span class="settings-nav-trigger__label" aria-hidden="true">
+            {{ activeSectionLabelKey() | translate }}
+          </span>
+          <span class="settings-nav-trigger__menu" aria-hidden="true">
+            {{ 'settings.menu' | translate }}
+          </span>
+          <i class="settings-nav-trigger__chevron ri-arrow-down-s-line" aria-hidden="true"></i>
+        </button>
+
+        <div
+          id="settings-tabs"
+          class="settings-tabs"
+          role="tablist"
+          aria-orientation="horizontal"
+          [class.settings-tabs--open]="mobileNavOpen()"
+          [attr.aria-label]="'settings.navLabel' | translate"
+          (keydown.escape)="mobileNavOpen.set(false)"
+        >
+          @for (s of sections; track s.value; let i = $index) {
+            <button
+              type="button"
+              role="tab"
+              class="settings-tab"
+              [attr.data-testid]="'settings-tab-' + s.value"
+              [class.is-active]="activeSection === s.value"
+              [id]="tabId(s.value)"
+              [attr.aria-selected]="activeSection === s.value"
+              [attr.aria-controls]="panelId(s.value)"
+              [attr.tabindex]="activeSection === s.value ? 0 : -1"
+              (click)="onTabClick(s.value)"
+              (keydown)="onTabKeydown($event, i)"
+            >
+              <span class="settings-tab__icon" aria-hidden="true"><i [class]="s.icon"></i></span>
+              <span class="settings-tab__label">{{ s.labelKey | translate }}</span>
+            </button>
+          }
+        </div>
+      </div>
+
+      <div class="settings-panel-area">
+        <!-- Deliberate ARIA Tabs pattern: only the ACTIVE panel exists in the DOM, and each panel
+             renders its own role="tabpanel" with the tabId()/panelId() pair so the tablist's
+             aria-controls always points at the one live panel. -->
+        @switch (activeSection) {
+          @case ('profile') {
+            <app-settings-profile-panel
+              [panelId]="panelId('profile')"
+              [labelledBy]="tabId('profile')"
+              [profileForm]="profileForm"
+              [profileSaving]="profileSaving()"
+              (cancelProfile)="cancelProfile()"
+              (saveProfile)="saveProfile()"
+            ></app-settings-profile-panel>
+          }
+          @case ('security') {
+            <app-settings-security-panel
+              [panelId]="panelId('security')"
+              [labelledBy]="tabId('security')"
+              [locale]="locale()"
+              [mfaEnabled]="mfaEnabled()"
+              [mfaAction]="mfaAction()"
+              [mfaSubmitting]="mfaSubmitting()"
+              [mfaErrorKey]="mfaErrorKey()"
+              [mfaNewBackupCodes]="mfaNewBackupCodes()"
+              [mfaCodesSaved]="mfaCodesSaved()"
+              [mfaReauthForm]="mfaReauthForm"
+              [devices]="devices()"
+              [devicesLoading]="devicesLoading()"
+              [devicesErrorKey]="devicesErrorKey()"
+              [revokingId]="revokingId()"
+              [confirmRevokeId]="confirmRevokeId()"
+              [skeletonRows]="skeletonRows"
+              (enableMfa)="enableMfa()"
+              (openMfaAction)="openMfaAction($event)"
+              (toggleMfaCodesSaved)="toggleMfaCodesSaved()"
+              (dismissNewBackupCodes)="dismissNewBackupCodes()"
+              (cancelMfaAction)="cancelMfaAction()"
+              (submitMfaAction)="submitMfaAction()"
+              (retryLoadDevices)="retryLoadDevices()"
+              (askRevoke)="askRevoke($event)"
+              (confirmRevoke)="confirmRevoke()"
+              (cancelRevoke)="cancelRevoke()"
+              (openAdminMfaReset)="openAdminMfaReset()"
+              (openAdminPasswordReset)="openAdminPasswordReset()"
+            ></app-settings-security-panel>
+          }
+          @case ('appearance') {
+            <app-settings-appearance-panel
+              [panelId]="panelId('appearance')"
+              [labelledBy]="tabId('appearance')"
+              [themeOptions]="themeOptions"
+              [themeChoice]="themeChoice"
+              [densityOptions]="densityOptions"
+              [density]="density()"
+              (themeChange)="onThemeChange($event)"
+              (densityChange)="onDensityChange($event)"
+            ></app-settings-appearance-panel>
+          }
+          @case ('language') {
+            <app-settings-language-panel
+              [panelId]="panelId('language')"
+              [labelledBy]="tabId('language')"
+              [langOptions]="langOptions"
+              [currentLang]="currentLang"
+              (langChange)="onLangChange($event)"
+            ></app-settings-language-panel>
+          }
+          @case ('notifications') {
+            <app-settings-notifications-panel
+              [panelId]="panelId('notifications')"
+              [labelledBy]="tabId('notifications')"
+              [notificationsForm]="notificationsForm"
+              (viewAllNotifications)="goToNotifications()"
+            ></app-settings-notifications-panel>
+          }
+          @case ('access') {
+            <app-settings-access-panel
+              [panelId]="panelId('access')"
+              [labelledBy]="tabId('access')"
+              [accessLoadFailed]="accessLoadFailed()"
+              [accessLoading]="accessLoading()"
+              [accountPermissionsCount]="accountPermissions().length"
+              [accountResourceCount]="accountResourceCount()"
+              [sensitiveCount]="sensitiveCount()"
+              [uptimeParts]="uptimeParts()"
+              [accessCategories]="accessCategories"
+              [accessRows]="accessRows()"
+            ></app-settings-access-panel>
+          }
+        }
+      </div>
+    </section>
+
+    <app-ui-drawer
+      [open]="mfaSetupOpen()"
+      size="md"
+      [title]="'mfa.setup.drawerTitle' | translate"
+      [disableClose]="mfaSetupDismissBlocked()"
+      [closeAriaLabel]="'common.close' | translate"
+      (closed)="closeMfaSetup()"
+    >
+      @if (mfaSetupOpen()) {
+        <app-mfa-setup-wizard
+          (done)="onMfaSetupDone()"
+          (cancelled)="closeMfaSetup()"
+          (dismissBlockedChange)="onMfaDismissBlockedChange($event)"
+        ></app-mfa-setup-wizard>
+      }
+    </app-ui-drawer>
+  }
+</div>

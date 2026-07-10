@@ -1,0 +1,214 @@
+/* Horizon-style shell: collapsible left rail + fluid dashboard workspace. */
+.app-shell {
+  --rail-w: 290px;
+
+  display: grid;
+  grid-template-columns: var(--rail-w) minmax(0, 1fr);
+
+  /* Fixed-viewport shell: the shell never scrolls; the sidebar + header stay pinned and
+     only `.content` scrolls internally (kills page-level scroll + the drifting rail). */
+  height: 100dvh;
+  overflow: hidden;
+  background: var(--color-bg);
+  color: var(--color-text);
+  transition: grid-template-columns var(--motion-normal) var(--motion-ease-emphasized);
+}
+
+/* Collapsed rail: narrow icon-only column; let the rail overflow so hover flyouts aren't clipped. */
+.app-shell--rail-collapsed {
+  --rail-w: 84px;
+}
+
+.app-shell--rail-collapsed .sidebar-rail {
+  overflow: visible;
+  z-index: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-shell {
+    transition: none;
+  }
+}
+
+.skip-link {
+  position: fixed;
+  top: var(--space-4);
+  left: var(--space-4);
+  z-index: var(--z-tooltip);
+  transform: translateY(-150%);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text);
+  padding: var(--space-3) var(--space-5);
+  box-shadow: var(--shadow-md);
+  font-size: var(--text-body-sm);
+  font-weight: var(--font-weight-semibold);
+  text-decoration: none;
+
+  &:focus-visible {
+    transform: translateY(0);
+    outline: none;
+    box-shadow: var(--shadow-focus), var(--shadow-md);
+  }
+}
+
+/* Pinned full-height column inside the fixed shell; scrolls internally only if the nav is tall.
+   No stacking z-index: the rail is a non-overlapping grid column, and modal/drawer overlays
+   (rendered inside the scrolling content) MUST paint above it. A positive z-index here would
+   re-trap the delete-customer overlay behind the sidebar. */
+.sidebar-rail {
+  height: 100dvh;
+  overflow-y: auto;
+}
+
+.app-main {
+  --layout-content-gutter: 1.5rem;
+
+  display: flex;
+  flex-direction: column;
+
+  /* Own the viewport height so the header pins to the top and only `.content` scrolls. */
+  height: 100dvh;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* Header stays a fixed band at the top of the main column (never shrinks, never scrolls). */
+app-header {
+  flex: none;
+}
+
+/* Content canvas uses Tailwind's standard responsive spacing; pages own their internal grids.
+   This is the single scroll region of the shell (min-height:0 lets it shrink so overflow-y works).
+   NOTE: it deliberately sets NO z-index — a stacking context here would trap position:fixed modals
+   below the sidebar (the delete-customer overlay bug); fixed overlays must reach the root context. */
+.content {
+  position: relative;
+  flex: 1 1 auto;
+  display: grid;
+  align-content: start;
+  gap: var(--space-6);
+  padding: var(--layout-content-gutter);
+  min-width: 0;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+
+.route-host {
+  position: relative; // anchors the absolutely-pinned :leave view (routeFade, §9)
+  width: 100%;
+  min-width: 0;
+}
+
+/* Direct child of .app-main; `.content` (flex: 1) pushes it to the viewport bottom. */
+.footer {
+  flex: none;
+  width: 100%;
+  padding: var(--space-8) var(--layout-content-gutter, 1.5rem);
+  border-top: 1px solid var(--color-border);
+  font-size: var(--text-caption);
+}
+
+.footer-text {
+  color: var(--color-text-muted);
+}
+
+.mobile-nav {
+  position: fixed;
+  inset: 0;
+  background: var(--color-overlay);
+  backdrop-filter: blur(4px);
+  z-index: var(--z-drawer);
+  display: grid;
+  align-items: start;
+}
+
+.mobile-nav__panel {
+  width: min(360px, 100%);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  padding: var(--space-6);
+  box-shadow: var(--shadow-lg);
+  height: 100%;
+}
+
+.mobile-nav__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: var(--space-5);
+}
+
+.mobile-nav__title {
+  font-size: var(--text-body);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
+}
+
+.mobile-nav__close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-field);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text);
+  cursor: pointer;
+  transition:
+    background-color var(--motion-duration-fast) var(--motion-ease-standard),
+    border-color var(--motion-duration-fast) var(--motion-ease-standard),
+    box-shadow var(--motion-duration-fast) var(--motion-ease-standard),
+    transform var(--motion-duration-fast) var(--motion-ease-standard);
+
+  &:hover {
+    background: var(--color-surface-2);
+    border-color: var(--color-border-strong);
+    transform: translateY(-1px);
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: var(--shadow-focus);
+  }
+}
+
+/* Rail is visible from tablet up; the overlay drawer (hamburger) is mobile-only (≤767). */
+@media (width >= 768px) {
+  .mobile-nav {
+    display: none;
+  }
+}
+
+@media (width <= 1279px) {
+  .app-main {
+    --layout-content-gutter: 1.25rem;
+  }
+}
+
+/* Below tablet the rail gives way to the overlay drawer (hamburger in the header). */
+@media (width <= 767px) {
+  .app-shell {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .sidebar-rail {
+    display: none;
+  }
+}
+
+@media (width <= 767px) {
+  .app-main {
+    --layout-content-gutter: 1rem;
+  }
+
+  .mobile-nav__panel {
+    width: min(340px, 100%);
+    padding: var(--space-5);
+  }
+}

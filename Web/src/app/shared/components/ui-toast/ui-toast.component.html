@@ -1,0 +1,8 @@
+<app-ui-alert
+  [type]="alertType"
+  [title]="title() || null"
+  [message]="message() || null"
+  [dismissible]="true"
+  [dismissLabel]="'common.close' | translate"
+  (dismissed)="remove()"
+></app-ui-alert>

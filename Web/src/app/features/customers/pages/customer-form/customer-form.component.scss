@@ -1,0 +1,222 @@
+// Create/Edit customer screen. Standard project page structure: a slim page-head card (the
+// customer-detail `.enterprise-header` band) over ONE full-width form card. The form is laid out
+// in a compact 2-column grid (address spans full width) so the whole set fits with minimal scroll.
+.customer-form {
+  width: 100%;
+}
+
+// --- Page-head card (horizontal header band: identity/title left, breadcrumb + back right) ------
+.form-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-8);
+
+  // On-grid header band padding (was 8/14 — the 14px was off the spacing grid).
+  padding: var(--space-8) var(--space-11);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-xs);
+}
+
+.form-head__lead {
+  display: flex;
+  align-items: center;
+  gap: var(--space-5);
+  min-width: 0;
+}
+
+.form-head__icon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-tile, 14px);
+  background: var(--gradient-brand);
+  color: #fff;
+  font-size: 22px;
+  box-shadow: var(--shadow-card);
+}
+
+.form-head__avatar {
+  flex: none;
+}
+
+.form-head__lead-copy {
+  display: grid;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.form-head__title {
+  margin: 0;
+  font-size: var(--text-h3, 18px);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-heading);
+  line-height: 1.2;
+}
+
+.form-head__title--name {
+  @apply truncate;
+}
+
+.form-head__subtitle {
+  margin: 0;
+  font-size: var(--text-body-sm);
+  color: var(--color-text-muted);
+}
+
+.form-head__badges {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.form-head__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-4);
+  flex: none;
+
+  app-ui-button {
+    flex: none;
+  }
+}
+
+// --- Form card: flat grouped sections ---------------------------------------------------------
+// One ui-card holds the whole form; the grouped sections are FLAT (no nested gray panels). They
+// read as titled field groups separated by a single hairline divider — not faux-cards-in-a-card.
+// (Design rule: only the ui-card / ui-card[sim] surface; no secondary recessed panels.) The form
+// column is bounded so the 2-up inputs don't sprawl edge-to-edge on wide screens (rule §8).
+.form-card {
+  // A11: FULL-WIDTH card — the section grid below splits it into two ≤640px form columns, so the
+  // old 920px ceiling is no longer needed to keep inputs from sprawling.
+  max-width: none;
+}
+
+/* A11: 2×2 section grid on wide screens — row 1 = Identity | Address, row 2 = Wallet & Finance |
+   KYC & Status (the sections flow row-major in exactly that order). Collapses to the original
+   single column at ≤1024px. */
+/* stylelint-disable-next-line selector-pseudo-element-no-unknown */
+.form-card__form ::ng-deep .ui-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-13) 48px; // 32px section rhythm, 48px column gutter
+
+  @media (width <= 1024px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+// Flat sections: no surface fill, border, or hover glow — just the field group + its own air.
+/* stylelint-disable-next-line selector-pseudo-element-no-unknown */
+.form-card__form ::ng-deep .ui-form__section {
+  gap: var(--space-4);
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+// Dividers follow the grid: on the wide 2×2 layout only the SECOND ROW (sections 3+) draws the
+// hairline (a side-by-side pair must not carry a mid-row border); the single-column fallback
+// keeps the original between-every-group divider.
+/* stylelint-disable-next-line selector-pseudo-element-no-unknown */
+.form-card__form ::ng-deep .ui-form__section:nth-child(n + 3) {
+  padding-top: var(--space-13);
+  border-top: 1px solid var(--color-border);
+}
+
+@media (width <= 1024px) {
+  /* stylelint-disable-next-line selector-pseudo-element-no-unknown */
+  .form-card__form ::ng-deep .ui-form__section + .ui-form__section {
+    padding-top: var(--space-13);
+    border-top: 1px solid var(--color-border);
+  }
+}
+
+// Standard field rhythm: 44px controls (matches buttons + the rest of the app) and a roomy grid.
+/* stylelint-disable-next-line selector-pseudo-element-no-unknown */
+.form-card__form ::ng-deep .ui-form__field {
+  gap: var(--space-2);
+}
+
+/* stylelint-disable-next-line selector-pseudo-element-no-unknown */
+.form-card__form ::ng-deep .ui-input, .form-card__form ::ng-deep .ui-select {
+  min-height: 44px;
+}
+
+// 30px column gutter (rule §1) between the two field columns; 8px row gap.
+/* stylelint-disable-next-line selector-pseudo-element-no-unknown */
+.form-card__form ::ng-deep .ui-form__grid {
+  gap: var(--space-4) 30px;
+}
+
+/* stylelint-disable-next-line selector-pseudo-element-no-unknown */
+.form-card__form ::ng-deep .ui-form__error {
+  min-height: 16px;
+  margin-top: 2px;
+}
+
+// --- Footer actions ---------------------------------------------------------------------------
+.form-actions {
+  @apply flex flex-wrap items-center justify-end gap-3;
+
+  app-ui-button {
+    @apply flex-none;
+  }
+}
+
+// Footer actions live in the card body (content projection inside @if cannot target the card's
+// footer slot), so draw the separating rule + spacing here.
+.form-actions--footer {
+  margin-top: var(--space-11);
+  padding-top: var(--space-11);
+  border-top: 1px solid var(--color-border);
+}
+
+// v2 §5: primary Save follows the 190px minimum width.
+app-ui-button.form-actions__save {
+  width: auto;
+}
+
+// --- Loading skeleton (mirrors the compact 2-col field grid) ----------------------------------
+.form-skeleton {
+  display: grid;
+  gap: var(--space-4) 30px;
+  grid-template-columns: 1fr;
+
+  @media (width >= 768px) {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.form-skeleton-field {
+  display: grid;
+  gap: 5px;
+}
+
+.form-skeleton-field--full {
+  @media (width >= 768px) {
+    grid-column: 1 / -1;
+  }
+}
+
+// --- Responsive -------------------------------------------------------------------------------
+@media (width <= 760px) {
+  .form-head {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-5);
+    padding: var(--space-8);
+  }
+
+  .form-head__actions {
+    justify-content: flex-start;
+    width: 100%;
+  }
+}

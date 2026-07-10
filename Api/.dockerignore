@@ -1,0 +1,16 @@
+# Keep the build context small and never ship local state / secrets into the image.
+node_modules
+dist
+coverage
+*.log
+.DS_Store
+.git
+.gitignore
+# Local env (incl. .env.example / .env.docker.example) — the container is configured via injected env.
+.env
+.env.*
+# Docker + docs artifacts aren't needed inside the image.Ï
+Dockerfile
+.dockerignore
+docker-compose*.yml
+README.md

@@ -1,0 +1,280 @@
+<div class="page-shell customer-list" [attr.data-density]="density">
+  @let isLoading = (loading$ | async) ?? false;
+  @let rows = (data$ | async) ?? [];
+  @let count = (total$ | async) ?? 0;
+  @let hasError = !!(error$ | async);
+  @let chips = activeFilterChips;
+
+  <!--
+    v2.1 §5 /customers + §3.3 G1: the title row (status tabs left, page actions right) lives
+    OUTSIDE/ABOVE the card on the `.v2-section` utilities; the header owns the H1.
+  -->
+  <section class="v2-section">
+    <div class="v2-section__head customer-list__topbar">
+      <app-ui-tabs
+        class="customer-list__tabs"
+        [items]="statusTabs"
+        [value]="isActive.value"
+        [ariaLabel]="'common.filters' | translate"
+        (valueChange)="onStatusTabChange($event)"
+      ></app-ui-tabs>
+
+      <div class="customer-list__actions">
+        <!-- Below md the filter controls collapse into a drawer; this button opens it. -->
+        <app-ui-button
+          class="toolbar__filters-trigger"
+          variant="ghost"
+          size="sm"
+          type="button"
+          (click)="openFiltersDrawer()"
+        >
+          <i class="ri-filter-3-line ui-button__icon" aria-hidden="true"></i>
+          {{ 'common.filters' | translate }}
+          @if (activeFilterCount > 0) {
+            <span class="toolbar__filters-count">{{ activeFilterCount }}</span>
+          }
+        </app-ui-button>
+
+        @if (auth.hasPermission('customers.pii.reveal')) {
+          <app-ui-button
+            variant="ghost"
+            size="sm"
+            type="button"
+            data-testid="customers-pii-toggle"
+            [attr.aria-pressed]="reveal()"
+            [attr.aria-label]="
+              (reveal() ? 'customers.pii.maskAria' : 'customers.pii.revealAria') | translate
+            "
+            (click)="toggleReveal()"
+          >
+            <i
+              class="ui-button__icon"
+              [class.ri-eye-off-line]="reveal()"
+              [class.ri-eye-line]="!reveal()"
+              aria-hidden="true"
+            ></i>
+            {{ (reveal() ? 'customers.pii.mask' : 'customers.pii.reveal') | translate }}
+          </app-ui-button>
+        }
+
+        @if (auth.hasPermission('customers.manage')) {
+          <app-ui-button size="sm" type="button" data-testid="customers-create" (click)="create()">
+            <i class="ri-user-add-line ui-button__icon" aria-hidden="true"></i>
+            {{ 'customers.create' | translate }}
+          </app-ui-button>
+        }
+      </div>
+    </div>
+
+    @if (reveal()) {
+      <p id="customer-list-reveal-notice" class="reveal-notice" role="status" aria-live="polite">
+        <i class="ri-eye-line" aria-hidden="true"></i>
+        {{ 'customers.pii.revealedNotice' | translate }}
+      </p>
+    }
+
+    <!--
+      v2.1 §5 /customers: ONE white card holds (top to bottom) the toolbar row, the active-filter
+      chips, and the table whose own footer keeps the pagination bottom-right INSIDE the card.
+      The previous separate stacked toolbar card is gone ("scattered" defect fix).
+    -->
+    <div class="customer-list__card" data-testid="customers-list-card">
+      <!-- Toolbar row: search pill grows · KYC select · density segmented right (labels stay for AT). -->
+      <div class="toolbar motion-stagger">
+        <div class="toolbar__search">
+          <label class="sr-only" for="flt-search">{{ 'customers.search' | translate }}</label>
+          <app-ui-input
+            id="flt-search"
+            data-testid="customers-filter-search"
+            iconStart="ri-search-line"
+            [control]="search"
+            [inputClass]="'!rounded-full !border-0 !bg-[var(--color-surface-2)]'"
+            [placeholder]="'customers.searchPlaceholder' | translate"
+          ></app-ui-input>
+        </div>
+
+        <div class="toolbar__kyc">
+          <label class="sr-only" for="flt-kyc">{{ 'customers.kycStatus' | translate }}</label>
+          <app-ui-select
+            id="flt-kyc"
+            data-testid="customers-filter-kyc"
+            [control]="kycStatus"
+            [options]="kycStatusOptions"
+          ></app-ui-select>
+        </div>
+
+        @if (chips.length > 0) {
+          <div class="active-filters" role="group" [attr.aria-label]="'common.filters' | translate">
+            <app-ui-button size="sm" variant="ghost" type="button" (click)="clearFilters()">
+              <i class="ri-filter-off-line ui-button__icon" aria-hidden="true"></i>
+              {{ 'common.clearAll' | translate }}
+            </app-ui-button>
+          </div>
+        }
+      </div>
+
+      <!--
+        Populated/loading path keeps the existing app-ui-table verbatim (its own skeleton, footer
+        "Total: N" + v2 pagination, and #rowActions slot are unchanged). When the result set is
+        empty and not loading, a richer app-ui-empty replaces the table region inside the SAME
+        card — first-run vs no-results copy by filters.
+      -->
+      @if (!isLoading && count === 0 && !hasError) {
+        @if (hasActiveFilters) {
+          <app-ui-empty
+            class="customer-list__empty"
+            icon="ri-search-eye-line"
+            [title]="'customers.noResultsTitle' | translate"
+            [message]="'customers.noResultsMessage' | translate"
+            [actionLabel]="'common.clearAll' | translate"
+            actionIcon="ri-filter-off-line"
+            (actionClick)="clearFilters()"
+          ></app-ui-empty>
+        } @else {
+          <app-ui-empty
+            class="customer-list__empty"
+            icon="ri-user-add-line"
+            [title]="'customers.emptyTitle' | translate"
+            [message]="'customers.emptyMessage' | translate"
+            [actionLabel]="
+              auth.hasPermission('customers.manage') ? ('customers.create' | translate) : null
+            "
+            actionIcon="ri-user-add-line"
+            (actionClick)="create()"
+          ></app-ui-empty>
+        }
+      } @else {
+        <app-ui-table
+          class="customer-list__table"
+          data-testid="customers-table"
+          [columns]="columns"
+          [data]="rows"
+          [loading]="isLoading"
+          [error]="hasError"
+          [page]="page"
+          [pageSize]="pageSize"
+          [total]="count"
+          [density]="density"
+          rowActionLabelKey="common.details"
+          (pageChange)="onPageChange($event)"
+          (retry)="reload()"
+        >
+          <!--
+            First-column renderer (§7.3): avatar (initials, deterministic hue) + name + email
+            stacked. Wired to columns[0].cellTemplate in ngAfterViewInit; other columns keep the
+            table's default rendering. `let-row` reads the CellTemplateContext.row.
+          -->
+          <ng-template #customerCell let-row="row">
+            <div class="customer-cell">
+              <app-ui-avatar
+                class="customer-cell__avatar"
+                size="sm"
+                color="auto"
+                [name]="row.name"
+              ></app-ui-avatar>
+              <span class="customer-cell__text">
+                <span class="customer-cell__name">{{ row.name }}</span>
+                <span class="customer-cell__email">{{ row.email }}</span>
+              </span>
+            </div>
+          </ng-template>
+
+          <!-- v2 §4/§5: row actions are pill outline buttons (confirm dialog still guards delete). -->
+          <ng-template #rowActions let-row>
+            <div class="row-actions">
+              <app-ui-button
+                size="sm"
+                variant="pill"
+                type="button"
+                data-testid="customers-row-open"
+                [iconOnly]="true"
+                [ariaLabel]="'common.details' | translate"
+                (click)="open(row)"
+              >
+                <i class="ri-eye-line ui-button__icon" aria-hidden="true"></i>
+              </app-ui-button>
+
+              <app-ui-button
+                *appHasPermission="'customers.delete'"
+                size="sm"
+                variant="pill"
+                type="button"
+                data-testid="customers-row-delete"
+                [iconOnly]="true"
+                [ariaLabel]="'common.delete' | translate"
+                (click)="openDelete(row)"
+              >
+                <i class="ri-delete-bin-6-line ui-button__icon" aria-hidden="true"></i>
+              </app-ui-button>
+            </div>
+          </ng-template>
+        </app-ui-table>
+      }
+    </div>
+  </section>
+
+  <!-- Mobile Filters drawer (§7.3): inline-toolbar controls; status lives in the tabs above. -->
+  <app-ui-drawer
+    size="sm"
+    [open]="filtersDrawerOpen"
+    [title]="'common.filters' | translate"
+    [closeAriaLabel]="'common.cancel' | translate"
+    (closed)="closeFiltersDrawer()"
+  >
+    <div class="filters-drawer">
+      <div class="form-field">
+        <label for="flt-search-m">{{ 'customers.search' | translate }}</label>
+        <app-ui-input
+          id="flt-search-m"
+          [control]="search"
+          [placeholder]="'customers.searchPlaceholder' | translate"
+        ></app-ui-input>
+      </div>
+
+      <div class="form-field">
+        <label for="flt-kyc-m">{{ 'customers.kycStatus' | translate }}</label>
+        <app-ui-select
+          id="flt-kyc-m"
+          [control]="kycStatus"
+          [options]="kycStatusOptions"
+        ></app-ui-select>
+      </div>
+
+      <div class="form-field">
+        <label>{{ 'common.density' | translate }}</label>
+        <app-ui-segmented
+          size="sm"
+          [items]="densityOptions"
+          [value]="density"
+          [ariaLabel]="'common.density' | translate"
+          (valueChange)="setDensity($event)"
+        ></app-ui-segmented>
+      </div>
+    </div>
+
+    <div drawer-footer class="filters-drawer__footer">
+      @if (hasActiveFilters) {
+        <app-ui-button variant="ghost" size="sm" type="button" (click)="clearFilters()">
+          <i class="ri-filter-off-line ui-button__icon" aria-hidden="true"></i>
+          {{ 'common.clearAll' | translate }}
+        </app-ui-button>
+      }
+      <app-ui-button size="sm" type="button" (click)="closeFiltersDrawer()">
+        <i class="ri-check-line ui-button__icon" aria-hidden="true"></i>
+        {{ 'common.apply' | translate }}
+      </app-ui-button>
+    </div>
+  </app-ui-drawer>
+
+  <app-ui-confirm-dialog
+    [open]="deleteModalOpen"
+    titleKey="customers.deleteTitle"
+    messageKey="customers.deleteConfirm"
+    [messageParams]="{ name: deleteTarget?.name ?? '' }"
+    confirmLabelKey="common.delete"
+    cancelLabelKey="common.cancel"
+    [loading]="(deletingTarget$ | async) ?? false"
+    (confirm)="confirmDelete()"
+    (cancel)="closeDelete()"
+  ></app-ui-confirm-dialog>
+</div>

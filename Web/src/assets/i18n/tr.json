@@ -1,0 +1,1309 @@
+{
+  "auth": {
+    "login": {
+      "formTitle": "Tekrar hoş geldiniz",
+      "subtitle": "Operasyon konsoluna giriş yapın",
+      "languageLabel": "Dil seçimi",
+      "themeLight": "Aydınlık temaya geç",
+      "themeDark": "Karanlık temaya geç",
+      "slides": {
+        "label": "Öne çıkanlar",
+        "goTo": "{{index}}. slayda git",
+        "customers": {
+          "title": "360° müşteri görünümü",
+          "body": "Her müşteriyi tek ekranda toplayın; hesaplar, işlemler ve risk bir arada."
+        },
+        "risk": {
+          "title": "Risk ve uyum, canlı",
+          "body": "KYC, AML ve zincir üstü riski denetime hazır izlerle takip edin."
+        },
+        "realtime": {
+          "title": "Gerçek zamanlı operasyon",
+          "body": "Akışları, onayları ve uyarıları gecikme olmadan yönetin."
+        }
+      },
+      "demoBadge": "DEMO",
+      "demoNote": "Demo ortamı — tüm veriler simülasyondur. Gerçek müşteri bilgisi gösterilmez.",
+      "demo": {
+        "title": "Bir demo rol deneyin",
+        "subtitle": "Formu doldurmak için bir rol seçin, ardından giriş yapın.",
+        "fill": "Doldur",
+        "fillAria": "Giriş formunu {{role}} demo hesabıyla doldur",
+        "roles": {
+          "administrator": {
+            "name": "Yönetici",
+            "desc": "Tam erişim — PII görüntüleme, silme, rol ve kullanıcı yönetimi"
+          },
+          "operator": {
+            "name": "Uyum Görevlisi",
+            "desc": "Günlük operasyon — silme veya PII görüntüleme yok"
+          },
+          "auditor": {
+            "name": "İzleyici",
+            "desc": "Konsol genelinde salt-okunur gözetim"
+          }
+        }
+      },
+      "email": "E-posta",
+      "emailPlaceholder": "ad.soyad@sirket.com",
+      "password": "Parola",
+      "passwordPlaceholder": "Parolanızı girin",
+      "submit": "Giriş yap",
+      "signingIn": "Giriş yapılıyor...",
+      "showPassword": "Parolayı göster",
+      "hidePassword": "Parolayı gizle",
+      "invalid": "Geçersiz e-posta veya parola.",
+      "failed": "Giriş başarısız. Lütfen tekrar deneyin.",
+      "locked": "Çok fazla deneme. Lütfen biraz sonra tekrar deneyin.",
+      "lockedRetry": "Çok fazla deneme. Lütfen {{seconds}} saniye sonra tekrar deneyin.",
+      "forgotPassword": "Şifremi unuttum?"
+    },
+    "forgot": {
+      "title": "Şifrenizi sıfırlayın",
+      "subtitle": "Kimliğinizi doğrulayın ve ekranda yeni bir parola belirleyin.",
+      "stepsLabel": "Sıfırlama adımları",
+      "steps": {
+        "identify": "Kimlik",
+        "verify": "Doğrulama",
+        "reset": "Yeni parola"
+      },
+      "brandHeadline": "Hesabınıza erişimi geri kazanın",
+      "brandBody": "E-posta gönderilmez — kimliğinizi iki adımlı doğrulama ile kanıtlar, yeni parolanızı doğrudan burada belirlersiniz.",
+      "identify": {
+        "intro": "Hesabınıza bağlı e-posta adresini girin.",
+        "submit": "Devam et"
+      },
+      "verify": {
+        "intro": "{{email}} için kimlik doğrulayıcı uygulamanızdaki güncel kodu girin.",
+        "codeLabel": "Doğrulama kodu",
+        "digit": "Doğrulama kodu hanesi",
+        "submit": "Doğrula",
+        "introBackup": "{{email}} için tek kullanımlık yedek kodlarınızdan birini girin.",
+        "backupLabel": "Yedek kod",
+        "backupPlaceholder": "XXXXX-XXXXX",
+        "useBackup": "Bunun yerine yedek kod kullan",
+        "useTotp": "Bunun yerine kimlik doğrulayıcı uygulamayı kullan"
+      },
+      "reset": {
+        "intro": "Yeni parolanızı belirleyin.",
+        "newPassword": "Yeni parola",
+        "newPasswordPlaceholder": "En az 12 karakter",
+        "confirmPassword": "Yeni parola (tekrar)",
+        "confirmPlaceholder": "Parolayı tekrar girin",
+        "match": "Parolalar eşleşiyor",
+        "mismatch": "Parolalar eşleşmiyor",
+        "submit": "Parolayı güncelle"
+      },
+      "reqTitle": "Parolanız şunları içermeli",
+      "rules": {
+        "len": "En az 12 karakter",
+        "upper": "Bir büyük harf (A-Z)",
+        "lower": "Bir küçük harf (a-z)",
+        "digit": "Bir rakam (0-9)",
+        "symbol": "Bir özel karakter (!?@#)"
+      },
+      "strength": {
+        "weak": "Zayıf",
+        "fair": "Orta",
+        "strong": "Güçlü",
+        "veryStrong": "Çok güçlü"
+      },
+      "working": {
+        "identity": "Kontrol ediliyor…",
+        "verify": "Doğrulanıyor…",
+        "reset": "Güncelleniyor…"
+      },
+      "back": "Geri",
+      "backToLogin": "Girişe dön",
+      "done": {
+        "title": "Parolanız güncellendi",
+        "body": "Parolanız değiştirildi ve diğer tüm oturumlar kapatıldı. Devam etmek için yeni parolanızla giriş yapın.",
+        "backToLogin": "Girişe dön"
+      },
+      "error": {
+        "invalidCode": "Kod hatalı veya süresi dolmuş. Lütfen tekrar girin.",
+        "factorRequired": "Doğrulama kodu gerekli. Lütfen kodu yeniden girin.",
+        "expired": "Bu sıfırlama isteğinin süresi doldu. Lütfen baştan başlayın.",
+        "weakPassword": "Parola gereksinimleri karşılamıyor. Lütfen daha güçlü bir parola seçin.",
+        "samePassword": "Yeni parolanız mevcut parolanızdan farklı olmalıdır.",
+        "rateLimit": "Çok fazla deneme. Lütfen biraz sonra tekrar deneyin.",
+        "rateLimitRetry": "Çok fazla deneme. Lütfen {{seconds}} saniye sonra tekrar deneyin.",
+        "generic": "Bir şeyler ters gitti. Lütfen tekrar deneyin."
+      },
+      "expired": {
+        "title": "Sıfırlama isteği süresi doldu",
+        "body": "Bu parola sıfırlama artık tamamlanamıyor. Yeni bir istek için baştan başlayın.",
+        "startOver": "Baştan başla"
+      },
+      "adminRequest": {
+        "link": "Kimlik doğrulayıcıma erişemiyorum — yöneticiden sıfırlama iste",
+        "title": "Yöneticiden sıfırlama iste",
+        "intro": "Yöneticilerinize bir parola sıfırlama isteği gönderin. Bir yönetici kimliğinizi doğrulayıp isteği onaylar; ardından yeni parolanızı bu ekrandan kendiniz belirlersiniz.",
+        "emailLabel": "Hesap e-postası",
+        "submit": "İstek gönder",
+        "waitingTitle": "İsteğiniz alındı",
+        "waitingBody": "İsteğiniz alındı. Bir isteğiniz zaten bekliyorsa yönetici onayı sonrası bu ekrandan devam edebilirsiniz.",
+        "waitingHint": "Bu ekran durumu 20 saniyede bir otomatik olarak denetler. Ekranı açık tutabilirsiniz; onay biraz zaman alabilir.",
+        "checkNow": "Durumu kontrol et",
+        "deniedTitle": "İstek reddedildi",
+        "deniedBody": "Bir yönetici bu sıfırlama isteğini reddetti. Bunun bir hata olduğunu düşünüyorsanız yöneticinizle doğrudan iletişime geçin.",
+        "error": {
+          "expired": "İsteğin süresi tamamlanmadan doldu. Lütfen yeni bir istek gönderin.",
+          "generic": "İstek şu anda işlenemedi. Lütfen tekrar deneyin."
+        }
+      },
+      "adminContact": {
+        "title": "Giriş için yardım mı gerekiyor?",
+        "body": "Kendi kendine sıfırlama, hesabınızda iki adımlı doğrulama gerektirir. Tamamlayamıyorsanız parolanızı sıfırlaması için bir yöneticiye başvurun."
+      }
+    }
+  },
+  "app": {
+    "title": "Fintech Operasyon Paneli",
+    "footer": "Fintech İç Operasyon Paneli",
+    "brand": "Vaultchain",
+    "tagline": "Fintech Operations"
+  },
+  "nav": {
+    "dashboard": "Panel",
+    "customers": "Müşteriler",
+    "settings": "Ayarlar",
+    "analytics": "Analitik",
+    "profile": "Profil",
+    "home": "Ana sayfa",
+    "notifications": "Bildirimler",
+    "passwordReset": "Parola sıfırlama",
+    "sections": {
+      "main": "Menü",
+      "insights": "Analiz",
+      "other": "Diğer"
+    }
+  },
+  "dashboard": {
+    "asOf": "Güncellik",
+    "kyc": {
+      "NOT_STARTED": "Başlamadı",
+      "PENDING": "Beklemede",
+      "IN_REVIEW": "İncelemede",
+      "VERIFIED": "Doğrulandı",
+      "REJECTED": "Reddedildi",
+      "EXPIRED": "Süresi doldu"
+    },
+    "kpi": {
+      "totalCustomers": "Toplam Müşteri",
+      "totalCustomersHint": "Sistemdeki tüm müşteriler",
+      "activeRate": "Aktif Müşteri Oranı",
+      "kycStatus": "KYC Durumu Dağılımı",
+      "kycStatusHint": "Uyum durumu özeti",
+      "avgAge": "Ortalama Yaş",
+      "avgAgeHint": "Doğum tarihine göre hesaplanır",
+      "latestUpdated": "Son Güncellenen Müşteri",
+      "latestUpdatedHint": "En son güncellenen profil",
+      "activeCustomers": "Aktif Müşteriler"
+    },
+    "labels": {
+      "active": "aktif",
+      "inactive": "pasif",
+      "years": "yaş",
+      "updatedAt": "Güncellendi"
+    },
+    "sections": {
+      "portfolio": "Müşteri Portföyü",
+      "portfolioHint": "Aktif ve pasif müşteri dağılımı",
+      "overview": "Genel Bakış",
+      "recentCustomers": "Son Müşteriler",
+      "activeSplit": "Aktif / Pasif"
+    },
+    "hero": {
+      "verifiedKyc": "Doğrulanmış KYC",
+      "verifiedShare": "Doğrulanma oranı"
+    },
+    "quickActions": {
+      "title": "Hızlı işlemler",
+      "addCustomer": "Müşteri ekle",
+      "openAnalytics": "Analitiği aç",
+      "viewCustomers": "Müşterileri görüntüle"
+    },
+    "trend": {
+      "title": "Müşteri eğilimi",
+      "summary": "Zaman içinde müşteri eğilimi grafiği",
+      "noDataForRange": "Bu aralıkta müşteri trend verisi yok.",
+      "series": {
+        "newCustomers": "Yeni müşteri",
+        "activeCustomers": "Aktif toplam",
+        "transactions": "İşlem sayısı"
+      }
+    },
+    "empty": {
+      "portfolioTitle": "Portföy verisi yok",
+      "portfolioMessage": "Henüz gösterilecek müşteri yok.",
+      "kycTitle": "KYC verisi yok",
+      "kycMessage": "Henüz KYC durumu kaydı yok.",
+      "latestTitle": "Müşteri yok",
+      "latestMessage": "Henüz kayıtlı müşteri bulunmuyor."
+    }
+  },
+  "common": {
+    "actions": "Aksiyonlar",
+    "close": "Kapat",
+    "details": "Detay",
+    "seeAll": "Tümünü gör",
+    "noData": "Veri yok",
+    "total": "Toplam",
+    "prev": "Geri",
+    "next": "İleri",
+    "page": "Sayfa",
+    "all": "Hepsi",
+    "yes": "Evet",
+    "no": "Hayır",
+    "save": "Kaydet",
+    "saving": "Kaydediliyor...",
+    "back": "Geri",
+    "edit": "Düzenle",
+    "create": "Oluştur",
+    "clear": "Temizle",
+    "filter": "Filtrele",
+    "reset": "Sıfırla",
+    "apply": "Uygula",
+    "delete": "Sil",
+    "cancel": "Vazgeç",
+    "confirm": "Onayla",
+    "deleting": "Siliniyor...",
+    "loading": "Yükleniyor...",
+    "search": "Arama",
+    "searchPlaceholder": "Aramak için yazın...",
+    "light": "Açık",
+    "dark": "Koyu",
+    "confirmMessage": "Emin misiniz?",
+    "menu": "Menü",
+    "closeMenu": "Menüyü kapat",
+    "collapseSidebar": "Menüyü daralt",
+    "expandSidebar": "Menüyü genişlet",
+    "logout": "Çıkış yap",
+    "skipToContent": "İçeriğe geç",
+    "loadError": "Veriler yüklenemedi",
+    "retry": "Tekrar dene",
+    "dataTable": "Veri tablosu",
+    "breadcrumb": "Sayfa yolu",
+    "more": "Diğer işlemler",
+    "clearAll": "Tümünü temizle",
+    "comfortable": "Rahat",
+    "compact": "Sıkışık",
+    "density": "Yoğunluk",
+    "filters": "Filtreler",
+    "remove": "{{item}} kaldır",
+    "time": {
+      "justNow": "az önce",
+      "minutesAgo": "{{count}} dk önce",
+      "hoursAgo": "{{count}} sa önce",
+      "daysAgo": "{{count}} gün önce",
+      "absolute": "daha önce"
+    }
+  },
+  "customers": {
+    "title": "Müşteriler",
+    "pii": {
+      "reveal": "Maskeyi kaldır",
+      "mask": "Maskele",
+      "revealedNotice": "Maskelenmemiş kişisel veriler görünür durumda",
+      "revealAria": "Maskelenmemiş kişisel verileri göster",
+      "maskAria": "Kişisel verileri maskele"
+    },
+    "create": "Müşteri Oluştur",
+    "edit": "Müşteri Düzenle",
+    "created": "Müşteri oluşturuldu",
+    "updated": "Müşteri güncellendi",
+    "search": "Arama",
+    "searchPlaceholder": "isim / e-posta / telefon / cüzdan / TCKN",
+    "name": "Ad Soyad",
+    "email": "E-posta",
+    "phone": "Telefon",
+    "walletNumber": "Cüzdan Numarası",
+    "dateOfBirth": "Doğum Tarihi",
+    "nationalId": "TCKN",
+    "kycStatus": "KYC Durumu",
+    "active": "Aktif",
+    "inactive": "Pasif",
+    "keepCurrentHint": "Mevcut değeri korumak için boş bırakın",
+    "deleteTitle": "Müşteriyi sil",
+    "deleteConfirm": "{{name}} adlı müşteriyi silmek istediğinize emin misiniz? Bu işlem geri alınamaz.",
+    "deleted": "Müşteri silindi",
+    "address": {
+      "title": "Adres",
+      "country": "Ülke",
+      "city": "Şehir",
+      "postalCode": "Posta Kodu",
+      "line1": "Adres Satırı"
+    },
+    "sections": {
+      "identity": {
+        "title": "Kimlik",
+        "description": "Müşterinin temel kimlik bilgileri"
+      },
+      "address": {
+        "title": "Adres",
+        "description": "İkamet ve iletişim adresi"
+      },
+      "walletFinance": {
+        "title": "Cüzdan ve Finans",
+        "description": "Cüzdan ve finansal bilgiler"
+      },
+      "kycStatus": {
+        "title": "KYC ve Durum",
+        "description": "Doğrulama durumu ve hesap erişimi"
+      }
+    },
+    "emptyTitle": "Henüz müşteri yok",
+    "emptyMessage": "İlk müşteriyi ekleyerek başlayın.",
+    "noResultsTitle": "Sonuç bulunamadı",
+    "noResultsMessage": "Arama veya filtreleri değiştirmeyi deneyin.",
+    "formHero": {
+      "createTitle": "Yeni Müşteri",
+      "createSubtitle": "Operasyon konsoluna yeni bir müşteri kaydı ekleyin.",
+      "editTitle": "Müşteriyi Düzenle",
+      "editSubtitle": "Mevcut müşteri kaydını güncelleyin.",
+      "guidanceTitle": "Bilmeniz gerekenler",
+      "guidance": {
+        "wallet": "Müşteri oluşturulduğunda varsayılan bir cüzdan otomatik açılır.",
+        "kyc": "KYC durumu kayıt sonrası operatör tarafından yönetilir.",
+        "privacy": "Ad, e-posta ve telefon gizlilik gereği maskeli saklanır.",
+        "nationalId": "TC Kimlik No doğrulanır ve sonradan değiştirilemez."
+      }
+    }
+  },
+  "customerDetail": {
+    "title": "Müşteri Detayı",
+    "emptyValue": "—",
+    "lastUpdated": "Son güncelleme",
+    "addressSubtitle": "İkamet ve iletişim adresi",
+    "transactionsSubtitle": "Filtreler, yeni işlem ve işlem geçmişi tek çalışma alanında.",
+    "limitUsage": "Limit kullanımı",
+    "dailyVsMonthly": "Günlük limitin aylık limite oranı",
+    "operations": {
+      "title": "Operasyon sinyalleri",
+      "subtitle": "Geçmiş kayıt ve aktivite sayaçları"
+    },
+    "tabs": {
+      "overview": "Genel Bakış",
+      "transactions": "İşlemler",
+      "kyc": "KYC",
+      "risk": "Risk"
+    },
+    "profile": "Profil",
+    "contact": "İletişim",
+    "stat": {
+      "memberSince": "Kayıt tarihi"
+    },
+    "kycCard": {
+      "title": "KYC ve kimlik",
+      "subtitle": "Uyum durumu ve kimlik referansı"
+    },
+    "kycHistory": {
+      "title": "KYC geçmişi",
+      "empty": "Bu müşteri için KYC geçmiş kaydı yok."
+    },
+    "kycMethod": {
+      "manual": "Manuel",
+      "manual_review": "Manuel inceleme",
+      "e_kyc": "e-KYC",
+      "document": "Belge",
+      "biometric": "Biyometrik",
+      "liveness": "Canlılık"
+    },
+    "riskCard": {
+      "title": "Web3 risk taraması",
+      "subtitle": "Bu müşteri için salt okunur zincir üstü risk bilgisi"
+    },
+    "riskHistory": {
+      "title": "Risk karar geçmişi",
+      "empty": "Bu müşteri için kaydedilmiş risk kararı yok."
+    },
+    "notFound": {
+      "eyebrow": "Kayıt erişilemedi",
+      "title": "Müşteri bulunamadı",
+      "desc": "Bu müşteri silinmiş, arşivlenmiş veya bağlantıdaki kayıt numarası geçersiz olabilir.",
+      "primaryAction": "Müşteri listesine dön",
+      "clues": {
+        "removed": "Kayıt silinmiş olabilir",
+        "invalidId": "Bağlantıdaki müşteri numarası geçersiz olabilir",
+        "searchAgain": "Listeden yeniden arayarak devam edin"
+      }
+    }
+  },
+  "wallet": {
+    "title": "Cüzdan",
+    "subtitle": "Bakiye ve limitler",
+    "balance": "Bakiye",
+    "dailyLimit": "Günlük Limit",
+    "monthlyLimit": "Aylık Limit",
+    "updated": "Cüzdan limitleri güncellendi",
+    "status": {
+      "title": "Cüzdan durumu",
+      "ACTIVE": "Aktif",
+      "FROZEN": "Donduruldu",
+      "CLOSED": "Kapalı"
+    }
+  },
+  "transactions": {
+    "title": "İşlemler",
+    "filters": "İşlem Filtreleri",
+    "type": "Tip",
+    "direction": "Yön",
+    "kind": "Tür",
+    "status": "Durum",
+    "currency": "Para Birimi",
+    "from": "Başlangıç (occurredAt ≥)",
+    "to": "Bitiş (occurredAt ≤)",
+    "amount": "Tutar",
+    "createdAt": "Tarih",
+    "description": "Açıklama",
+    "kinds": {
+      "DEPOSIT": "Para Yatırma",
+      "WITHDRAWAL": "Para Çekme",
+      "TRANSFER": "Transfer",
+      "FEE": "Ücret",
+      "ADJUSTMENT": "Düzeltme",
+      "REVERSAL": "Ters Kayıt"
+    },
+    "statuses": {
+      "PENDING": "Beklemede",
+      "POSTED": "Tamamlandı",
+      "FAILED": "Başarısız",
+      "REVERSED": "İade Edildi"
+    },
+    "create": {
+      "title": "İşlem oluştur",
+      "subtitle": "İşlem bu müşterinin mevcut cüzdanı üzerinden post edilir.",
+      "kind": "İşlem türü",
+      "amount": "Tutar",
+      "submit": "İşlem oluştur",
+      "created": "İşlem oluşturuldu.",
+      "filteredOut": "İşlem oluşturuldu; aktif filtreler nedeniyle listede görünmüyor olabilir.",
+      "walletRequired": "İşlem oluşturmak için backend'den cüzdan kimliği dönmelidir."
+    }
+  },
+  "kyc": {
+    "NOT_STARTED": "Başlamadı",
+    "PENDING": "Beklemede",
+    "IN_REVIEW": "İncelemede",
+    "VERIFIED": "Doğrulandı",
+    "REJECTED": "Reddedildi",
+    "EXPIRED": "Süresi doldu"
+  },
+  "validation": {
+    "required": "Bu alanın doldurulması zorunludur.",
+    "multipleSpaces": "Lütfen tek boşluk kullanarak giriniz.",
+    "email": "Lütfen geçerli bir e-posta adresi giriniz.",
+    "min": "Değer en az {{min}} olmalıdır.",
+    "max": "Değer en fazla {{max}} olmalıdır.",
+    "minLength": "En az {{min}} karakter giriniz.",
+    "maxLength": "En fazla {{max}} karakter giriniz.",
+    "digitsMin": "En az {{min}} hane giriniz.",
+    "digitsMax": "En fazla {{max}} hane giriniz.",
+    "surnameRequired": "Lütfen ad ve soyad bilgisini birlikte giriniz.",
+    "phoneInvalid": "Lütfen geçerli bir telefon numarası giriniz.",
+    "walletNumberInvalid": "Cüzdan numarası 16 haneli olmalıdır.",
+    "nameInvalid": "Ad alanı yalnızca harf, boşluk, kesme ve tire içerebilir.",
+    "unsafeChars": "İzin verilmeyen karakter kullanıldı.",
+    "dateInvalid": "Lütfen geçerli bir tarih seçiniz.",
+    "dateInFuture": "Tarih gelecekte olamaz.",
+    "minAge": "Müşteri en az {{min}} yaşında olmalıdır.",
+    "maxAge": "Müşteri yaşı en fazla {{max}} olmalıdır.",
+    "invalid": "Geçersiz değer.",
+    "limitMismatch": "Günlük limit aylık limitten küçük olmalıdır.",
+    "nationalIdNumeric": "TCKN yalnızca rakamlardan oluşmalıdır.",
+    "nationalIdLength": "TCKN 11 haneli olmalıdır.",
+    "nationalIdStartsWithZero": "TCKN 0 ile başlayamaz.",
+    "nationalIdChecksum": "TCKN doğrulaması başarısız.",
+    "alphaOnly": "Bu alan yalnızca harf, boşluk, kesme ve tire içerebilir.",
+    "postalCodeInvalid": "Posta kodu yalnızca rakamlardan oluşmalıdır (4–10 hane)."
+  },
+  "errors": {
+    "network": "Bağlantı hatası. İnternetinizi kontrol edin.",
+    "server": "Sistemsel bir hata oluştu. Daha sonra tekrar deneyin.",
+    "notFound": "Kayıt bulunamadı.",
+    "unknown": "Beklenmeyen bir hata oluştu.",
+    "referenceSuffix": " (Referans: {{id}})",
+    "validation": "Lütfen form alanlarını kontrol edin.",
+    "forbidden": "Bu işlemi gerçekleştirme yetkiniz yok.",
+    "conflict": "Bu kayıt başka biri tarafından değiştirildi. Lütfen sayfayı yenileyip tekrar deneyin.",
+    "sessionExpired": "Oturumunuzun süresi doldu. Lütfen tekrar giriş yapın.",
+    "tooManyRequests": "Çok fazla istek. Lütfen biraz yavaşlayıp tekrar deneyin.",
+    "code": {
+      "Auth": {
+        "AccountLocked": "Hesap çok sayıda başarısız deneme nedeniyle geçici olarak kilitlendi. Lütfen daha sonra tekrar deneyin.",
+        "Forbidden": "Bu işlem için yetkiniz yok.",
+        "InvalidCredentials": "E-posta veya parola hatalı.",
+        "InvalidToken": "Oturum doğrulanamadı. Lütfen yeniden giriş yapın.",
+        "MfaEnrollmentRequired": "Giriş yapmadan önce iki adımlı doğrulama kurulumunu tamamlamanız gerekiyor.",
+        "PermissionsStale": "Erişim yetkileriniz değişti. Lütfen yeniden giriş yapın.",
+        "ResetChallengeConsumed": "Bu doğrulama adımı zaten kullanıldı. Lütfen sıfırlamayı baştan başlatın.",
+        "ResetChallengeInvalid": "Parola sıfırlama oturumu geçersiz veya süresi doldu. Lütfen baştan başlayın.",
+        "ResetChallengeMissing": "Parola sıfırlama oturumu bulunamadı. Lütfen baştan başlayın.",
+        "ResetFactorRequired": "Devam etmeden önce doğrulama kodunuzu onaylamanız gerekiyor.",
+        "ResetInvalidCode": "Doğrulama kodu hatalı veya süresi doldu.",
+        "ResetRequestAlreadyDecided": "Bu sıfırlama isteği zaten karara bağlandı. Güncel durumu görmek için listeyi yenileyin.",
+        "ResetRequestExpired": "Bu sıfırlama isteğinin süresi doldu; artık karara bağlanamaz.",
+        "ResetRequestNotFound": "Sıfırlama isteği bulunamadı. Kaldırılmış olabilir; listeyi yenileyin.",
+        "SamePassword": "Yeni parola mevcut parolanızla aynı olamaz.",
+        "SelfResetForbidden": "Kendi hesabınız için bu sıfırlama yolunu kullanamazsınız.",
+        "StreamTokenInvalid": "Canlı veri akışı doğrulanamadı. Sayfayı yenileyin.",
+        "StreamTokenMissing": "Canlı veri akışı için yetki bulunamadı. Sayfayı yenileyin.",
+        "TokenInvalid": "Oturum geçersiz. Lütfen yeniden giriş yapın.",
+        "TokenMissing": "Oturum bulunamadı. Lütfen giriş yapın.",
+        "TokenReused": "Güvenlik nedeniyle tüm oturumlar sonlandırıldı. Lütfen yeniden giriş yapın.",
+        "UserNotFound": "Kullanıcı bulunamadı.",
+        "WeakPassword": "Parola gereksinimleri karşılamıyor. Daha güçlü bir parola seçin."
+      },
+      "Customers": {
+        "Conflict": "Müşteri kaydı siz görüntülerken değişti. Sayfayı yenileyip tekrar deneyin.",
+        "DuplicateEmail": "Bu e-posta adresi başka bir müşteride kayıtlı.",
+        "DuplicateNationalId": "Bu TC kimlik numarası başka bir müşteride kayıtlı.",
+        "IllegalKycTransition": "Bu KYC durumu geçişine izin verilmiyor.",
+        "IllegalStatusTransition": "Bu müşteri durum geçişine izin verilmiyor.",
+        "NotFound": "Müşteri bulunamadı."
+      },
+      "Database": {
+        "Unavailable": "Veritabanına şu anda ulaşılamıyor. Lütfen birazdan tekrar deneyin."
+      },
+      "Idempotency": {
+        "InFlight": "Aynı istek zaten işleniyor. Lütfen sonucunu bekleyin.",
+        "KeyConflict": "Bu istek anahtarı farklı bir istekte kullanılmış. Lütfen işlemi yenileyin.",
+        "KeyInvalid": "İstek anahtarı geçersiz.",
+        "KeyRequired": "Bu işlem için istek anahtarı gerekli."
+      },
+      "Internal": {
+        "Error": "Beklenmeyen bir sistem hatası oluştu. Lütfen tekrar deneyin."
+      },
+      "Mfa": {
+        "AlreadyEnrolled": "İki adımlı doğrulama bu hesapta zaten etkin.",
+        "ChallengeConsumed": "Bu doğrulama oturumu zaten kullanıldı. Lütfen yeniden giriş yapın.",
+        "ChallengeInvalid": "Doğrulama oturumu geçersiz veya süresi doldu. Lütfen yeniden giriş yapın.",
+        "ChallengeMissing": "Doğrulama oturumu bulunamadı. Lütfen yeniden giriş yapın.",
+        "InvalidCode": "Doğrulama kodu hatalı. Lütfen güncel kodu deneyin.",
+        "NoSetupInProgress": "Devam eden bir iki adımlı doğrulama kurulumu yok. Lütfen kurulumu baştan başlatın.",
+        "NotEnabled": "İki adımlı doğrulama bu hesapta etkin değil.",
+        "SelfResetForbidden": "Kendi iki adımlı doğrulamanızı yönetici yoluyla sıfırlayamazsınız.",
+        "WrongChallenge": "Doğrulama oturumu bu işlemle eşleşmiyor. Lütfen yeniden deneyin."
+      },
+      "Notification": {
+        "ForbiddenParam": "Bildirim içeriği izin verilmeyen bir alan içeriyor.",
+        "NotFound": "Bildirim bulunamadı.",
+        "ParamsTooLarge": "Bildirim içeriği çok büyük."
+      },
+      "Operator": {
+        "NotFound": "Operatör kaydı bulunamadı."
+      },
+      "Query": {
+        "DateRangeRequired": "Bu sorgu için geçerli bir tarih aralığı gerekli.",
+        "MetricRequired": "Bu sorgu için bir metrik seçilmeli."
+      },
+      "Rbac": {
+        "LastAdmin": "Bu değişiklik son yönetici yetkisini kaldıracağı için uygulanamaz.",
+        "PermissionNotFound": "İzin tanımı bulunamadı.",
+        "RoleNotFound": "Rol bulunamadı.",
+        "SelfEscalation": "Kendi yetkilerinizi bu şekilde değiştiremezsiniz.",
+        "UserNotFound": "Kullanıcı bulunamadı."
+      },
+      "Resource": {
+        "Conflict": "Kayıt siz görüntülerken değişti. Sayfayı yenileyip tekrar deneyin.",
+        "NotFound": "Kayıt bulunamadı."
+      },
+      "Risk": {
+        "CustomerNotFound": "Risk kontrolü için müşteri bulunamadı.",
+        "MislabeledSimulation": "Kural tabanlı tarama güvenlik bayrağıyla kaydedilmelidir. Karar kaydedilmedi."
+      },
+      "Transactions": {
+        "AlreadyReversed": "Bu işlem zaten ters kayıtla iptal edilmiş.",
+        "CrossCurrency": "Farklı para birimleri arasında işlem yapılamaz.",
+        "InsufficientBalance": "Cüzdan bakiyesi bu işlem için yetersiz.",
+        "KindNotImplemented": "Bu işlem türü henüz desteklenmiyor.",
+        "NotReversible": "Bu işlem ters kayıtla iptal edilemez.",
+        "OriginalNotFound": "Ters kayıt için orijinal işlem bulunamadı.",
+        "ReversalMismatch": "Ters kayıt orijinal işlemle eşleşmiyor.",
+        "SameWallet": "Kaynak ve hedef cüzdan aynı olamaz.",
+        "SystemWalletMissing": "Sistem cüzdanı yapılandırılmamış. Lütfen yöneticinize başvurun."
+      },
+      "Validation": {
+        "Failed": "Gönderilen bilgiler doğrulamadan geçemedi. Lütfen alanları kontrol edin."
+      },
+      "Wallet": {
+        "NotFound": "Cüzdan bulunamadı."
+      },
+      "Wallets": {
+        "Conflict": "Cüzdan siz görüntülerken değişti. Sayfayı yenileyip tekrar deneyin.",
+        "InvalidLimits": "Günlük limit aylık limitten küçük olmalıdır.",
+        "NotFound": "Cüzdan bulunamadı."
+      }
+    }
+  },
+  "web3": {
+    "title": "Web3 Risk & Uyum",
+    "subtitle": "KYC kararına destek için salt-okunur zincir-üstü cüzdan risk istihbaratı",
+    "riskCheck": "Web3 Risk Kontrolü",
+    "back": "Müşteriye dön",
+    "command": {
+      "flow": "Salt-okunur uyum akışı",
+      "readOnly": "Saklama yok / işlem yok"
+    },
+    "context": {
+      "title": "Müşteri bağlamı",
+      "subtitle": "Beyan edilen cüzdanını taradığınız müşteri",
+      "kyc": "Mevcut KYC durumu",
+      "walletNote": "Vaka çalışması hesap numarası — zincir-üstü adres değildir."
+    },
+    "operator": {
+      "title": "Operatör cüzdanı",
+      "subtitle": "Opsiyonel — denetim imzası için kendi cüzdanınızı bağlayın",
+      "connect": "Cüzdan bağla",
+      "disconnect": "Bağlantıyı kes",
+      "account": "Hesap",
+      "chain": "Zincir",
+      "sign": "Denetim imzası ver (opsiyonel)",
+      "signed": "Denetim imzası alındı",
+      "signatureHint": "Yalnızca imza — işlem yok, saklama (custody) yok, özel anahtar yok."
+    },
+    "wallet": {
+      "notFound": "Tarayıcı cüzdanı bulunamadı. Salt-okunur tarama yine de çalışır.",
+      "rejected": "Cüzdan bağlantısı reddedildi.",
+      "error": "Cüzdana bağlanılamadı."
+    },
+    "screen": {
+      "title": "Taranan cüzdan adresi",
+      "subtitle": "Taramak için müşteriye ait beyan edilen zincir adresini girin.",
+      "placeholder": "0x… (42 karakter)",
+      "invalid": "Geçerli bir 0x adresi girin (40 hex karakter).",
+      "action": "Cüzdanı tara",
+      "checksumNote": "Yalnızca format kontrolü — tam EIP-55 checksum kapsam dışıdır."
+    },
+    "facts": {
+      "title": "Zincir-üstü veriler",
+      "subtitle": "Yapılandırılmış düğümden canlı, anahtarsız JSON-RPC okumaları",
+      "real": "GERÇEK zincir-üstü",
+      "derivedChip": "Türetilmiş demo adres",
+      "balance": "Bakiye",
+      "txCount": "Gönderilen işlem (nonce)",
+      "type": "Hesap tipi",
+      "eoa": "EOA (cüzdan)",
+      "contract": "Sözleşme",
+      "explorer": "Gezginde görüntüle",
+      "error": "Zincir-üstü veri şu an okunamadı. Lütfen tekrar deneyin.",
+      "loading": "Zincir okunuyor…",
+      "emptyTitle": "Tarama bekleniyor",
+      "emptyDesc": "Beyan edilen 0x adresi tarandığında bakiye, nonce ve hesap tipi burada görünecek."
+    },
+    "network": {
+      "title": "Ağ durumu",
+      "chainId": "Zincir ID",
+      "block": "Son blok",
+      "gas": "Gas fiyatı",
+      "unavailable": "Ağ snapshot alınamadı"
+    },
+    "risk": {
+      "title": "Risk istihbaratı",
+      "subtitle": "Backend risk screening API üzerinden dönen etiketli sinyaller",
+      "signalsLabel": "Sinyal kontrol listesi",
+      "simulated": "Kural tabanlı sinyal",
+      "decision": "Öneri",
+      "lastTx": "Son görülen işlem referansı",
+      "lastTxNote": "Türetilmiş referans — gerçek bir işlem değildir; gezgin bağlantısı yoktur.",
+      "explanationLabel": "Sezgisel (heuristic) açıklama",
+      "emptyTitle": "Risk sinyali yok",
+      "emptyDesc": "Müşteri kaydından türetilen tarama adresi yüklendiğinde kural tabanlı sinyaller burada etiketli şekilde listelenecek."
+    },
+    "sim": {
+      "providers": "Bu ortamda canlı Chainalysis / TRM Labs / OFAC bağlantısı yoktur. Sinyaller müşteri/cüzdan girdisinden deterministik üretilen kural tabanlı uyum sinyalleridir."
+    },
+    "signals": {
+      "mixerExposure": "Mixer teması",
+      "highVelocity": "Yüksek işlem hızı",
+      "suspiciousCounterparty": "Şüpheli karşı taraf",
+      "sanctionsHit": "Yaptırım listesi eşleşmesi"
+    },
+    "signalState": {
+      "clear": "Temiz",
+      "flagged": "İşaretli"
+    },
+    "decision": {
+      "ALLOW": "İzin ver",
+      "REVIEW": "İncele",
+      "BLOCK": "Engelle"
+    },
+    "explanation": {
+      "none": "risk sinyali yok",
+      "template": "Sezgisel değerlendirme: {{count}} sinyal işaretlendi ({{list}}). Önerilen aksiyon: {{decision}}. (kural tabanlı)"
+    },
+    "vc": {
+      "title": "Doğrulanabilir kimlik bilgisi (kavram önizlemesi)",
+      "subtitle": "Örnek bir W3C VC. Gerçek kriptografik doğrulama yapılmaz.",
+      "simulated": "Kavram önizlemesi",
+      "credentialFileName": "credential.json",
+      "proofValid": "Kanıt yapısı geçerli",
+      "flow": "Üretimde: düzenleyen imzalar → sahip saklar → doğrulayan kanıtı kontrol eder. Hiçbir PII zincire yazılmaz.",
+      "emptyTitle": "Kimlik bilgisi önizlemesi alınamadı",
+      "emptyDesc": "Bu alan backend credential-preview endpoint'inden beslenir. Endpoint cevap vermezse kavram önizlemesi gösterilmez."
+    },
+    "record": {
+      "title": "Uyum kararı",
+      "subtitle": "Bu tarama için önerinizi kaydedin",
+      "engineSuggests": "Motor önerisi",
+      "allow": "İzin ver",
+      "review": "İncele",
+      "block": "Engelle",
+      "recorded": "Karar kaydedildi — {{decision}} (kural tabanlı sinyallerden)",
+      "toast": "Karar kaydedildi: {{decision}}",
+      "demoNote": "Karar denetim kaydına yazıldı; temel risk sinyalleri canlı AML sağlayıcısı değil, kural tabanlı değerlendirmedir.",
+      "waitForScreen": "Karar butonları tarama sonucu oluşunca aktifleşir."
+    },
+    "signMessage": "Fintech Ops uyum denetimi — taranan cüzdan {{address}}"
+  },
+  "header": {
+    "pages": "Sayfalar",
+    "search": "Ara",
+    "theme": "Tema",
+    "themeSwitchToLight": "Açık temaya geç",
+    "themeSwitchToDark": "Koyu temaya geç",
+    "language": "Dil",
+    "languageEnglish": "English",
+    "languageTurkish": "Türkçe",
+    "notifications": "Bildirimler",
+    "notificationsWithCount": "Bildirimler ({{count}} okunmamış)",
+    "unreadCount": "{{count}} okunmamış bildirim",
+    "noUnread": "Okunmamış bildirim yok",
+    "userMenu": "Hesap menüsü",
+    "account": "Hesap",
+    "notificationsEmpty": "Bildirim yok",
+    "recentActivity": "Son aktiviteler",
+    "newCount": "{{count}} yeni",
+    "notificationActions": {
+      "customerCreate": "Müşteri oluşturuldu",
+      "customerUpdate": "Müşteri güncellendi",
+      "customerDelete": "Müşteri silindi",
+      "kycChange": "KYC durumu değişti",
+      "riskDecision": "Risk kararı kaydedildi",
+      "profileUpdate": "Profil güncellendi",
+      "notificationPreferences": "Bildirim tercihleri güncellendi",
+      "rbacChange": "Yetki yönetimi güncellendi",
+      "activity": "Operatör aktivitesi"
+    }
+  },
+  "settings": {
+    "title": "Ayarlar",
+    "navLabel": "Ayarlar bölümleri",
+    "localOnly": "Yalnızca bu cihazda saklanır — hiçbir sunucuya gönderilmez.",
+    "savedLocal": "Bu cihaza kaydedildi.",
+    "serverBacked": "API üzerinden kaydedilir.",
+    "savedServer": "Ayarlar kaydedildi.",
+    "identity": {
+      "fallbackName": "Operatör",
+      "sessionActive": "Oturum aktif",
+      "roleLabel": "Rol",
+      "roleAdministrator": "Yönetici",
+      "roleOperator": "Operatör",
+      "mfaLabel": "2FA",
+      "mfaOn": "Açık",
+      "mfaOff": "Kapalı",
+      "lastLogin": "Son giriş",
+      "mfaEnableAction": "Etkinleştir"
+    },
+    "actions": {
+      "save": "Kaydet",
+      "cancel": "Vazgeç"
+    },
+    "profile": {
+      "title": "Profil",
+      "subtitle": "Kişisel bilgilerinizi güncelleyin",
+      "displayName": "Görünen ad",
+      "displayNamePlaceholder": "Adınızı girin",
+      "email": "E-posta",
+      "emailPlaceholder": "ornek@sirket.com",
+      "emailReadonlyHint": "Erişim yöneticileri tarafından yönetilir; burada değiştirilemez.",
+      "phone": "Telefon",
+      "phonePlaceholder": "+905551112233",
+      "phoneHint": "Yalnızca rakam kullanın; başta isteğe bağlı +.",
+      "jobTitle": "Unvan",
+      "jobTitlePlaceholder": "Örn. Uyum Uzmanı",
+      "emailSso": "SSO"
+    },
+    "appearance": {
+      "title": "Görünüm",
+      "subtitle": "Arayüzün nasıl göründüğünü özelleştirin",
+      "theme": {
+        "label": "Tema",
+        "hint": "Açık, koyu veya sistem temasını seçin",
+        "light": "Açık",
+        "dark": "Koyu",
+        "system": "Sistem"
+      },
+      "density": {
+        "label": "Yoğunluk",
+        "hint": "Arayüz öğelerinin aralığını ayarlayın",
+        "comfortable": "Rahat",
+        "compact": "Sıkışık"
+      }
+    },
+    "language": {
+      "title": "Dil",
+      "subtitle": "Tercih ettiğiniz arayüz dilini seçin",
+      "label": "Görüntüleme dili",
+      "hint": "Bu, tüm arayüz metinlerine uygulanır",
+      "saved": "Dil güncellendi"
+    },
+    "notifications": {
+      "title": "Bildirimler",
+      "subtitle": "Sizi neyin uyaracağını seçin",
+      "productUpdates": "Ürün güncellemeleri",
+      "productUpdatesHint": "Yeni özellikler ve iyileştirmeler hakkında bilgi alın",
+      "securityAlerts": "Güvenlik uyarıları",
+      "securityAlertsHint": "Önemli güvenlik etkinlikleri için uyarı alın",
+      "weeklyDigest": "Haftalık özet",
+      "weeklyDigestHint": "Etkinliğinizin haftalık özetini alın",
+      "viewAll": "Tüm bildirimleri gör"
+    },
+    "access": {
+      "title": "Hesap erişimi",
+      "subtitle": "Giriş yapan hesaba tanımlı izinleri gözden geçirin",
+      "grantedPermissions": "Tanımlı izinler",
+      "resourceGroups": "Kaynak grupları",
+      "uptime": "{{hours}} sa {{minutes}} dk çalışma süresi",
+      "loadFailed": "Servis durumu yüklenemedi. Hesap izinleri aktif oturumdan gösterilmeye devam eder.",
+      "noPermissions": "Bu hesaba tanımlı izin yok.",
+      "sensitiveCount": "{{count}} hassas yetki",
+      "sensitiveNote": "Kullanım denetim kaydına yazılır",
+      "sensitiveFlag": "Hassas yetki",
+      "categories": "Kategoriler",
+      "colResource": "Kaynak",
+      "colScopes": "Kapsamlar",
+      "colPermissions": "İzin",
+      "categoryIdentity": "Kimlik & erişim",
+      "categoryCustomer": "Müşteri",
+      "categoryKyc": "KYC",
+      "categoryFinancial": "Finansal"
+    },
+    "sections": {
+      "profile": "Profil",
+      "security": "Güvenlik",
+      "appearance": "Görünüm",
+      "language": "Dil",
+      "notifications": "Bildirimler",
+      "access": "Erişim"
+    },
+    "menu": "Menü"
+  },
+  "analytics": {
+    "title": "Analitik",
+    "pagehead": "Portföy genel görünümü",
+    "subtitle": "Müşteri ve işlem verilerinizden canlı toplamlar.",
+    "updated": "Güncellendi {{date}}",
+    "updatedHint": "Günlük rollup verisi: bu ekran gün sonu toplanan metrikleri gösterir; panel özetindeki \"şu an itibarıyla\" canlı sayımdan farklı olabilir.",
+    "refresh": "Yenile",
+    "kpi": {
+      "totalCustomers": "Toplam Müşteri",
+      "activeRate": "Aktif Oran",
+      "verified": "Doğrulanmış KYC",
+      "kycTotal": "Toplam KYC Kaydı"
+    },
+    "range": {
+      "label": "Zaman aralığı",
+      "day": "Gün",
+      "week": "Hafta",
+      "month": "Ay"
+    },
+    "volume": {
+      "title": "Zaman İçinde Hacim",
+      "subtitle": "{{range}} bazında işlem hacmi",
+      "summary": "Zaman içindeki işlem hacmi grafiği",
+      "noDataForRange": "Bu aralıkta işlem hacmi verisi yok."
+    },
+    "kyc": {
+      "title": "KYC Dağılımı",
+      "subtitle": "Duruma göre müşteri payı",
+      "summary": "Duruma göre KYC dağılımı halka grafiği",
+      "centerCaption": "müşteri"
+    },
+    "status": {
+      "title": "Müşteri Durumu",
+      "subtitle": "Aktif ve pasif müşteriler",
+      "summary": "Aktif ve pasif müşteri sayıları çubuk grafiği"
+    },
+    "breakdown": {
+      "title": "KYC Kırılımı",
+      "subtitle": "En yüksekten en düşüğe duruma göre",
+      "emptyTitle": "KYC verisi yok",
+      "emptyMessage": "Henüz KYC durumu kaydı yok."
+    },
+    "empty": {
+      "title": "Analitik verisi yok",
+      "message": "Henüz gösterilecek müşteri verisi yok."
+    },
+    "table": {
+      "category": "Kategori",
+      "value": "Değer",
+      "share": "Pay"
+    },
+    "donut": {
+      "total": "Toplam"
+    }
+  },
+  "mfa": {
+    "verify": {
+      "title": "İki adımlı doğrulama",
+      "subtitle": "Kimlik doğrulayıcı uygulamanızdaki 6 haneli kodu girin.",
+      "backupSubtitle": "Tek kullanımlık yedek kodlarınızdan birini girin.",
+      "codeLabel": "Doğrulama kodu",
+      "codePlaceholder": "6 haneli kod",
+      "codeAria": "6 haneli doğrulama kodu",
+      "codeHint": "Lütfen 6 haneli bir kod girin.",
+      "codeAriaLabel": "6 haneli doğrulama kodu",
+      "backupCodeLabel": "Yedek kod",
+      "backupCodePlaceholder": "XXXXX-XXXXX",
+      "backupCodeAria": "Tek kullanımlık yedek kod",
+      "backupCodeHint": "Lütfen geçerli bir yedek kod girin.",
+      "rememberDevice": "Bu cihazı hatırla",
+      "rememberDeviceHint": "Bu cihazda bir süre boyunca tekrar kod istenmez.",
+      "rememberDeviceAria": "Bu cihazı hatırla",
+      "submit": "Doğrula",
+      "verifying": "Doğrulanıyor...",
+      "useBackup": "Bunun yerine yedek kod kullan",
+      "useAuthenticator": "Kimlik doğrulayıcı uygulamayı kullan",
+      "backToLogin": "Girişe geri dön",
+      "error": "Kod doğrulanamadı. Lütfen tekrar deneyin."
+    },
+    "setup": {
+      "pageTitle": "İki adımlı doğrulamayı kur",
+      "pageSubtitle": "Hesabınıza kimlik doğrulayıcı uygulama ile ikinci bir katman ekleyin.",
+      "stepsLabel": "Kurulum adımları",
+      "step": {
+        "password": "Parola",
+        "confirm": "Doğrula",
+        "backup": "Yedek kodlar"
+      },
+      "step1Title": "Kimliğinizi doğrulayın",
+      "reauthHint": "Güvenlik için lütfen hesap parolanızı yeniden girin.",
+      "reauthLabel": "Hesap parolası",
+      "continue": "Devam et",
+      "confirmTitle": "Kimlik doğrulayıcıyı bağlayın",
+      "scanHint": "QR kodunu kimlik doğrulayıcı uygulamanızla tarayın ya da anahtarı elle girin.",
+      "qrAlt": "Kimlik doğrulayıcı kurulumu için QR kodu",
+      "manualKeyLabel": "Elle giriş anahtarı",
+      "confirmCodeLabel": "Uygulamadaki kod",
+      "confirmCodePlaceholder": "6 haneli kod",
+      "activate": "Etkinleştir",
+      "backupTitle": "Yedek kodlarınızı kaydedin",
+      "backupSaveHint": "Bu kodları güvenli bir yerde saklayın. Yalnızca bir kez gösterilir ve her biri tek kullanımlıktır.",
+      "savedConfirm": "Bu kodları kaydettim.",
+      "copy": "Kopyala",
+      "copied": "Yedek kodlar kopyalandı.",
+      "copyFailed": "Kopyalama başarısız oldu.",
+      "download": "İndir",
+      "done": "Tamam",
+      "startError": "Kurulum başlatılamadı. Parolanızı kontrol edip tekrar deneyin.",
+      "confirmError": "Kod doğrulanamadı. Lütfen tekrar deneyin.",
+      "drawerTitle": "İki adımlı doğrulama",
+      "securitySavedStatus": "İki adımlı doğrulama etkinleştirildi.",
+      "securityCancelledStatus": "İki adımlı doğrulama değişmedi.",
+      "stepIndicatorActiveLabel": "geçerli adım",
+      "stepIndicatorDoneLabel": "tamamlandı"
+    },
+    "settings": {
+      "cardTitle": "İki adımlı doğrulama",
+      "cardSubtitle": "Girişe kimlik doğrulayıcı tabanlı ikinci bir katman ekleyin.",
+      "status": "Durum",
+      "statusHint": "İki adımlı doğrulamanın bu hesap için etkin olup olmadığını gösterir.",
+      "statusEnabled": "Etkin",
+      "statusDisabled": "Devre dışı",
+      "enable": "İki adımlı doğrulamayı etkinleştir",
+      "disable": "Devre dışı bırak",
+      "regenerate": "Yedek kodları yenile",
+      "disabledToast": "İki adımlı doğrulama devre dışı bırakıldı.",
+      "actionError": "İşlem tamamlanamadı. Parolanızı ve kodunuzu kontrol edin.",
+      "disableReauthHint": "Devre dışı bırakmak için parolanızı ve bir doğrulama kodunu girin.",
+      "regenerateReauthHint": "Yeni yedek kodlar için parolanızı ve bir doğrulama kodunu girin.",
+      "reauthPassword": "Hesap parolası",
+      "reauthCode": "Doğrulama veya yedek kod",
+      "reauthCodePlaceholder": "6 haneli kod ya da XXXXX-XXXXX",
+      "reauthCodeInvalid": "6 haneli kod ya da XXXXX-XXXXX biçiminde bir yedek kod girin.",
+      "disableConfirm": "Devre dışı bırak",
+      "regenerateConfirm": "Yedek kodları yenile",
+      "newBackupTitle": "Yeni yedek kodlar",
+      "newBackupHint": "Yeni kodlar oluşturuldu. Bunları güvenli bir yerde saklayın; eski kodlar artık geçersizdir.",
+      "savedConfirm": "Bu kodları kaydettim.",
+      "backupDone": "Kaydettim"
+    },
+    "devices": {
+      "title": "Güvenilen cihazlar",
+      "subtitle": "Hatırlamayı seçtiğiniz cihazlar, süresi dolana kadar doğrulama kodunu atlar. Artık kullanmadıklarınızı kaldırın.",
+      "loading": "Güvenilen cihazlar yükleniyor",
+      "empty": "Güvenilen cihaz yok. Giriş sırasında “bu cihazı hatırla” seçeneğini işaretlediğinizde burada görünür.",
+      "errorTitle": "Güvenilen cihazlar yüklenemedi",
+      "errorBody": "Güvenilen cihazlarınız yüklenemedi. Lütfen tekrar deneyin.",
+      "retry": "Tekrar dene",
+      "networkLabel": "Ağ",
+      "networkUnknown": "Bilinmeyen ağ",
+      "createdLabel": "Eklendi",
+      "expiresLabel": "Süre sonu",
+      "revoke": "Kaldır",
+      "revokeAria": "{{network}} ağındaki güvenilen cihazı kaldır",
+      "revoking": "Kaldırılıyor…",
+      "confirmTitle": "Bu cihaz kaldırılsın mı?",
+      "confirmBody": "Bu cihazdan yapılacak bir sonraki girişte yeniden doğrulama kodu istenecek. Bu işlem geri alınamaz.",
+      "confirmRevoke": "Cihazı kaldır",
+      "revokedToast": "Güvenilen cihaz kaldırıldı.",
+      "revokeError": "Cihaz kaldırılamadı. Lütfen tekrar deneyin."
+    },
+    "adminReset": {
+      "pageTitle": "Operatör MFA sıfırlama",
+      "heading": "Bir operatörün iki adımlı doğrulamasını sıfırla",
+      "intro": "Hesabı kilitlenen bir operatörün iki adımlı doğrulamasını sıfırlar. Bu işlem operatörün authenticator'ını, yedek kodlarını ve hatırlanan cihazlarını siler — ikinci faktörle giriş yapabilmek için yeniden kayıt olmaları gerekir.",
+      "targetLabel": "Operatör kullanıcı kimliği",
+      "targetPlaceholder": "00000000-0000-0000-0000-000000000000",
+      "targetHint": "Operatörün kullanıcı kimliğini (UUID) yapıştırın.",
+      "validation": {
+        "required": "Operatörün kullanıcı kimliğini girin.",
+        "uuid": "Geçerli bir kullanıcı kimliği (UUID) girin."
+      },
+      "submit": "İki adımlı doğrulamayı sıfırla",
+      "confirmTitle": "Bu operatörün MFA'sı sıfırlansın mı?",
+      "confirmBody": "Bu işlem operatörün authenticator'ını, yedek kodlarını ve hatırlanan cihazlarını kalıcı olarak siler. Operatörün yeniden kayıt olması gerekir. Bu işlem geri alınamaz.",
+      "confirmCta": "MFA'yı sıfırla",
+      "cancel": "İptal",
+      "working": "Sıfırlanıyor…",
+      "success": {
+        "title": "İki adımlı doğrulama sıfırlandı",
+        "body": "Operatörün MFA'sı temizlendi. İkinci faktörü yeniden kullanabilmek için yeniden kayıt olmaları gerekir."
+      },
+      "resetAnother": "Başka bir operatörü sıfırla",
+      "error": {
+        "selfReset": "Kendi MFA'nızı buradan sıfırlayamazsınız. Kendi hesabınızın güvenlik ayarlarını kullanın.",
+        "invalidTarget": "Bu kullanıcı kimliğiyle eşleşen bir operatör yok. Kimliği kontrol edip tekrar deneyin.",
+        "rateLimit": "Çok fazla deneme. Lütfen biraz bekleyip tekrar deneyin.",
+        "generic": "Sıfırlama tamamlanamadı. Lütfen tekrar deneyin."
+      }
+    }
+  },
+  "password": {
+    "adminReset": {
+      "pageTitle": "Operatör parolasını sıfırla",
+      "heading": "Operatör parolasını sıfırla",
+      "intro": "Kilitlenmiş bir operatörün parolasını yönetici olarak sıfırlayın. Bu bir kurtarma yoludur.",
+      "bannerTitle": "Yıkıcı işlem.",
+      "bannerBody": "Operatörün aktif oturumları sonlanır ve işlem denetim kaydına yazılır.",
+      "whatTitle": "Bu işlem ne yapar?",
+      "what": {
+        "assign": "Operatöre geçici bir parola atanır.",
+        "sessions": "Operatörün açık tüm oturumları kapanır.",
+        "audit": "İşlem denetim kaydına (audit log) yazılır.",
+        "firstLogin": "İlk girişte değiştirme önerilir — zorunlu değil."
+      },
+      "generate": "Üret",
+      "showHide": "Göster/gizle",
+      "pickerLabel": "Operatör",
+      "pickerPlaceholder": "Bir operatör seçin",
+      "pickerHint": "Parolasını sıfırlamak istediğiniz operatörü seçin.",
+      "pickerFallback": "Operatör listesi yüklenemedi. Bunun yerine hedef operatörün kullanıcı kimliğini (UUID) yapıştırın.",
+      "targetLabel": "Hedef kullanıcı kimliği (UUID)",
+      "targetPlaceholder": "örn. 11111111-1111-1111-1111-111111111111",
+      "targetHint": "Parolası sıfırlanacak operatörün kullanıcı kimliğini girin.",
+      "newPasswordLabel": "Yeni parola",
+      "newPasswordPlaceholder": "Yeni geçici parolayı girin",
+      "advisory": "Operatöre bu parolayı güvenli bir kanaldan iletin ve ilk girişte değiştirmesini önerin. Bu yalnızca bir öneridir; sistem zorunlu kılmaz.",
+      "operatorStatus": "Operatör durumu",
+      "account": "Hesap",
+      "locked": "Kilitli",
+      "active": "Aktif",
+      "failedLogins": "Başarısız giriş",
+      "attempts": "{{count}} deneme",
+      "lastLogin": "Son giriş",
+      "lastLoginNever": "—",
+      "submit": "Parolayı sıfırla",
+      "working": "Sıfırlanıyor…",
+      "cancel": "Vazgeç",
+      "confirmTitle": "Operatör parolası sıfırlansın mı?",
+      "confirmBody": "Bu işlem operatörün tüm oturumlarını, güvenilen cihazlarını ve açık sıfırlama/MFA isteklerini kapatır ve PAROLAYI sıfırlar. Operatörün MFA'sını / kimlik doğrulayıcısını KALDIRMAZ. İşlem geri alınamaz.",
+      "confirmCta": "Evet, parolayı sıfırla",
+      "validation": {
+        "targetRequired": "Bir operatör seçin veya bir kullanıcı kimliği girin.",
+        "targetUuid": "Geçerli bir kullanıcı kimliği (UUID) girin.",
+        "password": "Parola tüm gereksinimleri karşılamalı ve en fazla 64 karakter olmalıdır."
+      },
+      "success": {
+        "title": "Parola sıfırlandı",
+        "body": "Operatörün parolası güncellendi; oturumları, güvenilen cihazları ve açık sıfırlama/MFA istekleri kapatıldı. MFA kaydı korunur."
+      },
+      "resetAnother": "Başka bir operatörü sıfırla",
+      "error": {
+        "selfReset": "Kendi parolanızı buradan sıfırlayamazsınız. Kendi hesabınızın güvenlik ayarlarını kullanın.",
+        "unknown": "Bu kullanıcı kimliğiyle eşleşen bir operatör yok. Kimliği kontrol edip tekrar deneyin.",
+        "weak": "Parola çok zayıf ya da mevcut paroladan farklı değil. Daha güçlü ve farklı bir parola seçin.",
+        "rate": "Çok fazla deneme. Lütfen biraz bekleyip tekrar deneyin.",
+        "generic": "Sıfırlama tamamlanamadı. Lütfen tekrar deneyin."
+      }
+    },
+    "resetRequests": {
+      "pageTitle": "Parola sıfırlama istekleri",
+      "heading": "Parola sıfırlama istekleri",
+      "intro": "Self servis sıfırlamayı tamamlayamayan operatörler burada onay ister. Onaylamadan önce isteği yapanın kimliğini sistem dışında (yüz yüze veya bilinen bir kanaldan) doğrulayın — sistem bu doğrulamayı sizin yerinize yapamaz.",
+      "empty": "Sıfırlama isteği yok. Bir operatör yönetici onaylı sıfırlama istediğinde burada görünür.",
+      "refresh": "Yenile",
+      "table": {
+        "account": "Hesap",
+        "status": "Durum",
+        "requested": "İstek zamanı",
+        "decided": "Karar"
+      },
+      "status": {
+        "pending": "Bekliyor",
+        "approved": "Onaylandı",
+        "denied": "Reddedildi",
+        "expired": "Süresi doldu",
+        "completed": "Tamamlandı"
+      },
+      "detail": {
+        "title": "İstek ayrıntıları",
+        "requested": "İstek zamanı",
+        "expires": "Son geçerlilik",
+        "ip": "Ağ",
+        "ipNote": "Yalnızca yaklaşık ağ öneki gösterilir — IP adresinin tamamı saklanmaz.",
+        "device": "Cihaz",
+        "deviceRaw": "Ham tarayıcı imzasını göster",
+        "decidedBy": "Kararı veren",
+        "decidedAt": "Karar zamanı",
+        "completedAt": "Tamamlanma zamanı"
+      },
+      "approve": "Onayla",
+      "deny": "Reddet",
+      "confirmApprove": {
+        "title": "Bu sıfırlama isteği onaylansın mı?",
+        "body": "Onay, isteği gönderen tarayıcının bu hesap için YENİ bir parola belirlemesine izin verir. Yalnızca isteği yapanın kimliğini sistem dışında doğruladıktan sonra onaylayın. Karar denetim kaydına yazılır.",
+        "confirm": "Evet, onayla"
+      },
+      "confirmDeny": {
+        "title": "Bu sıfırlama isteği reddedilsin mi?",
+        "body": "İsteği yapan kişiye isteğin reddedildiği bildirilir ve bu istekle devam edemez. Karar denetim kaydına yazılır.",
+        "confirm": "Evet, reddet"
+      },
+      "approvedNext": "Onaylandı: yeni parolayı isteği yapan kişi parolamı unuttum ekranından kendisi belirler — yönetici parola seçmez ve göremez.",
+      "error": {
+        "generic": "İşlem tamamlanamadı. Lütfen tekrar deneyin.",
+        "alreadyDecided": "Bu istek başka bir yerde zaten karara bağlandı. Liste yenilendi.",
+        "expired": "Bu isteğin süresi doldu; artık karara bağlanamaz. Liste yenilendi.",
+        "notFound": "Bu istek artık mevcut değil. Liste yenilendi."
+      }
+    }
+  },
+  "notifications": {
+    "markAllRead": "Tümünü okundu işaretle",
+    "markRead": "Okundu işaretle",
+    "markReadAria": "Bildirimi okundu işaretle",
+    "openRecordAria": "Kayda git",
+    "seeAll": "Tüm bildirimleri gör",
+    "empty": "Bildirim yok",
+    "unread": "Okunmadı",
+    "page": {
+      "title": "Bildirimler",
+      "subtitle": "Hesabınıza ait tüm bildirimler. Bir bildirime tıklayarak ilgili kayda gidebilirsiniz.",
+      "loading": "Bildirimler yükleniyor",
+      "emptyTitle": "Henüz bildirim yok",
+      "emptyBody": "Yeni bir etkinlik olduğunda burada görünür.",
+      "emptyFilteredTitle": "Eşleşen bildirim yok",
+      "emptyFilteredBody": "Seçtiğiniz filtrelere uyan bir bildirim bulunamadı.",
+      "errorTitle": "Bildirimler yüklenemedi",
+      "errorBody": "Bildirimleriniz yüklenemedi. Lütfen tekrar deneyin.",
+      "retry": "Tekrar dene",
+      "unreadSummary": "{{count}} okunmamış",
+      "allRead": "Tümü okundu",
+      "unreadAria": "{{count}} okunmamış bildirim",
+      "loadMore": "Daha fazla yükle",
+      "loadingMore": "Daha fazla bildirim yükleniyor",
+      "allLoaded": "Tüm bildirimler yüklendi.",
+      "loadedStatus": "{{total}} bildirimden {{count}} tanesi yüklendi."
+    },
+    "group": {
+      "today": "Bugün",
+      "earlier": "Daha eski"
+    },
+    "filter": {
+      "readState": "Okunma durumu",
+      "all": "Tümü",
+      "unread": "Okunmamış",
+      "read": "Okunmuş",
+      "type": "Tür",
+      "severity": "Önem",
+      "allTypes": "Tüm türler",
+      "allSeverities": "Tüm önem düzeyleri",
+      "clear": "Filtreleri temizle"
+    },
+    "severity": {
+      "info": "Bilgi",
+      "success": "Başarılı",
+      "warning": "Uyarı",
+      "critical": "Kritik"
+    },
+    "type": {
+      "securityAlert": "Güvenlik uyarısı",
+      "kycEvent": "KYC olayı",
+      "customerEvent": "Müşteri olayı",
+      "system": "Sistem bildirimi",
+      "account": "Hesap",
+      "activity": "Bildirim"
+    },
+    "customer": {
+      "created": {
+        "title": "Yeni müşteri eklendi",
+        "body": "Yeni bir müşteri kaydı oluşturuldu."
+      }
+    },
+    "system": {
+      "maintenance": {
+        "title": "Planlı bakım bildirimi",
+        "body": "Sistemde planlı bir bakım çalışması yakında gerçekleştirilecek."
+      }
+    },
+    "account": {
+      "signedIn": {
+        "title": "Hesabınıza giriş yapıldı",
+        "body": "Hesabınızda yeni bir oturum açıldı. Bu siz değilseniz parolanızı değiştirin."
+      }
+    },
+    "kyc": {
+      "statusChanged": {
+        "title": "KYC durumu güncellendi",
+        "body": "Bir müşterinin KYC durumu değişti."
+      }
+    },
+    "security": {
+      "adminPasswordReset": {
+        "title": "Parolanız sıfırlandı",
+        "body": "Bir yönetici hesabınızın parolasını sıfırladı. Bunu siz talep etmediyseniz yöneticinizle iletişime geçin."
+      },
+      "adminMfaReset": {
+        "title": "İki adımlı doğrulamanız sıfırlandı",
+        "body": "Bir yönetici iki adımlı doğrulamanızı sıfırladı. Ayarlar › Güvenlik bölümünden yeniden kurun."
+      },
+      "accountLockout": {
+        "title": "Hesabınız geçici olarak kilitlendi",
+        "body": "Art arda başarısız giriş denemeleri nedeniyle hesabınız geçici olarak kilitlendi. Bunu siz yapmadıysanız parolanızı sıfırlayın ve yöneticinizle iletişime geçin."
+      },
+      "newTrustedDevice": {
+        "title": "Yeni güvenilir cihaz eklendi",
+        "body": "Hesabınız için yeni bir güvenilir cihaz kaydedildi. Bunu siz yapmadıysanız Ayarlar › Güvenlik bölümünden cihazı kaldırın."
+      },
+      "resetRequestCreated": {
+        "title": "Parola sıfırlama isteği alındı",
+        "body": "{{account}} yönetici onaylı parola sıfırlama isteği gönderdi. İsteği sıfırlama istekleri ekranından inceleyin."
+      },
+      "resetRequestApproved": {
+        "title": "Sıfırlama isteğiniz onaylandı",
+        "body": "Bir yönetici parola sıfırlama isteğinizi onayladı. Yeni parolanızı belirlemek için parolamı unuttum ekranına dönün."
+      },
+      "resetRequestDenied": {
+        "title": "Sıfırlama isteğiniz reddedildi",
+        "body": "Bir yönetici parola sıfırlama isteğinizi reddetti. Bunu beklemiyorsanız yöneticinizle iletişime geçin."
+      }
+    },
+    "fallback": {
+      "title": "Bildirim",
+      "body": "Yeni bir bildiriminiz var."
+    }
+  }
+}

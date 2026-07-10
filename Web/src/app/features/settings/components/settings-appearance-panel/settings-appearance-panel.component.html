@@ -1,0 +1,53 @@
+<section
+  class="settings-panel motion-stagger"
+  role="tabpanel"
+  data-testid="settings-panel-appearance"
+  [attr.id]="panelId"
+  [attr.aria-labelledby]="labelledBy"
+>
+  <header class="settings-panel__head">
+    <span class="settings-medallion settings-medallion--pink" aria-hidden="true">
+      <i class="ri-palette-line"></i>
+    </span>
+    <div class="settings-panel__heading">
+      <h2 class="settings-panel__title">{{ 'settings.appearance.title' | translate }}</h2>
+      <p class="settings-panel__sub">{{ 'settings.appearance.subtitle' | translate }}</p>
+    </div>
+  </header>
+
+  <div class="settings-rows">
+    <div class="settings-row">
+      <div class="settings-row__text">
+        <span class="settings-row__label" id="set-theme-label">
+          {{ 'settings.appearance.theme.label' | translate }}
+        </span>
+        <span class="settings-row__hint">
+          {{ 'settings.appearance.theme.hint' | translate }}
+        </span>
+      </div>
+      <app-ui-segmented
+        [items]="themeOptions"
+        [value]="themeChoice"
+        [ariaLabel]="'settings.appearance.theme.label' | translate"
+        (valueChange)="themeChange.emit($event)"
+      ></app-ui-segmented>
+    </div>
+
+    <div class="settings-row">
+      <div class="settings-row__text">
+        <span class="settings-row__label">
+          {{ 'settings.appearance.density.label' | translate }}
+        </span>
+        <span class="settings-row__hint">
+          {{ 'settings.appearance.density.hint' | translate }}
+        </span>
+      </div>
+      <app-ui-segmented
+        [items]="densityOptions"
+        [value]="density"
+        [ariaLabel]="'settings.appearance.density.label' | translate"
+        (valueChange)="densityChange.emit($event)"
+      ></app-ui-segmented>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,1309 @@
+{
+  "auth": {
+    "login": {
+      "formTitle": "Welcome back",
+      "subtitle": "Sign in to the operations console",
+      "languageLabel": "Language",
+      "themeLight": "Switch to light theme",
+      "themeDark": "Switch to dark theme",
+      "slides": {
+        "label": "Highlights",
+        "goTo": "Go to slide {{index}}",
+        "customers": {
+          "title": "360° customer view",
+          "body": "Bring every customer onto one screen — accounts, transactions and risk together."
+        },
+        "risk": {
+          "title": "Risk & compliance, live",
+          "body": "Track KYC, AML and on-chain risk with audit-ready trails."
+        },
+        "realtime": {
+          "title": "Real-time operations",
+          "body": "Manage flows, approvals and alerts without delay."
+        }
+      },
+      "demoBadge": "DEMO",
+      "demoNote": "Demo environment — all data is simulated. No real customer information is shown.",
+      "demo": {
+        "title": "Try a demo role",
+        "subtitle": "Pick a role to prefill the form, then sign in.",
+        "fill": "Fill",
+        "fillAria": "Fill the sign-in form with the {{role}} demo account",
+        "roles": {
+          "administrator": {
+            "name": "Administrator",
+            "desc": "Full access — reveal PII, delete, manage roles & users"
+          },
+          "operator": {
+            "name": "Compliance Officer",
+            "desc": "Day-to-day operations — no delete or PII reveal"
+          },
+          "auditor": {
+            "name": "Viewer",
+            "desc": "Read-only oversight across the console"
+          }
+        }
+      },
+      "email": "Email",
+      "emailPlaceholder": "name@company.com",
+      "password": "Password",
+      "passwordPlaceholder": "Enter your password",
+      "submit": "Sign in",
+      "signingIn": "Signing in...",
+      "showPassword": "Show password",
+      "hidePassword": "Hide password",
+      "invalid": "Invalid email or password.",
+      "failed": "Sign-in failed. Please try again.",
+      "locked": "Too many attempts. Please try again later.",
+      "lockedRetry": "Too many attempts. Please try again in {{seconds}} seconds.",
+      "forgotPassword": "Forgot password?"
+    },
+    "forgot": {
+      "title": "Reset your password",
+      "subtitle": "Verify your identity and set a new password on screen.",
+      "stepsLabel": "Reset steps",
+      "steps": {
+        "identify": "Identity",
+        "verify": "Verification",
+        "reset": "New password"
+      },
+      "brandHeadline": "Regain access to your account",
+      "brandBody": "No email is sent — prove your identity with two-step verification and set your new password right here.",
+      "identify": {
+        "intro": "Enter the email linked to your account.",
+        "submit": "Continue"
+      },
+      "verify": {
+        "intro": "Enter the current code from your authenticator app for {{email}}.",
+        "codeLabel": "Verification code",
+        "digit": "Verification code digit",
+        "submit": "Verify",
+        "introBackup": "Enter one of your one-time backup codes for {{email}}.",
+        "backupLabel": "Backup code",
+        "backupPlaceholder": "XXXXX-XXXXX",
+        "useBackup": "Use a backup code instead",
+        "useTotp": "Use your authenticator app instead"
+      },
+      "reset": {
+        "intro": "Set your new password.",
+        "newPassword": "New password",
+        "newPasswordPlaceholder": "At least 12 characters",
+        "confirmPassword": "New password (repeat)",
+        "confirmPlaceholder": "Re-enter password",
+        "match": "Passwords match",
+        "mismatch": "Passwords don't match",
+        "submit": "Update password"
+      },
+      "reqTitle": "Your password must include",
+      "rules": {
+        "len": "At least 12 characters",
+        "upper": "One uppercase letter (A-Z)",
+        "lower": "One lowercase letter (a-z)",
+        "digit": "One number (0-9)",
+        "symbol": "One special character (!?@#)"
+      },
+      "strength": {
+        "weak": "Weak",
+        "fair": "Fair",
+        "strong": "Strong",
+        "veryStrong": "Very strong"
+      },
+      "working": {
+        "identity": "Checking…",
+        "verify": "Verifying…",
+        "reset": "Updating…"
+      },
+      "back": "Back",
+      "backToLogin": "Back to sign in",
+      "done": {
+        "title": "Your password has been updated",
+        "body": "Your password has been changed and all other sessions were signed out. Sign in with your new password to continue.",
+        "backToLogin": "Back to sign in"
+      },
+      "error": {
+        "invalidCode": "That code is incorrect or has expired. Please enter it again.",
+        "factorRequired": "A verification code is required. Please enter the code again.",
+        "expired": "This reset request has expired. Please start over.",
+        "weakPassword": "That password does not meet the requirements. Please choose a stronger one.",
+        "samePassword": "Your new password must be different from your current one.",
+        "rateLimit": "Too many attempts. Please try again later.",
+        "rateLimitRetry": "Too many attempts. Please try again in {{seconds}} seconds.",
+        "generic": "Something went wrong. Please try again."
+      },
+      "expired": {
+        "title": "Reset request expired",
+        "body": "This password reset can no longer be completed. Start over to request a new one.",
+        "startOver": "Start over"
+      },
+      "adminRequest": {
+        "link": "I can't access my authenticator — request an administrator reset",
+        "title": "Request an administrator reset",
+        "intro": "Send a password-reset request to your administrators. An administrator verifies your identity and approves the request; you then set your own new password on this screen.",
+        "emailLabel": "Account email",
+        "submit": "Send request",
+        "waitingTitle": "Request received",
+        "waitingBody": "Your request has been received. If you already have a pending request, you can continue from this screen once an administrator approves it.",
+        "waitingHint": "This screen checks the status automatically every 20 seconds. You can keep it open; approval may take a while.",
+        "checkNow": "Check status",
+        "deniedTitle": "Request declined",
+        "deniedBody": "An administrator declined this reset request. If you believe this is a mistake, contact your administrator directly.",
+        "error": {
+          "expired": "The request expired before it was completed. Please send a new request.",
+          "generic": "The request could not be processed right now. Please try again."
+        }
+      },
+      "adminContact": {
+        "title": "Need help signing in?",
+        "body": "Self-service reset requires two-step verification on your account. If you can’t complete it, ask an administrator to reset your password."
+      }
+    }
+  },
+  "app": {
+    "title": "Fintech Operations Dashboard",
+    "footer": "Fintech Operations",
+    "brand": "Vaultchain",
+    "tagline": "Fintech Operations"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "customers": "Customers",
+    "settings": "Settings",
+    "analytics": "Analytics",
+    "profile": "Profile",
+    "home": "Home",
+    "notifications": "Notifications",
+    "passwordReset": "Password reset",
+    "sections": {
+      "main": "Menu",
+      "insights": "Insights",
+      "other": "Other"
+    }
+  },
+  "dashboard": {
+    "asOf": "As of",
+    "kyc": {
+      "NOT_STARTED": "Not started",
+      "PENDING": "Pending",
+      "IN_REVIEW": "In review",
+      "VERIFIED": "Verified",
+      "REJECTED": "Rejected",
+      "EXPIRED": "Expired"
+    },
+    "kpi": {
+      "totalCustomers": "Total Customers",
+      "totalCustomersHint": "All customers in the system",
+      "activeRate": "Active Customer Rate",
+      "kycStatus": "KYC Status Distribution",
+      "kycStatusHint": "Compliance overview by status",
+      "avgAge": "Average Age",
+      "avgAgeHint": "Calculated from date of birth",
+      "latestUpdated": "Latest Updated Customer",
+      "latestUpdatedHint": "Most recently updated profile",
+      "activeCustomers": "Active Customers"
+    },
+    "labels": {
+      "active": "active",
+      "inactive": "inactive",
+      "years": "yrs",
+      "updatedAt": "Updated"
+    },
+    "sections": {
+      "portfolio": "Customer Portfolio",
+      "portfolioHint": "Active vs. inactive customer split",
+      "overview": "Overview",
+      "recentCustomers": "Recent Customers",
+      "activeSplit": "Active / Inactive"
+    },
+    "hero": {
+      "verifiedKyc": "Verified KYC",
+      "verifiedShare": "Verified share"
+    },
+    "quickActions": {
+      "title": "Quick actions",
+      "addCustomer": "Add customer",
+      "openAnalytics": "Open analytics",
+      "viewCustomers": "View customers"
+    },
+    "trend": {
+      "title": "Customer trend",
+      "summary": "Customer trend over time chart",
+      "noDataForRange": "No customer trend data for this range.",
+      "series": {
+        "newCustomers": "New customers",
+        "activeCustomers": "Active total",
+        "transactions": "Transaction count"
+      }
+    },
+    "empty": {
+      "portfolioTitle": "No portfolio data",
+      "portfolioMessage": "There are no customers to show yet.",
+      "kycTitle": "No KYC data",
+      "kycMessage": "No KYC status records yet.",
+      "latestTitle": "No customer",
+      "latestMessage": "No customers have been registered yet."
+    }
+  },
+  "common": {
+    "actions": "Actions",
+    "close": "Close",
+    "details": "Details",
+    "seeAll": "See all",
+    "noData": "No data",
+    "total": "Total",
+    "prev": "Prev",
+    "next": "Next",
+    "page": "Page",
+    "all": "All",
+    "yes": "Yes",
+    "no": "No",
+    "save": "Save",
+    "saving": "Saving...",
+    "back": "Back",
+    "edit": "Edit",
+    "create": "Create",
+    "clear": "Clear",
+    "filter": "Filter",
+    "reset": "Reset",
+    "apply": "Apply",
+    "delete": "Delete",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "deleting": "Deleting...",
+    "loading": "Loading...",
+    "search": "Search",
+    "searchPlaceholder": "Type to search...",
+    "light": "Light",
+    "dark": "Dark",
+    "confirmMessage": "Are you sure?",
+    "menu": "Menu",
+    "closeMenu": "Close menu",
+    "collapseSidebar": "Collapse menu",
+    "expandSidebar": "Expand menu",
+    "logout": "Logout",
+    "skipToContent": "Skip to content",
+    "loadError": "Could not load data",
+    "retry": "Retry",
+    "dataTable": "Data table",
+    "breadcrumb": "Breadcrumb",
+    "more": "More actions",
+    "clearAll": "Clear all",
+    "comfortable": "Comfortable",
+    "compact": "Compact",
+    "density": "Density",
+    "filters": "Filters",
+    "remove": "Remove {{item}}",
+    "time": {
+      "justNow": "just now",
+      "minutesAgo": "{{count}} min ago",
+      "hoursAgo": "{{count}} h ago",
+      "daysAgo": "{{count}} d ago",
+      "absolute": "earlier"
+    }
+  },
+  "customers": {
+    "title": "Customers",
+    "pii": {
+      "reveal": "Show unmasked",
+      "mask": "Mask",
+      "revealedNotice": "Unmasked personal data is visible",
+      "revealAria": "Show unmasked personal data",
+      "maskAria": "Mask personal data"
+    },
+    "create": "Create Customer",
+    "edit": "Edit Customer",
+    "created": "Customer created",
+    "updated": "Customer updated",
+    "search": "Search",
+    "searchPlaceholder": "name / email / phone / wallet / nationalId",
+    "name": "Name",
+    "email": "Email",
+    "phone": "Phone",
+    "walletNumber": "Wallet Number",
+    "dateOfBirth": "Date of Birth",
+    "nationalId": "National ID",
+    "kycStatus": "KYC Status",
+    "active": "Active",
+    "inactive": "Inactive",
+    "keepCurrentHint": "Leave blank to keep the current value",
+    "deleteTitle": "Delete customer",
+    "deleteConfirm": "Are you sure you want to delete {{name}}? This action cannot be undone.",
+    "deleted": "Customer deleted",
+    "address": {
+      "title": "Address",
+      "country": "Country",
+      "city": "City",
+      "postalCode": "Postal Code",
+      "line1": "Address Line"
+    },
+    "sections": {
+      "identity": {
+        "title": "Identity",
+        "description": "The customer's core identity details"
+      },
+      "address": {
+        "title": "Address",
+        "description": "Residential and contact address"
+      },
+      "walletFinance": {
+        "title": "Wallet & Finance",
+        "description": "Wallet and financial details"
+      },
+      "kycStatus": {
+        "title": "KYC & Status",
+        "description": "Verification status and account access"
+      }
+    },
+    "emptyTitle": "No customers yet",
+    "emptyMessage": "Get started by adding your first customer.",
+    "noResultsTitle": "No results found",
+    "noResultsMessage": "Try adjusting your search or filters.",
+    "formHero": {
+      "createTitle": "New Customer",
+      "createSubtitle": "Add a new customer record to the operations console.",
+      "editTitle": "Edit Customer",
+      "editSubtitle": "Update the existing customer record.",
+      "guidanceTitle": "What to know",
+      "guidance": {
+        "wallet": "A default wallet is created automatically with the customer.",
+        "kyc": "KYC status is managed by the operator after creation.",
+        "privacy": "Name, email and phone are stored masked for privacy.",
+        "nationalId": "The national ID is validated and cannot be changed later."
+      }
+    }
+  },
+  "customerDetail": {
+    "title": "Customer Detail",
+    "emptyValue": "—",
+    "lastUpdated": "Last updated",
+    "addressSubtitle": "Residence and contact address",
+    "transactionsSubtitle": "Filters, new transaction entry, and ledger history in one workspace.",
+    "limitUsage": "Limit usage",
+    "dailyVsMonthly": "Daily limit as a share of monthly limit",
+    "operations": {
+      "title": "Operations signals",
+      "subtitle": "History and activity counters"
+    },
+    "tabs": {
+      "overview": "Overview",
+      "transactions": "Transactions",
+      "kyc": "KYC",
+      "risk": "Risk"
+    },
+    "profile": "Profile",
+    "contact": "Contact",
+    "stat": {
+      "memberSince": "Member since"
+    },
+    "kycCard": {
+      "title": "KYC & identity",
+      "subtitle": "Compliance status and identity reference"
+    },
+    "kycHistory": {
+      "title": "KYC history",
+      "empty": "No KYC history has been recorded for this customer."
+    },
+    "kycMethod": {
+      "manual": "Manual",
+      "manual_review": "Manual review",
+      "e_kyc": "e-KYC",
+      "document": "Document",
+      "biometric": "Biometric",
+      "liveness": "Liveness"
+    },
+    "riskCard": {
+      "title": "Web3 risk screening",
+      "subtitle": "Read-only on-chain risk intelligence for this customer"
+    },
+    "riskHistory": {
+      "title": "Risk decision history",
+      "empty": "No risk decisions have been recorded for this customer."
+    },
+    "notFound": {
+      "eyebrow": "Record unavailable",
+      "title": "Customer not found",
+      "desc": "This customer may have been deleted, archived, or opened from an invalid record link.",
+      "primaryAction": "Back to customer list",
+      "clues": {
+        "removed": "The record may have been removed",
+        "invalidId": "The customer id in the link may be invalid",
+        "searchAgain": "Search again from the list to continue"
+      }
+    }
+  },
+  "wallet": {
+    "title": "Wallet",
+    "subtitle": "Balance and limits",
+    "balance": "Balance",
+    "dailyLimit": "Daily Limit",
+    "monthlyLimit": "Monthly Limit",
+    "updated": "Wallet limits updated",
+    "status": {
+      "title": "Wallet status",
+      "ACTIVE": "Active",
+      "FROZEN": "Frozen",
+      "CLOSED": "Closed"
+    }
+  },
+  "transactions": {
+    "title": "Transactions",
+    "filters": "Transaction Filters",
+    "type": "Type",
+    "direction": "Direction",
+    "kind": "Kind",
+    "status": "Status",
+    "currency": "Currency",
+    "from": "From (occurredAt ≥)",
+    "to": "To (occurredAt ≤)",
+    "amount": "Amount",
+    "createdAt": "Date",
+    "description": "Description",
+    "kinds": {
+      "DEPOSIT": "Deposit",
+      "WITHDRAWAL": "Withdrawal",
+      "TRANSFER": "Transfer",
+      "FEE": "Fee",
+      "ADJUSTMENT": "Adjustment",
+      "REVERSAL": "Reversal"
+    },
+    "statuses": {
+      "PENDING": "Pending",
+      "POSTED": "Posted",
+      "FAILED": "Failed",
+      "REVERSED": "Reversed"
+    },
+    "create": {
+      "title": "Create transaction",
+      "subtitle": "The transaction posts through this customer's current wallet.",
+      "kind": "Transaction kind",
+      "amount": "Amount",
+      "submit": "Create transaction",
+      "created": "Transaction created.",
+      "filteredOut": "Transaction created; it may be hidden by the active filters.",
+      "walletRequired": "The backend must return a wallet id before a transaction can be created."
+    }
+  },
+  "kyc": {
+    "NOT_STARTED": "Not Started",
+    "PENDING": "Pending",
+    "IN_REVIEW": "In Review",
+    "VERIFIED": "Verified",
+    "REJECTED": "Rejected",
+    "EXPIRED": "Expired"
+  },
+  "validation": {
+    "required": "This field is mandatory.",
+    "multipleSpaces": "Please use a single space between words.",
+    "email": "Please enter a valid email address.",
+    "min": "Value must be at least {{min}}.",
+    "max": "Value must be at most {{max}}.",
+    "minLength": "Please enter at least {{min}} characters.",
+    "maxLength": "Please enter no more than {{max}} characters.",
+    "digitsMin": "Please enter at least {{min}} digits.",
+    "digitsMax": "Please enter no more than {{max}} digits.",
+    "surnameRequired": "Please provide both first and last name.",
+    "phoneInvalid": "Please enter a valid phone number.",
+    "walletNumberInvalid": "Wallet number must be 16 digits.",
+    "nameInvalid": "Name may contain letters, spaces, apostrophes, and hyphens only.",
+    "unsafeChars": "Disallowed characters detected.",
+    "dateInvalid": "Please select a valid date.",
+    "dateInFuture": "Date cannot be in the future.",
+    "minAge": "Customer must be at least {{min}} years old.",
+    "maxAge": "Customer age must be no more than {{max}}.",
+    "invalid": "Invalid value.",
+    "limitMismatch": "Daily limit must be less than monthly limit.",
+    "nationalIdNumeric": "National ID must contain digits only.",
+    "nationalIdLength": "National ID must be 11 digits.",
+    "nationalIdStartsWithZero": "National ID cannot start with 0.",
+    "nationalIdChecksum": "National ID validation failed.",
+    "alphaOnly": "This field may contain letters, spaces, apostrophes, and hyphens only.",
+    "postalCodeInvalid": "Postal code must be numeric (4–10 digits)."
+  },
+  "errors": {
+    "network": "Network error. Please check your connection.",
+    "server": "A system error occurred. Please try again later.",
+    "notFound": "Record not found.",
+    "unknown": "Unexpected error occurred.",
+    "referenceSuffix": " (Reference: {{id}})",
+    "validation": "Please check the form fields.",
+    "forbidden": "You do not have permission to perform this action.",
+    "conflict": "This record was changed by someone else. Please reload and try again.",
+    "sessionExpired": "Your session has expired. Please sign in again.",
+    "tooManyRequests": "Too many requests. Please slow down and try again.",
+    "code": {
+      "Auth": {
+        "AccountLocked": "The account is temporarily locked after too many failed attempts. Please try again later.",
+        "Forbidden": "You do not have permission to perform this action.",
+        "InvalidCredentials": "Invalid email or password.",
+        "InvalidToken": "Your session could not be verified. Please sign in again.",
+        "MfaEnrollmentRequired": "You must complete two-step verification setup before signing in.",
+        "PermissionsStale": "Your access permissions changed. Please sign in again.",
+        "ResetChallengeConsumed": "This verification step was already used. Please restart the reset.",
+        "ResetChallengeInvalid": "The password reset session is invalid or has expired. Please start over.",
+        "ResetChallengeMissing": "No password reset session was found. Please start over.",
+        "ResetFactorRequired": "You need to verify your code before continuing.",
+        "ResetInvalidCode": "The verification code is invalid or has expired.",
+        "ResetRequestAlreadyDecided": "This reset request was already decided. Refresh the list to see its current state.",
+        "ResetRequestExpired": "This reset request has expired and can no longer be decided.",
+        "ResetRequestNotFound": "The reset request was not found. It may have been removed; refresh the list.",
+        "SamePassword": "The new password cannot be the same as your current password.",
+        "SelfResetForbidden": "You cannot use this reset path for your own account.",
+        "StreamTokenInvalid": "The live stream could not be authorized. Refresh the page.",
+        "StreamTokenMissing": "Live stream authorization is missing. Refresh the page.",
+        "TokenInvalid": "The session is invalid. Please sign in again.",
+        "TokenMissing": "No session found. Please sign in.",
+        "TokenReused": "All sessions were ended for security reasons. Please sign in again.",
+        "UserNotFound": "User not found.",
+        "WeakPassword": "The password does not meet the requirements. Choose a stronger one."
+      },
+      "Customers": {
+        "Conflict": "The customer record changed while you were viewing it. Reload and try again.",
+        "DuplicateEmail": "This email address is already registered to another customer.",
+        "DuplicateNationalId": "This national ID is already registered to another customer.",
+        "IllegalKycTransition": "This KYC status transition is not allowed.",
+        "IllegalStatusTransition": "This customer status transition is not allowed.",
+        "NotFound": "Customer not found."
+      },
+      "Database": {
+        "Unavailable": "The database is currently unavailable. Please try again shortly."
+      },
+      "Idempotency": {
+        "InFlight": "The same request is already being processed. Please wait for it to finish.",
+        "KeyConflict": "This request key was used by a different request. Please retry the operation.",
+        "KeyInvalid": "The request key is invalid.",
+        "KeyRequired": "A request key is required for this operation."
+      },
+      "Internal": {
+        "Error": "An unexpected system error occurred. Please try again."
+      },
+      "Mfa": {
+        "AlreadyEnrolled": "Two-step verification is already enabled on this account.",
+        "ChallengeConsumed": "This verification session was already used. Please sign in again.",
+        "ChallengeInvalid": "The verification session is invalid or has expired. Please sign in again.",
+        "ChallengeMissing": "No verification session was found. Please sign in again.",
+        "InvalidCode": "The verification code is incorrect. Please try the current code.",
+        "NoSetupInProgress": "No two-step verification setup is in progress. Please start the setup again.",
+        "NotEnabled": "Two-step verification is not enabled on this account.",
+        "SelfResetForbidden": "You cannot reset your own two-step verification through the admin path.",
+        "WrongChallenge": "The verification session does not match this operation. Please try again."
+      },
+      "Notification": {
+        "ForbiddenParam": "The notification content contains a disallowed field.",
+        "NotFound": "Notification not found.",
+        "ParamsTooLarge": "The notification content is too large."
+      },
+      "Operator": {
+        "NotFound": "Operator record not found."
+      },
+      "Query": {
+        "DateRangeRequired": "A valid date range is required for this query.",
+        "MetricRequired": "A metric must be selected for this query."
+      },
+      "Rbac": {
+        "LastAdmin": "This change cannot be applied because it would remove the last administrator capability.",
+        "PermissionNotFound": "Permission definition not found.",
+        "RoleNotFound": "Role not found.",
+        "SelfEscalation": "You cannot change your own privileges this way.",
+        "UserNotFound": "User not found."
+      },
+      "Resource": {
+        "Conflict": "The record changed while you were viewing it. Reload and try again.",
+        "NotFound": "Record not found."
+      },
+      "Risk": {
+        "CustomerNotFound": "Customer not found for the risk check.",
+        "MislabeledSimulation": "Rule-based screening must keep its safety flag. The decision was not recorded."
+      },
+      "Transactions": {
+        "AlreadyReversed": "This transaction has already been reversed.",
+        "CrossCurrency": "Transactions across different currencies are not supported.",
+        "InsufficientBalance": "The wallet balance is insufficient for this transaction.",
+        "KindNotImplemented": "This transaction kind is not supported yet.",
+        "NotReversible": "This transaction cannot be reversed.",
+        "OriginalNotFound": "The original transaction for the reversal was not found.",
+        "ReversalMismatch": "The reversal does not match the original transaction.",
+        "SameWallet": "The source and target wallets cannot be the same.",
+        "SystemWalletMissing": "The system wallet is not configured. Please contact your administrator."
+      },
+      "Validation": {
+        "Failed": "The submitted data failed validation. Please check the fields."
+      },
+      "Wallet": {
+        "NotFound": "Wallet not found."
+      },
+      "Wallets": {
+        "Conflict": "The wallet changed while you were viewing it. Reload and try again.",
+        "InvalidLimits": "The daily limit must be less than the monthly limit.",
+        "NotFound": "Wallet not found."
+      }
+    }
+  },
+  "web3": {
+    "title": "Web3 Risk & Compliance",
+    "subtitle": "Read-only on-chain wallet risk intelligence to inform a KYC decision",
+    "riskCheck": "Web3 Risk Check",
+    "back": "Back to customer",
+    "command": {
+      "flow": "Read-only compliance flow",
+      "readOnly": "No custody / no transaction"
+    },
+    "context": {
+      "title": "Customer context",
+      "subtitle": "The customer whose declared wallet you are screening",
+      "kyc": "Current KYC status",
+      "walletNote": "Case-study account number — not an on-chain address."
+    },
+    "operator": {
+      "title": "Operator wallet",
+      "subtitle": "Optional — connect your own wallet for an audit attestation",
+      "connect": "Connect wallet",
+      "disconnect": "Disconnect",
+      "account": "Account",
+      "chain": "Chain",
+      "sign": "Sign audit attestation (optional)",
+      "signed": "Audit signature captured",
+      "signatureHint": "Signature only — no transaction, no custody, no private keys."
+    },
+    "wallet": {
+      "notFound": "No browser wallet detected. Read-only screening still works.",
+      "rejected": "Wallet connection was rejected.",
+      "error": "Could not connect to the wallet."
+    },
+    "screen": {
+      "title": "Screened wallet address",
+      "subtitle": "Enter the customer's declared on-chain address to screen it.",
+      "placeholder": "0x… (42 characters)",
+      "invalid": "Enter a valid 0x address (40 hex characters).",
+      "action": "Screen wallet",
+      "checksumNote": "Format check only — full EIP-55 checksum is out of scope."
+    },
+    "facts": {
+      "title": "On-chain facts",
+      "subtitle": "Live, key-free JSON-RPC reads from the configured node",
+      "real": "REAL on-chain",
+      "derivedChip": "Derived demo address",
+      "balance": "Balance",
+      "txCount": "Transactions sent (nonce)",
+      "type": "Account type",
+      "eoa": "EOA (wallet)",
+      "contract": "Contract",
+      "explorer": "View on explorer",
+      "error": "Could not read on-chain data right now. Please try again.",
+      "loading": "Reading the chain…",
+      "emptyTitle": "Waiting for screening",
+      "emptyDesc": "Balance, nonce, and account type will appear here after a declared 0x address is screened."
+    },
+    "network": {
+      "title": "Network status",
+      "chainId": "Chain ID",
+      "block": "Latest block",
+      "gas": "Gas price",
+      "unavailable": "Network snapshot unavailable"
+    },
+    "risk": {
+      "title": "Risk intelligence",
+      "subtitle": "Labeled signals returned by the backend risk screening API",
+      "signalsLabel": "Signal checklist",
+      "simulated": "Rule-based signal",
+      "decision": "Recommendation",
+      "lastTx": "Last seen transaction reference",
+      "lastTxNote": "Derived reference — not a real transaction; no explorer link.",
+      "explanationLabel": "Heuristic explanation",
+      "emptyTitle": "No risk signals yet",
+      "emptyDesc": "When the screening address derived from the customer record loads, rule-based signals will be listed here with labels."
+    },
+    "sim": {
+      "providers": "This environment is not connected to live Chainalysis / TRM Labs / OFAC providers. Signals are deterministic rule-based compliance signals derived from customer/wallet input."
+    },
+    "signals": {
+      "mixerExposure": "Mixer exposure",
+      "highVelocity": "High transaction velocity",
+      "suspiciousCounterparty": "Suspicious counterparty",
+      "sanctionsHit": "Sanctions list hit"
+    },
+    "signalState": {
+      "clear": "Clear",
+      "flagged": "Flagged"
+    },
+    "decision": {
+      "ALLOW": "Allow",
+      "REVIEW": "Review",
+      "BLOCK": "Block"
+    },
+    "explanation": {
+      "none": "no risk signals",
+      "template": "Heuristic assessment: {{count}} signal(s) flagged ({{list}}). Recommended action: {{decision}}. (rule-based)"
+    },
+    "vc": {
+      "title": "Verifiable credential (concept preview)",
+      "subtitle": "Illustrative W3C VC. No real cryptographic verification is performed.",
+      "simulated": "Concept preview",
+      "credentialFileName": "credential.json",
+      "proofValid": "Proof structure valid",
+      "flow": "In production: issuer signs → holder stores → verifier checks the proof. No PII goes on-chain.",
+      "emptyTitle": "Credential preview unavailable",
+      "emptyDesc": "This section is fed by the backend credential-preview endpoint. If the endpoint does not respond, the concept preview is not shown."
+    },
+    "record": {
+      "title": "Compliance decision",
+      "subtitle": "Record your recommendation for this screening",
+      "engineSuggests": "Engine suggests",
+      "allow": "Allow",
+      "review": "Review",
+      "block": "Block",
+      "recorded": "Decision saved — {{decision}} (from rule-based signals)",
+      "toast": "Decision recorded: {{decision}}",
+      "demoNote": "Decision saved to the audit log; the underlying risk signals are rule-based and not live AML-provider advice.",
+      "waitForScreen": "Decision buttons become available after a screening result is produced."
+    },
+    "signMessage": "Fintech Ops compliance audit — screening wallet {{address}}"
+  },
+  "header": {
+    "pages": "Pages",
+    "search": "Search",
+    "theme": "Theme",
+    "themeSwitchToLight": "Switch to light theme",
+    "themeSwitchToDark": "Switch to dark theme",
+    "language": "Language",
+    "languageEnglish": "English",
+    "languageTurkish": "Türkçe",
+    "notifications": "Notifications",
+    "notificationsWithCount": "Notifications ({{count}} unread)",
+    "unreadCount": "{{count}} unread notifications",
+    "noUnread": "No unread notifications",
+    "userMenu": "Account menu",
+    "account": "Account",
+    "notificationsEmpty": "No notifications",
+    "recentActivity": "Recent activity",
+    "newCount": "{{count}} new",
+    "notificationActions": {
+      "customerCreate": "Customer created",
+      "customerUpdate": "Customer updated",
+      "customerDelete": "Customer deleted",
+      "kycChange": "KYC status changed",
+      "riskDecision": "Risk decision recorded",
+      "profileUpdate": "Profile updated",
+      "notificationPreferences": "Notification preferences updated",
+      "rbacChange": "Access management updated",
+      "activity": "Operator activity"
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "navLabel": "Settings sections",
+    "localOnly": "Stored on this device only — never sent to a server.",
+    "savedLocal": "Saved on this device.",
+    "serverBacked": "Saved through the API.",
+    "savedServer": "Settings saved.",
+    "identity": {
+      "fallbackName": "Operator",
+      "sessionActive": "Session active",
+      "roleLabel": "Role",
+      "roleAdministrator": "Administrator",
+      "roleOperator": "Operator",
+      "mfaLabel": "2FA",
+      "mfaOn": "On",
+      "mfaOff": "Off",
+      "lastLogin": "Last sign-in",
+      "mfaEnableAction": "Enable"
+    },
+    "actions": {
+      "save": "Save",
+      "cancel": "Cancel"
+    },
+    "profile": {
+      "title": "Profile",
+      "subtitle": "Update your personal information",
+      "displayName": "Display name",
+      "displayNamePlaceholder": "Enter your name",
+      "email": "Email",
+      "emailPlaceholder": "you@company.com",
+      "emailReadonlyHint": "Managed by access administrators; cannot be changed here.",
+      "phone": "Phone",
+      "phonePlaceholder": "+905551112233",
+      "phoneHint": "Digits only; an optional leading +.",
+      "jobTitle": "Job title",
+      "jobTitlePlaceholder": "e.g. Compliance Analyst",
+      "emailSso": "SSO"
+    },
+    "appearance": {
+      "title": "Appearance",
+      "subtitle": "Customize how the interface looks",
+      "theme": {
+        "label": "Theme",
+        "hint": "Choose light, dark, or system theme",
+        "light": "Light",
+        "dark": "Dark",
+        "system": "System"
+      },
+      "density": {
+        "label": "Density",
+        "hint": "Adjust the spacing of interface elements",
+        "comfortable": "Comfortable",
+        "compact": "Compact"
+      }
+    },
+    "language": {
+      "title": "Language",
+      "subtitle": "Select your preferred interface language",
+      "label": "Display language",
+      "hint": "This applies to all interface text",
+      "saved": "Language updated"
+    },
+    "notifications": {
+      "title": "Notifications",
+      "subtitle": "Choose what notifies you",
+      "productUpdates": "Product updates",
+      "productUpdatesHint": "Get notified about new features and improvements",
+      "securityAlerts": "Security alerts",
+      "securityAlertsHint": "Be alerted about important security events",
+      "weeklyDigest": "Weekly digest",
+      "weeklyDigestHint": "Receive a weekly summary of your activity",
+      "viewAll": "See all notifications"
+    },
+    "access": {
+      "title": "Account access",
+      "subtitle": "Review the permissions granted to the signed-in account",
+      "grantedPermissions": "Granted permissions",
+      "resourceGroups": "Resource groups",
+      "uptime": "{{hours}}h {{minutes}}m uptime",
+      "loadFailed": "Service health could not be loaded. Your account permissions are still shown from the active session.",
+      "noPermissions": "No permissions are granted to this account.",
+      "sensitiveCount": "{{count}} sensitive grants",
+      "sensitiveNote": "Written to the audit log on use",
+      "sensitiveFlag": "Sensitive grant",
+      "categories": "Categories",
+      "colResource": "Resource",
+      "colScopes": "Scopes",
+      "colPermissions": "Permissions",
+      "categoryIdentity": "Identity & access",
+      "categoryCustomer": "Customer",
+      "categoryKyc": "KYC",
+      "categoryFinancial": "Financial"
+    },
+    "sections": {
+      "profile": "Profile",
+      "security": "Security",
+      "appearance": "Appearance",
+      "language": "Language",
+      "notifications": "Notifications",
+      "access": "Access"
+    },
+    "menu": "Menu"
+  },
+  "analytics": {
+    "title": "Analytics",
+    "pagehead": "Portfolio overview",
+    "subtitle": "Live aggregates from your customer and transaction data.",
+    "updated": "Updated {{date}}",
+    "updatedHint": "Daily rollup data: this screen shows end-of-day aggregated metrics; it can trail the dashboard summary's live \"as of now\" count.",
+    "refresh": "Refresh",
+    "kpi": {
+      "totalCustomers": "Total Customers",
+      "activeRate": "Active Rate",
+      "verified": "Verified KYC",
+      "kycTotal": "Total KYC Records"
+    },
+    "range": {
+      "label": "Time range",
+      "day": "Day",
+      "week": "Week",
+      "month": "Month"
+    },
+    "volume": {
+      "title": "Volume over time",
+      "subtitle": "Transaction volume by {{range}}",
+      "summary": "Transaction volume over time chart",
+      "noDataForRange": "No transaction volume data for this range."
+    },
+    "kyc": {
+      "title": "KYC distribution",
+      "subtitle": "Customer share by status",
+      "summary": "KYC distribution donut by status",
+      "centerCaption": "customers"
+    },
+    "status": {
+      "title": "Customer status",
+      "subtitle": "Active vs inactive customers",
+      "summary": "Active vs inactive customer counts bar chart"
+    },
+    "breakdown": {
+      "title": "KYC breakdown",
+      "subtitle": "By status, highest to lowest",
+      "emptyTitle": "No KYC data",
+      "emptyMessage": "No KYC status records yet."
+    },
+    "empty": {
+      "title": "No analytics data",
+      "message": "There is no customer data to show yet."
+    },
+    "table": {
+      "category": "Category",
+      "value": "Value",
+      "share": "Share"
+    },
+    "donut": {
+      "total": "Total"
+    }
+  },
+  "mfa": {
+    "verify": {
+      "title": "Two-step verification",
+      "subtitle": "Enter the 6-digit code from your authenticator app.",
+      "backupSubtitle": "Enter one of your single-use backup codes.",
+      "codeLabel": "Verification code",
+      "codePlaceholder": "6-digit code",
+      "codeAria": "6-digit verification code",
+      "codeHint": "Please enter a 6-digit code.",
+      "codeAriaLabel": "6-digit verification code",
+      "backupCodeLabel": "Backup code",
+      "backupCodePlaceholder": "XXXXX-XXXXX",
+      "backupCodeAria": "Single-use backup code",
+      "backupCodeHint": "Please enter a valid backup code.",
+      "rememberDevice": "Remember this device",
+      "rememberDeviceHint": "This device will skip the code prompt for a while.",
+      "rememberDeviceAria": "Remember this device",
+      "submit": "Verify",
+      "verifying": "Verifying...",
+      "useBackup": "Use a backup code instead",
+      "useAuthenticator": "Use the authenticator app",
+      "backToLogin": "Back to login",
+      "error": "That code could not be verified. Please try again."
+    },
+    "setup": {
+      "pageTitle": "Set up two-step verification",
+      "pageSubtitle": "Add a second layer to your account with an authenticator app.",
+      "stepsLabel": "Setup steps",
+      "step": {
+        "password": "Password",
+        "confirm": "Verify",
+        "backup": "Backup codes"
+      },
+      "step1Title": "Confirm your identity",
+      "reauthHint": "For security, please re-enter your account password.",
+      "reauthLabel": "Account password",
+      "continue": "Continue",
+      "confirmTitle": "Connect your authenticator",
+      "scanHint": "Scan the QR code with your authenticator app, or enter the key manually.",
+      "qrAlt": "QR code for authenticator setup",
+      "manualKeyLabel": "Manual entry key",
+      "confirmCodeLabel": "Code from the app",
+      "confirmCodePlaceholder": "6-digit code",
+      "activate": "Activate",
+      "backupTitle": "Save your backup codes",
+      "backupSaveHint": "Store these codes somewhere safe. They are shown only once and each can be used a single time.",
+      "savedConfirm": "I have saved these codes.",
+      "copy": "Copy",
+      "copied": "Backup codes copied.",
+      "copyFailed": "Copy failed.",
+      "download": "Download",
+      "done": "Done",
+      "startError": "Could not start setup. Check your password and try again.",
+      "confirmError": "That code could not be verified. Please try again.",
+      "drawerTitle": "Two-step verification",
+      "securitySavedStatus": "Two-step verification enabled.",
+      "securityCancelledStatus": "Two-step verification unchanged.",
+      "stepIndicatorActiveLabel": "current step",
+      "stepIndicatorDoneLabel": "completed"
+    },
+    "settings": {
+      "cardTitle": "Two-step verification",
+      "cardSubtitle": "Add an authenticator-based second layer to sign-in.",
+      "status": "Status",
+      "statusHint": "Shows whether two-step verification is active for this account.",
+      "statusEnabled": "Enabled",
+      "statusDisabled": "Disabled",
+      "enable": "Enable two-step verification",
+      "disable": "Disable",
+      "regenerate": "Regenerate backup codes",
+      "disabledToast": "Two-step verification has been disabled.",
+      "actionError": "That action could not be completed. Check your password and code.",
+      "disableReauthHint": "To disable, enter your password and a verification code.",
+      "regenerateReauthHint": "For new backup codes, enter your password and a verification code.",
+      "reauthPassword": "Account password",
+      "reauthCode": "Verification or backup code",
+      "reauthCodePlaceholder": "6-digit code or XXXXX-XXXXX",
+      "reauthCodeInvalid": "Enter a 6-digit code or a backup code in the XXXXX-XXXXX format.",
+      "disableConfirm": "Disable",
+      "regenerateConfirm": "Regenerate backup codes",
+      "newBackupTitle": "New backup codes",
+      "newBackupHint": "New codes were generated. Store them safely; the old codes are now invalid.",
+      "savedConfirm": "I have saved these codes.",
+      "backupDone": "Saved"
+    },
+    "devices": {
+      "title": "Trusted devices",
+      "subtitle": "Devices you chose to remember skip the verification code until they expire. Revoke any you no longer use.",
+      "loading": "Loading trusted devices",
+      "empty": "No trusted devices. When you choose “remember this device” at sign-in, it will appear here.",
+      "errorTitle": "Could not load trusted devices",
+      "errorBody": "We couldn’t load your trusted devices. Please try again.",
+      "retry": "Try again",
+      "networkLabel": "Network",
+      "networkUnknown": "Unknown network",
+      "createdLabel": "Added",
+      "expiresLabel": "Expires",
+      "revoke": "Revoke",
+      "revokeAria": "Revoke the trusted device on network {{network}}",
+      "revoking": "Revoking…",
+      "confirmTitle": "Revoke this device?",
+      "confirmBody": "The next sign-in from this device will require a verification code again. This cannot be undone.",
+      "confirmRevoke": "Revoke device",
+      "revokedToast": "Trusted device revoked.",
+      "revokeError": "Could not revoke the device. Please try again."
+    },
+    "adminReset": {
+      "pageTitle": "Reset operator MFA",
+      "heading": "Reset an operator's two-step verification",
+      "intro": "For a locked-out operator, reset their two-step verification. This wipes their authenticator, backup codes, and remembered devices — they must enrol again to sign in with a second factor.",
+      "targetLabel": "Operator user ID",
+      "targetPlaceholder": "00000000-0000-0000-0000-000000000000",
+      "targetHint": "Paste the operator's user ID (UUID).",
+      "validation": {
+        "required": "Enter the operator's user ID.",
+        "uuid": "Enter a valid user ID (UUID)."
+      },
+      "submit": "Reset two-step verification",
+      "confirmTitle": "Reset this operator's MFA?",
+      "confirmBody": "This permanently clears the operator's authenticator, backup codes, and remembered devices. They will have to enrol again. This cannot be undone.",
+      "confirmCta": "Reset MFA",
+      "cancel": "Cancel",
+      "working": "Resetting…",
+      "success": {
+        "title": "Two-step verification reset",
+        "body": "The operator's MFA has been cleared. They must re-enrol to use a second factor again."
+      },
+      "resetAnother": "Reset another operator",
+      "error": {
+        "selfReset": "You can't reset your own MFA here. Use the security settings on your own account.",
+        "invalidTarget": "No operator matches that user ID. Check the ID and try again.",
+        "rateLimit": "Too many attempts. Please wait a moment and try again.",
+        "generic": "The reset could not be completed. Please try again."
+      }
+    }
+  },
+  "password": {
+    "adminReset": {
+      "pageTitle": "Reset operator password",
+      "heading": "Reset operator password",
+      "intro": "Reset a locked-out operator's password as an administrator. This is a recovery path.",
+      "bannerTitle": "Destructive action.",
+      "bannerBody": "The operator's active sessions end and the action is written to the audit log.",
+      "whatTitle": "What does this do?",
+      "what": {
+        "assign": "A temporary password is assigned to the operator.",
+        "sessions": "All of the operator's open sessions are closed.",
+        "audit": "The action is written to the audit log.",
+        "firstLogin": "Changing it on first sign-in is advised — not enforced."
+      },
+      "generate": "Generate",
+      "showHide": "Show/hide",
+      "pickerLabel": "Operator",
+      "pickerPlaceholder": "Select an operator",
+      "pickerHint": "Choose the operator whose password you want to reset.",
+      "pickerFallback": "Couldn't load the operator list. Paste the target operator's user ID (UUID) instead.",
+      "targetLabel": "Target user ID (UUID)",
+      "targetPlaceholder": "e.g. 11111111-1111-1111-1111-111111111111",
+      "targetHint": "Enter the user ID of the operator whose password will be reset.",
+      "newPasswordLabel": "New password",
+      "newPasswordPlaceholder": "Enter the new temporary password",
+      "advisory": "Share this password with the operator over a secure channel and advise them to change it on first sign-in. This is advisory only and is not enforced by the system.",
+      "operatorStatus": "Operator status",
+      "account": "Account",
+      "locked": "Locked",
+      "active": "Active",
+      "failedLogins": "Failed sign-ins",
+      "attempts": "{{count}} attempts",
+      "lastLogin": "Last sign-in",
+      "lastLoginNever": "—",
+      "submit": "Reset password",
+      "working": "Resetting…",
+      "cancel": "Cancel",
+      "confirmTitle": "Reset this operator's password?",
+      "confirmBody": "This closes all of the operator's sessions, trusted devices and open reset/MFA challenges, and resets the PASSWORD. It does NOT remove the operator's MFA / authenticator. This cannot be undone.",
+      "confirmCta": "Yes, reset the password",
+      "validation": {
+        "targetRequired": "Select an operator or enter a user ID.",
+        "targetUuid": "Enter a valid user ID (UUID).",
+        "password": "The password must meet every requirement and be at most 64 characters."
+      },
+      "success": {
+        "title": "Password reset",
+        "body": "The operator's password has been updated; their sessions, trusted devices and open reset/MFA challenges were closed. Their MFA enrollment is preserved."
+      },
+      "resetAnother": "Reset another operator",
+      "error": {
+        "selfReset": "You can't reset your own password here. Use the security settings on your own account.",
+        "unknown": "No operator matches that user ID. Check the ID and try again.",
+        "weak": "The password is too weak or unchanged from the current one. Choose a stronger, different password.",
+        "rate": "Too many attempts. Please wait a moment and try again.",
+        "generic": "The reset could not be completed. Please try again."
+      }
+    },
+    "resetRequests": {
+      "pageTitle": "Password reset requests",
+      "heading": "Password reset requests",
+      "intro": "Operators who cannot complete the self-service reset ask for approval here. Verify the requester's identity out-of-band (in person or over a known channel) before approving — the system cannot do that for you.",
+      "empty": "No reset requests. When an operator requests an administrator reset, it appears here.",
+      "refresh": "Refresh",
+      "table": {
+        "account": "Account",
+        "status": "Status",
+        "requested": "Requested",
+        "decided": "Decided"
+      },
+      "status": {
+        "pending": "Pending",
+        "approved": "Approved",
+        "denied": "Denied",
+        "expired": "Expired",
+        "completed": "Completed"
+      },
+      "detail": {
+        "title": "Request details",
+        "requested": "Requested at",
+        "expires": "Expires at",
+        "ip": "Network",
+        "ipNote": "Approximate network prefix only — the full IP address is not stored.",
+        "device": "Device",
+        "deviceRaw": "Show raw browser signature",
+        "decidedBy": "Decided by",
+        "decidedAt": "Decided at",
+        "completedAt": "Completed at"
+      },
+      "approve": "Approve",
+      "deny": "Deny",
+      "confirmApprove": {
+        "title": "Approve this reset request?",
+        "body": "Approval lets the requesting browser set a NEW password for this account. Only approve after you have verified the requester's identity out-of-band. The decision is written to the audit log.",
+        "confirm": "Yes, approve"
+      },
+      "confirmDeny": {
+        "title": "Deny this reset request?",
+        "body": "The requester is notified that the request was declined and cannot continue with it. The decision is written to the audit log.",
+        "confirm": "Yes, deny"
+      },
+      "approvedNext": "Approved: the requester sets their own new password from the forgot-password screen — no password is chosen or seen by an administrator.",
+      "error": {
+        "generic": "The operation could not be completed. Please try again.",
+        "alreadyDecided": "This request was already decided elsewhere. The list has been refreshed.",
+        "expired": "This request has expired and can no longer be decided. The list has been refreshed.",
+        "notFound": "This request no longer exists. The list has been refreshed."
+      }
+    }
+  },
+  "notifications": {
+    "markAllRead": "Mark all read",
+    "markRead": "Mark read",
+    "markReadAria": "Mark notification as read",
+    "openRecordAria": "Go to record",
+    "seeAll": "See all notifications",
+    "empty": "No notifications",
+    "unread": "Unread",
+    "page": {
+      "title": "Notifications",
+      "subtitle": "All notifications for your account. Select a notification to go to the related record.",
+      "loading": "Loading notifications",
+      "emptyTitle": "No notifications yet",
+      "emptyBody": "When something new happens, it will appear here.",
+      "emptyFilteredTitle": "No matching notifications",
+      "emptyFilteredBody": "No notifications match the filters you selected.",
+      "errorTitle": "Could not load notifications",
+      "errorBody": "We couldn’t load your notifications. Please try again.",
+      "retry": "Try again",
+      "unreadSummary": "{{count}} unread",
+      "allRead": "All caught up",
+      "unreadAria": "{{count}} unread notifications",
+      "loadMore": "Load more",
+      "loadingMore": "Loading more notifications",
+      "allLoaded": "All notifications loaded.",
+      "loadedStatus": "{{count}} of {{total}} notifications loaded."
+    },
+    "group": {
+      "today": "Today",
+      "earlier": "Earlier"
+    },
+    "filter": {
+      "readState": "Read state",
+      "all": "All",
+      "unread": "Unread",
+      "read": "Read",
+      "type": "Type",
+      "severity": "Severity",
+      "allTypes": "All types",
+      "allSeverities": "All severities",
+      "clear": "Clear filters"
+    },
+    "severity": {
+      "info": "Info",
+      "success": "Success",
+      "warning": "Warning",
+      "critical": "Critical"
+    },
+    "type": {
+      "securityAlert": "Security alert",
+      "kycEvent": "KYC event",
+      "customerEvent": "Customer event",
+      "system": "System notification",
+      "account": "Account",
+      "activity": "Notification"
+    },
+    "customer": {
+      "created": {
+        "title": "New customer added",
+        "body": "A new customer record was created."
+      }
+    },
+    "system": {
+      "maintenance": {
+        "title": "Scheduled maintenance",
+        "body": "A scheduled maintenance window will take place soon."
+      }
+    },
+    "account": {
+      "signedIn": {
+        "title": "New sign-in to your account",
+        "body": "A new session was opened on your account. If this wasn't you, change your password."
+      }
+    },
+    "kyc": {
+      "statusChanged": {
+        "title": "KYC status updated",
+        "body": "A customer's KYC status has changed."
+      }
+    },
+    "security": {
+      "adminPasswordReset": {
+        "title": "Your password was reset",
+        "body": "An administrator reset your account password. If this wasn't expected, contact your administrator."
+      },
+      "adminMfaReset": {
+        "title": "Your two-step verification was reset",
+        "body": "An administrator reset your two-step verification. Set it up again from Settings › Security."
+      },
+      "accountLockout": {
+        "title": "Your account was temporarily locked",
+        "body": "Your account was temporarily locked after repeated failed sign-in attempts. If this wasn't you, reset your password and contact your administrator."
+      },
+      "newTrustedDevice": {
+        "title": "A new trusted device was added",
+        "body": "A new trusted device was registered for your account. If this wasn't you, remove the device from Settings › Security."
+      },
+      "resetRequestCreated": {
+        "title": "Password-reset request received",
+        "body": "{{account}} requested an administrator-approved password reset. Review it on the reset-requests screen."
+      },
+      "resetRequestApproved": {
+        "title": "Your reset request was approved",
+        "body": "An administrator approved your password-reset request. Return to the forgot-password screen to set your new password."
+      },
+      "resetRequestDenied": {
+        "title": "Your reset request was declined",
+        "body": "An administrator declined your password-reset request. Contact your administrator if you didn't expect this."
+      }
+    },
+    "fallback": {
+      "title": "Notification",
+      "body": "You have a new notification."
+    }
+  }
+}
