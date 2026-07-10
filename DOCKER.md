@@ -1,9 +1,9 @@
 # Docker — Local Run Guide
 
 This guide covers running Vaultchain locally with Docker. One command builds the whole stack —
-the Angular web app, the NestJS API, and a PostgreSQL database — and brings it up already populated
-with demo data. It is meant for local viewing and evaluation on your own machine, not for
-production deployment.
+the Angular 21 app served by nginx, the NestJS 11 API backed by Prisma 7, and PostgreSQL 16 — and
+brings it up already populated with demo data. It is meant for local viewing and evaluation on
+your own machine, not for production deployment.
 
 ## Prerequisites
 
@@ -56,8 +56,8 @@ flowchart LR
 
 | Service   | What it is                                        | Where |
 | --------- | ------------------------------------------------- | ----- |
-| `web`     | Angular app served by nginx, proxying `/api/` to the backend | http://localhost:8080 |
-| `api`     | NestJS backend                                    | loopback only: `127.0.0.1:3000` (`/api/v1/health` for a liveness check) |
+| `web`     | Angular 21 app served by nginx, proxying `/api/` to the backend | http://localhost:8080 |
+| `api`     | NestJS 11 backend with Prisma 7                    | loopback only: `127.0.0.1:3000` (`/api/v1/health` for a liveness check) |
 | `db`      | PostgreSQL 16                                     | internal to the compose network; also published on `127.0.0.1:55432` for host tools |
 | `db-init` | One-shot schema push + seed-if-empty job          | runs on `up`, exits when done |
 

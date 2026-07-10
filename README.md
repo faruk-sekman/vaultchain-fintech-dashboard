@@ -4,11 +4,18 @@
 
 ### The back-office console for fintech operations — customers, KYC, wallets, transactions and read-only on-chain risk, on one screen.
 
+<p>
+  <a href="Web/README.md"><img alt="Angular 21" src="https://img.shields.io/badge/Angular_21-DD0031?style=for-the-badge&amp;logo=angular&amp;logoColor=white" /></a>
+  <a href="Web/package.json"><img alt="TypeScript 5.9" src="https://img.shields.io/badge/TypeScript_5.9-3178C6?style=for-the-badge&amp;logo=typescript&amp;logoColor=white" /></a>
+  <a href="Api/README.md"><img alt="NestJS 11" src="https://img.shields.io/badge/NestJS_11-E0234E?style=for-the-badge&amp;logo=nestjs&amp;logoColor=white" /></a>
+  <a href="docs/data-model.md"><img alt="PostgreSQL 16" src="https://img.shields.io/badge/PostgreSQL_16-4169E1?style=for-the-badge&amp;logo=postgresql&amp;logoColor=white" /></a>
+  <a href="Api/prisma/schema.prisma"><img alt="Prisma 7" src="https://img.shields.io/badge/Prisma_7-2D3748?style=for-the-badge&amp;logo=prisma&amp;logoColor=white" /></a>
+  <a href="DOCKER.md"><img alt="Docker Compose" src="https://img.shields.io/badge/Docker_Compose-2496ED?style=for-the-badge&amp;logo=docker&amp;logoColor=white" /></a>
+</p>
+
 [![CI](https://github.com/faruk-sekman/vaultchain-fintech-dashboard/actions/workflows/ci.yml/badge.svg)](https://github.com/faruk-sekman/vaultchain-fintech-dashboard/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Node](https://img.shields.io/badge/Node-%E2%89%A522-339933?logo=node.js&logoColor=white)](.nvmrc)
-[![Angular](https://img.shields.io/badge/Angular-21-DD0031?logo=angular&logoColor=white)](Web/README.md)
-[![NestJS](https://img.shields.io/badge/NestJS-11-E0234E?logo=nestjs&logoColor=white)](Api/README.md)
 
 <em>A full-stack fintech operations platform — Angular front end + NestJS back end — built with the
 correctness, security and privacy discipline a real product team would demand.</em>
