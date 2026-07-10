@@ -1,0 +1,69 @@
+<!-- Shared lang + theme controls. :host is the absolutely-positioned cluster in the panel's top-right. -->
+<div
+  class="auth-controls__lang"
+  role="group"
+  [attr.aria-label]="'auth.login.languageLabel' | translate"
+>
+  <button
+    type="button"
+    class="auth-controls__lang-btn"
+    [class.is-active]="currentLang() === 'tr'"
+    [attr.aria-pressed]="currentLang() === 'tr'"
+    (click)="switchLang('tr')"
+  >
+    TR
+  </button>
+  <button
+    type="button"
+    class="auth-controls__lang-btn"
+    [class.is-active]="currentLang() === 'en'"
+    [attr.aria-pressed]="currentLang() === 'en'"
+    (click)="switchLang('en')"
+  >
+    EN
+  </button>
+</div>
+<button
+  type="button"
+  class="auth-controls__theme"
+  (click)="toggleTheme()"
+  [attr.aria-pressed]="theme() === 'dark'"
+  [attr.aria-label]="
+    (theme() === 'dark' ? 'auth.login.themeLight' : 'auth.login.themeDark') | translate
+  "
+>
+  @if (theme() === 'dark') {
+    <svg
+      class="auth-controls__svg"
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.8"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
+    >
+      <circle cx="12" cy="12" r="4"></circle>
+      <path
+        d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M6.3 17.7l-1.4 1.4M19.1 4.9l-1.4 1.4"
+      ></path>
+    </svg>
+  } @else {
+    <svg
+      class="auth-controls__svg"
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.8"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
+    </svg>
+  }
+</button>

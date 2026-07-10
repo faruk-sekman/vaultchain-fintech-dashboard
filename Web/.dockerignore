@@ -1,0 +1,16 @@
+# Keep the build context small and never ship local state into the image.
+node_modules
+dist
+.angular
+coverage
+*.log
+.DS_Store
+.git
+.gitignore
+.env
+.env.*
+# Docker artifacts aren't needed by the build (nginx.conf.template IS needed — do not ignore it).
+Dockerfile
+.dockerignore
+docker-compose*.yml
+README.md

@@ -1,0 +1,134 @@
+:host {
+  @apply block;
+}
+
+.ui-card {
+  @apply flex flex-col gap-3;
+
+  background: var(--color-surface);
+
+  // v2 §4: borderless white card in light; dark re-introduces a 1px hairline.
+  border: 1px solid transparent;
+  border-radius: var(--radius-card);
+
+  // Resting depth + a 1px top inset highlight (quiet premium detail, tokens only):
+  // the white sheen catches the top edge so the card reads lifted off the canvas.
+  box-shadow: var(--shadow-card), var(--shadow-card-inset-highlight);
+  color: var(--color-text);
+  transition:
+    border-color var(--motion-duration-base) var(--motion-ease-emphasized),
+    box-shadow var(--motion-duration-base) var(--motion-ease-emphasized);
+
+  :host-context(html[data-theme="dark"]) & {
+    border-color: var(--color-border);
+  }
+
+  // Padding scale: compact card rhythm for dense dashboard surfaces.
+  &--pad-sm {
+    padding: 18px;
+  }
+
+  &--pad-md {
+    padding: 22px;
+  }
+
+  &--pad-lg {
+    padding: 26px;
+  }
+
+  &--muted {
+    background: var(--color-surface-3);
+  }
+
+  // v2 §4: the ONLY non-default card outline — a dashed --color-link border that
+  // marks a real-vs-simulated / preview surface (simulated Web3 blocks). Never
+  // decorative; reserved for compliance-honesty "simulated/preview" affordances.
+  &--sim {
+    border: 1px dashed var(--color-link);
+
+    :host-context(html[data-theme="dark"]) & {
+      border-color: var(--color-link);
+    }
+  }
+
+  &--gradient {
+    background: var(--gradient-brand);
+    border-color: transparent;
+    color: var(--color-on-brand);
+
+    .ui-card__title {
+      color: inherit;
+    }
+
+    .ui-card__subtitle {
+      color: var(--color-on-brand);
+      opacity: 0.82;
+    }
+  }
+
+  &--interactive {
+    cursor: pointer;
+
+    &:hover {
+      box-shadow: var(--shadow-lg);
+    }
+
+    // Keyboard focus surfaced when the consumer makes the card focusable.
+    &:focus-within {
+      box-shadow: var(--shadow-focus);
+    }
+  }
+
+  &__header {
+    @apply flex items-start justify-between gap-3;
+  }
+
+  &__heading {
+    @apply flex min-w-0 flex-col gap-1;
+  }
+
+  // Card-local headings stay below external section titles.
+  &__title {
+    @apply m-0;
+
+    font-size: var(--text-h3);
+    line-height: var(--text-h3-lh);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-heading);
+  }
+
+  &__subtitle {
+    @apply m-0 leading-5;
+
+    font-size: var(--text-body-sm);
+    color: var(--color-text-muted);
+  }
+
+  &__actions {
+    @apply flex shrink-0 items-center gap-2;
+  }
+
+  &__body {
+    @apply min-w-0;
+  }
+
+  &__footer {
+    @apply border-t pt-3;
+
+    border-top: 1px solid var(--color-border);
+  }
+
+  &--gradient &__footer {
+    border-top-color: rgb(255 255 255 / 24%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ui-card {
+    transition: none;
+  }
+
+  .ui-card--interactive:hover {
+    transform: none;
+  }
+}

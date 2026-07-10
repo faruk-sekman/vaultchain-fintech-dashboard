@@ -1,0 +1,146 @@
+<section
+  class="settings-panel motion-stagger"
+  role="tabpanel"
+  data-testid="settings-panel-profile"
+  [attr.id]="panelId"
+  [attr.aria-labelledby]="labelledBy"
+>
+  <header class="settings-panel__head">
+    <span class="settings-medallion settings-medallion--blue" aria-hidden="true">
+      <i class="ri-user-line"></i>
+    </span>
+    <div class="settings-panel__heading">
+      <h2 class="settings-panel__title">{{ 'settings.profile.title' | translate }}</h2>
+      <p class="settings-panel__sub">{{ 'settings.profile.subtitle' | translate }}</p>
+    </div>
+  </header>
+
+  <div class="settings-form">
+    <div class="form-field">
+      <label for="set-profile-name">{{ 'settings.profile.displayName' | translate }}</label>
+      <app-ui-input
+        id="set-profile-name"
+        data-testid="settings-profile-name"
+        iconStart="ri-user-line"
+        [control]="profileForm.controls.displayName"
+        [placeholder]="'settings.profile.displayNamePlaceholder' | translate"
+        [ariaInvalid]="
+          profileForm.controls.displayName.invalid &&
+          (profileForm.controls.displayName.touched || profileForm.controls.displayName.dirty)
+        "
+        [ariaDescribedBy]="
+          profileForm.controls.displayName.invalid &&
+          (profileForm.controls.displayName.touched || profileForm.controls.displayName.dirty)
+            ? 'set-profile-name-error'
+            : null
+        "
+      ></app-ui-input>
+      @if (
+        profileForm.controls.displayName.invalid &&
+        (profileForm.controls.displayName.touched || profileForm.controls.displayName.dirty)
+      ) {
+        <p class="settings-field-error" id="set-profile-name-error" role="alert">
+          {{
+            (profileForm.controls.displayName.errors?.['required']
+              ? 'validation.required'
+              : 'validation.maxLength'
+            ) | translate: { max: 120 }
+          }}
+        </p>
+      }
+    </div>
+
+    <div class="form-field">
+      <label for="set-profile-email">{{ 'settings.profile.email' | translate }}</label>
+      <div class="settings-affix">
+        <app-ui-input
+          id="set-profile-email"
+          iconStart="ri-lock-2-line"
+          [readOnly]="true"
+          [control]="profileForm.controls.email"
+          ariaDescribedBy="set-profile-email-hint"
+        ></app-ui-input>
+        <span class="settings-affix__pill" aria-hidden="true">
+          {{ 'settings.profile.emailSso' | translate }}
+        </span>
+      </div>
+      <p class="settings-field-hint" id="set-profile-email-hint">
+        {{ 'settings.profile.emailReadonlyHint' | translate }}
+      </p>
+    </div>
+
+    <div class="form-field">
+      <label for="set-profile-phone">{{ 'settings.profile.phone' | translate }}</label>
+      <app-ui-input
+        id="set-profile-phone"
+        iconStart="ri-phone-line"
+        [control]="profileForm.controls.phone"
+        [maxLength]="32"
+        [placeholder]="'settings.profile.phonePlaceholder' | translate"
+        [ariaInvalid]="
+          profileForm.controls.phone.invalid &&
+          (profileForm.controls.phone.touched || profileForm.controls.phone.dirty)
+        "
+        [ariaDescribedBy]="
+          profileForm.controls.phone.invalid &&
+          (profileForm.controls.phone.touched || profileForm.controls.phone.dirty)
+            ? 'set-profile-phone-error'
+            : 'set-profile-phone-hint'
+        "
+      ></app-ui-input>
+      @if (
+        profileForm.controls.phone.invalid &&
+        (profileForm.controls.phone.touched || profileForm.controls.phone.dirty)
+      ) {
+        <p class="settings-field-error" id="set-profile-phone-error" role="alert">
+          {{
+            (profileForm.controls.phone.errors?.['maxlength']
+              ? 'validation.maxLength'
+              : 'validation.phoneInvalid'
+            ) | translate: { max: 32 }
+          }}
+        </p>
+      } @else {
+        <p class="settings-field-hint" id="set-profile-phone-hint">
+          {{ 'settings.profile.phoneHint' | translate }}
+        </p>
+      }
+    </div>
+
+    <div class="form-field">
+      <label for="set-profile-title">{{ 'settings.profile.jobTitle' | translate }}</label>
+      <app-ui-input
+        id="set-profile-title"
+        iconStart="ri-briefcase-line"
+        [control]="profileForm.controls.jobTitle"
+        [placeholder]="'settings.profile.jobTitlePlaceholder' | translate"
+      ></app-ui-input>
+    </div>
+  </div>
+
+  <div class="settings-form-footer">
+    <span class="settings-form-footer__note">
+      <i class="ri-cloud-line" aria-hidden="true"></i>
+      {{ 'settings.serverBacked' | translate }}
+    </span>
+    <div class="settings-form-footer__actions">
+      <app-ui-button
+        variant="ghost"
+        type="button"
+        [disabled]="profileForm.pristine || profileSaving"
+        (click)="cancelProfile.emit()"
+      >
+        {{ 'settings.actions.cancel' | translate }}
+      </app-ui-button>
+      <app-ui-button
+        type="button"
+        data-testid="settings-profile-save"
+        [disabled]="profileForm.invalid || profileForm.pristine || profileSaving"
+        (click)="saveProfile.emit()"
+      >
+        <i class="ri-save-3-line ui-button__icon" aria-hidden="true"></i>
+        {{ profileSaving ? ('common.saving' | translate) : ('settings.actions.save' | translate) }}
+      </app-ui-button>
+    </div>
+  </div>
+</section>

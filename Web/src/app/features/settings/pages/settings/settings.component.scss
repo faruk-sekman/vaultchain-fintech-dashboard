@@ -1,0 +1,483 @@
+/*
+ * Copyright (c) 2026 Fintech Dashboard contributors.
+ * Settings SHELL (redesign v3 — reference: settings_design.html concept 1b "Single Surface"):
+ * ONE 24px shell card with a soft brand wash over the account header (gradient-ring avatar + role
+ * pill + live session chips), a full-bleed underline tablist (gradient indicator), and the active
+ * panel below. Tokens first; the reference's exact geometry (px sizes, chip heights) is kept raw
+ * per the redesign fidelity budget.
+ *
+ * This stylesheet owns ONLY the markup this component renders: the card chrome, head zone, tablist,
+ * nav trigger, panel area, and the first-paint skeleton. The section panels own their styles
+ * (Emulated scoping) via `components/_settings-panel.shared.scss` + per-panel stylesheets.
+ */
+
+/* The shell owns the card chrome itself (no ui-card): the head-zone wash + tabs must run edge-to-
+   edge under the 24px radius, so padding is per-zone rather than uniform. */
+.settings-shell {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: 24px;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-card);
+}
+
+/* ── Head zone: account header + tabs over a fading brand wash (reference 1b) ── */
+
+.settings-head-zone {
+  padding: 24px 28px 0;
+
+  /* vc-soft: a 7% brand tint fading out by 85% height — resolves in both themes via the link token. */
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--color-link) 7%, transparent),
+    transparent 85%
+  );
+}
+
+.account-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-4) var(--space-6);
+  min-width: 0;
+  padding-block-end: 20px;
+}
+
+.account-head__lead {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
+}
+
+/* Initials medallion: a 2.5px gradient ring around a surface face, the monogram itself set in
+   gradient ink (background-clip) — reference 1b. Brand-tinted drop shadow kept raw for fidelity. */
+.account-head__avatar {
+  display: inline-flex;
+  flex-shrink: 0;
+  padding: 2.5px;
+  border-radius: var(--radius-pill);
+  background: var(--gradient-brand);
+  box-shadow: 0 8px 20px rgb(24 20 243 / 20%);
+}
+
+.account-head__avatar-face {
+  display: grid;
+  place-items: center;
+  inline-size: 54px;
+  block-size: 54px;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+}
+
+.account-head__initials {
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  background: var(--gradient-brand);
+  background-clip: text;
+  /* stylelint-disable-next-line property-no-vendor-prefix */
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+.account-head__stack {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.account-head__name-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 9px;
+  min-width: 0;
+}
+
+.account-head__name {
+  overflow: hidden;
+  font-size: 19px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color: var(--color-text-strong);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.account-head__role {
+  flex-shrink: 0;
+  padding: 3px 9px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--color-link) 7%, transparent);
+  font-size: 10.5px;
+  font-weight: var(--font-weight-bold);
+  color: var(--color-link);
+}
+
+.account-head__email {
+  overflow: hidden;
+  font-size: var(--text-body-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-muted);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Live session facts: status/2FA chips + the last sign-in readout. */
+.account-head__meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.account-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  block-size: 28px;
+  padding-inline: 12px;
+  border-radius: var(--radius-pill);
+  font-size: 11.5px;
+  font-weight: var(--font-weight-semibold);
+  white-space: nowrap;
+
+  i {
+    font-size: 13px;
+    line-height: 1;
+  }
+}
+
+.account-chip--ok {
+  background: var(--color-success-bg);
+  color: var(--color-success-text);
+}
+
+.account-chip--warn {
+  background: var(--color-warning-bg);
+  color: var(--color-warning-text);
+}
+
+.account-chip__dot {
+  flex-shrink: 0;
+  inline-size: 7px;
+  block-size: 7px;
+  border-radius: var(--radius-pill);
+  background: var(--color-success-strong);
+  animation: settings-pulse 2.4s infinite;
+}
+
+/* Inline "enable 2FA" jump inside the warning chip — a real button, underlined like the reference. */
+.account-chip__action {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-weight: var(--font-weight-bold);
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: none;
+    border-radius: 4px;
+    box-shadow: var(--shadow-focus);
+  }
+}
+
+.account-head__last {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--text-caption);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-muted);
+  white-space: nowrap;
+
+  i {
+    font-size: 13px;
+    color: var(--color-text-subtle);
+  }
+}
+
+/* Live-session pulse (reference vcPulse) on the status dot. The access panel carries its own copy:
+   Angular scopes @keyframes names per component under Emulated encapsulation. */
+@keyframes settings-pulse {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-success) 55%, transparent);
+  }
+
+  70% {
+    box-shadow: 0 0 0 6px transparent;
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+  }
+}
+
+/* ── Horizontal section tablist (full-bleed, gradient underline — reference 1b) ── */
+
+/* Never a horizontal scroller: the row fits every ≥768px width; below that the native picker
+   (.settings-tabs-select) replaces it outright. */
+.settings-tabs {
+  display: flex;
+  align-items: stretch;
+  gap: 2px;
+  margin-inline: -28px;
+  padding-inline: 24px;
+  border-block-end: 1px solid var(--color-border);
+}
+
+.settings-tab {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 11px 14px 13px;
+  border: 0;
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: 13.5px;
+  font-weight: var(--font-weight-medium);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color var(--motion-fast) var(--motion-ease-standard);
+
+  /* 3px gradient underline riding the row hairline; transparent until active. */
+  &::after {
+    content: '';
+    position: absolute;
+    inset-inline: 10px;
+    inset-block-end: -1px;
+    block-size: 3px;
+    border-radius: 3px 3px 0 0;
+    background: transparent;
+  }
+
+  &:hover:not(.is-active) {
+    color: var(--color-text-strong);
+  }
+
+  &.is-active {
+    color: var(--color-primary);
+    font-weight: var(--font-weight-semibold);
+
+    &::after {
+      background: var(--gradient-brand);
+    }
+  }
+
+  &:focus-visible {
+    outline: none;
+    border-radius: var(--radius-field);
+    box-shadow: var(--shadow-focus);
+  }
+}
+
+.settings-tab__icon {
+  flex: none;
+  font-size: 16px;
+  line-height: 1;
+  color: inherit;
+}
+
+/* Mobile nav trigger — an explicit MENU button (active-section tile + name, uppercase "MENU"
+   caption, rotating chevron). Hidden on desktop; ≤768px it replaces the tab row and discloses the
+   tablist below as a stacked menu panel. */
+.settings-nav-trigger {
+  display: none;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 48px;
+  margin-block-end: 14px;
+  padding: 0 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-card);
+  font-size: 13.5px;
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-strong);
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: none;
+    border-color: var(--color-link);
+    box-shadow: var(--shadow-focus);
+  }
+}
+
+.settings-nav-trigger__icon {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  inline-size: 30px;
+  block-size: 30px;
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--color-link) 8%, transparent);
+  color: var(--color-link);
+  font-size: 16px;
+}
+
+.settings-nav-trigger__label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.settings-nav-trigger__menu {
+  margin-inline-start: auto;
+  font-size: 10px;
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.settings-nav-trigger__chevron {
+  flex-shrink: 0;
+  font-size: 18px;
+  color: var(--color-text-muted);
+  transition: transform var(--motion-fast) var(--motion-ease-standard);
+}
+
+.settings-nav-trigger.is-open .settings-nav-trigger__chevron {
+  transform: rotate(180deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .settings-tab,
+  .settings-nav-trigger__chevron {
+    transition: none;
+  }
+
+  .account-chip__dot {
+    animation: none;
+  }
+}
+
+.settings-panel-area {
+  min-width: 0;
+  min-height: 480px;
+  padding: 26px 28px 28px;
+}
+
+/* ── Responsive ─────────────────────────────────────────────────────────────── */
+
+@media (width <= 768px) {
+  .account-head__meta {
+    justify-content: flex-start;
+  }
+
+  .settings-head-zone {
+    padding-inline: 20px;
+  }
+
+  /* The tab row never scrolls: below tablet width the MENU trigger takes over, and the SAME
+     tablist opens under it as a stacked menu card (icons + active highlight, closes on pick). */
+  .settings-nav-trigger {
+    display: flex;
+  }
+
+  .settings-tabs {
+    display: none;
+  }
+
+  .settings-tabs.settings-tabs--open {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin: -6px 0 14px;
+    padding: 6px;
+    border: 1px solid var(--color-border);
+    border-radius: 14px;
+    background: var(--color-surface);
+    box-shadow: var(--shadow-card);
+  }
+
+  .settings-tabs--open .settings-tab {
+    width: 100%;
+    padding: 11px 12px;
+    border-radius: 10px;
+
+    &::after {
+      display: none;
+    }
+
+    &.is-active {
+      background: color-mix(in srgb, var(--color-link) 8%, transparent);
+    }
+
+    &:hover:not(.is-active) {
+      background: var(--color-surface-2);
+    }
+  }
+
+  .settings-panel-area {
+    padding: 22px 20px 24px;
+  }
+}
+
+/* ── Skeleton shell + reveal entrance ───────────────────────────────────────── */
+
+.settings-shell-sk {
+  display: grid;
+  gap: var(--space-5);
+  padding: 24px 28px 28px;
+}
+
+.settings-shell-sk__head,
+.settings-shell-sk__tabs {
+  display: flex;
+  gap: var(--space-5);
+  padding-block-end: var(--space-4);
+}
+
+.settings-shell-sk__head {
+  align-items: center;
+}
+
+.settings-shell-sk__stack {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.settings-shell-sk__chip {
+  margin-inline-start: auto;
+}
+
+.settings-shell-sk__tabs {
+  gap: var(--space-3);
+  border-block-end: 1px solid var(--color-border);
+  overflow: hidden;
+}
+
+/* Skeleton placeholder rows: 1:1 the chrome of the shared `.settings-row` (see
+   `components/_settings-panel.shared.scss`) so the reveal swap doesn't shift layout. */
+.settings-panel-sk__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-5);
+  min-width: 0;
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-2);
+}
+
+.settings-panel-sk__row-text {
+  display: grid;
+  gap: var(--space-2);
+  min-width: 0;
+}

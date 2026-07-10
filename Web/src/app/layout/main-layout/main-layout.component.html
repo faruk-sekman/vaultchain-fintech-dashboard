@@ -1,0 +1,54 @@
+<div
+  class="app-shell"
+  data-testid="app-shell"
+  [class.app-shell--rail-collapsed]="sidebar.collapsed()"
+>
+  <a href="#main-content" class="skip-link">
+    {{ 'common.skipToContent' | translate }}
+  </a>
+
+  <aside class="sidebar-rail motion-slide-in-left">
+    <app-sidebar></app-sidebar>
+  </aside>
+
+  <div class="app-main">
+    <app-header (menuToggle)="toggleMobileNav()" (search)="onGlobalSearch($event)"></app-header>
+
+    <!-- No transform-retaining entrance animation here: `.content` is the scroll + modal host,
+         so a lingering transform would trap position:fixed overlays (delete dialog) inside it.
+         Route transitions are handled by the routeFade trigger on `.route-host` below. -->
+    <main id="main-content" data-testid="main-content" tabindex="-1" class="content">
+      <div class="route-host" [@.disabled]="reducedMotion" [@routeFade]="routeKey()">
+        <router-outlet #outlet="outlet" (activate)="updateRoute(outlet)"></router-outlet>
+      </div>
+    </main>
+
+    <!-- Sticky footer: pinned to the viewport bottom when content is short, pushed down otherwise. -->
+    <footer class="footer footer-text">
+      {{ 'app.footer' | translate }}
+    </footer>
+  </div>
+
+  @if (mobileNavOpen) {
+    <div class="mobile-nav motion-backdrop" (click)="closeMobileNav()">
+      <div
+        class="mobile-nav__panel motion-slide-in-left"
+        data-testid="mobile-nav-panel"
+        (click)="$event.stopPropagation()"
+      >
+        <div class="mobile-nav__header">
+          <div class="mobile-nav__title">{{ 'common.menu' | translate }}</div>
+          <button
+            type="button"
+            class="mobile-nav__close"
+            [attr.aria-label]="'common.closeMenu' | translate"
+            (click)="closeMobileNav()"
+          >
+            <i class="ri-close-line" aria-hidden="true"></i>
+          </button>
+        </div>
+        <app-sidebar [showBrand]="false" (navigate)="closeMobileNav()"></app-sidebar>
+      </div>
+    </div>
+  }
+</div>

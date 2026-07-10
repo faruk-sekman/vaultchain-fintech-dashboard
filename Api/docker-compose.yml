@@ -1,0 +1,70 @@
+# Standalone BACKEND stack: api + postgres. Run from Api/ with `docker compose up`.
+# Self-contained — no reference outside Api/, so it works unchanged if Api/ becomes its own repo.
+# Defaults let it start with zero config; copy .env.docker.example to .env to override.
+name: ftd-api
+
+services:
+  db:
+    image: postgres:16-alpine@sha256:e013e867e712fec275706a6c51c966f0bb0c93cfa8f51000f85a15f9865a28cb
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-fintech_dev}
+    volumes:
+      - ftd-api-pgdata:/var/lib/postgresql/data
+    # Not published to the host by default (internal network only). To inspect from the host,
+    # uncomment and pick a free port (the existing local dev container ftd-local-pg uses 55440):
+    # ports:
+    #   - "127.0.0.1:55441:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build:
+      context: .
+      target: runtime
+    environment:
+      # development => the PII encryptor uses the clearly-labeled DEV-ONLY fallback key (no master key
+      # needed). production would refuse to boot without FTD_PII_MASTER_KEY (the app's security gate).
+      # Keep this matched with the db-setup seed so national_id encrypt/decrypt use the same key.
+      NODE_ENV: development
+      PORT: 3000
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-fintech_dev}?schema=public
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-change-me-local-dev-only-min-16}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-change-me-local-dev-only-min-16}
+      # Allowed browser origins — covers a host `ng serve` dev server (:4200/:4201) hitting this API.
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:4200,http://localhost:4201,http://localhost:8080}
+    # F8 (CWE-1188): bind the API to loopback by DEFAULT — reachable from localhost, NOT the network, so
+    # the dev fallback JWT secrets above aren't reachable off-host. web→api uses the internal compose
+    # network. Expose on the network only by EXPLICITLY setting API_BIND=0.0.0.0 with REAL JWT secrets.
+    ports:
+      - "${API_BIND:-127.0.0.1}:${API_HOST_PORT:-3000}:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # Gated, opt-in DB initialization (schema push + dev seed). NEVER runs on `up` (profile-gated).
+  # Uses the builder stage (has the Prisma CLI + ts-node + scripts). Run explicitly when you choose to:
+  #   docker compose --profile setup run --rm db-setup
+  db-setup:
+    build:
+      context: .
+      target: builder
+    profiles: ["setup"]
+    # Share the db container's network namespace so `localhost:5432` reaches Postgres. This satisfies
+    # seed-dev.ts's safety guard (it refuses any DATABASE_URL whose host isn't localhost/127.0.0.1) —
+    # without weakening that guard, and while keeping the db unpublished to the host.
+    network_mode: "service:db"
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@localhost:5432/${POSTGRES_DB:-fintech_dev}?schema=public
+    command: sh -c "node scripts/db-deploy.mjs && npx ts-node scripts/seed-dev.ts"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  ftd-api-pgdata:

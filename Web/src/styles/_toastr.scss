@@ -1,0 +1,65 @@
+// ngx-toastr container + FLAT toast wrapper. The toast BODY is the shared app-ui-alert
+// rendered by UiToastComponent — so a toast IS our in-app alert design (same markup/tokens/layout). This
+// file only positions the stacking container and sizes/clips each toast; the visual (border, accent,
+// surface, icon, dismiss) comes from app-ui-alert. No drop-shadow and no hover effects (flat, per design);
+// the ui-alert border (1px + 4px left accent) gives the floating toast its edge.
+
+.toast-container {
+  width: min(360px, calc(100vw - var(--space-8)));
+  z-index: var(--z-toast);
+
+  .ngx-toastr {
+    display: block;
+    width: 100%;
+    margin: 0 0 var(--space-3);
+    padding: 0;
+    overflow: hidden;
+    background: transparent;
+    background-image: none;
+    border-radius: var(--radius-field);
+    box-shadow: none;
+
+    // No hover effect on the toast itself (override ngx-toastr's default hover shadow, if any).
+    &:hover {
+      box-shadow: none;
+    }
+  }
+
+  // Dismiss = a PLAIN, STATIC × — no chip-button look, no hover effect. ui-alert's 44px chip dismiss
+  // suits the larger inline banner; a compact floating toast wants a bare glyph (the whole toast is
+  // tap-to-dismiss too). Scoped to the toast, so the inline ui-alert keeps its own chip dismiss. Higher
+  // specificity than ui-alert's own scoped `.ui-alert__dismiss` rules, so this wins.
+  .ngx-toastr .ui-alert__dismiss {
+    width: auto;
+    height: auto;
+    margin: 0;
+    padding: var(--space-1);
+    background: transparent;
+    border-color: transparent;
+    border-radius: 0;
+    box-shadow: none;
+    font-size: var(--font-size-xl);
+    opacity: 0.65;
+    transition: none;
+
+    // Hover identical to rest state → no hover effect.
+    &:hover {
+      background: transparent;
+      border-color: transparent;
+      box-shadow: none;
+      opacity: 0.65;
+      transform: none;
+    }
+
+    // Keep a keyboard focus ring (a11y) — shown only on keyboard focus, not on hover/pointer.
+    &:focus-visible {
+      box-shadow: var(--shadow-focus);
+    }
+  }
+}
+
+@media (width <= 640px) {
+  .toast-container {
+    width: calc(100vw - var(--space-6));
+  }
+}

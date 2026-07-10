@@ -1,0 +1,88 @@
+:host {
+  @apply inline-flex max-w-full;
+}
+
+.ui-segmented {
+  @apply inline-flex max-w-full items-center gap-0.5 rounded-full border p-0.5;
+
+  background: var(--color-surface-2);
+  border-color: var(--color-border);
+
+  &__item {
+    @apply inline-flex min-w-8 cursor-pointer items-center justify-center gap-1.5 rounded-full border-0 bg-transparent text-center leading-5;
+
+    background: transparent;
+    color: var(--color-text-muted);
+    font-weight: var(--font-weight-medium);
+    transition:
+      color var(--motion-duration-fast) var(--motion-ease-standard),
+      background-color var(--motion-duration-fast) var(--motion-ease-standard),
+      box-shadow var(--motion-duration-fast) var(--motion-ease-standard);
+
+    &:hover:not(:disabled, .ui-segmented__item--active) {
+      color: var(--color-text-subtle);
+    }
+
+    &:focus-visible {
+      @apply outline-none;
+
+      box-shadow: var(--shadow-focus);
+    }
+
+    // Active = raised surface chip on the inset track.
+    &--active {
+      background: var(--color-surface);
+      color: var(--color-text);
+      box-shadow: var(--shadow-xs);
+    }
+
+    &:disabled {
+      @apply cursor-not-allowed opacity-50;
+    }
+  }
+
+  &__icon {
+    @apply leading-none;
+
+    font-size: var(--text-h4);
+  }
+
+  // Brand emphasis — the active chip is painted with the brand gradient so the current choice
+  // (e.g. the EN/TR language switch) reads at a glance. Anchored to the fixed darker brand scale
+  // (NOT --gradient-brand, which lightens in dark theme) so white text clears WCAG AA (~5:1) in
+  // BOTH themes.
+  &--brand &__item--active {
+    background: linear-gradient(135deg, var(--brand-500) 0%, var(--brand-700) 100%);
+    color: var(--color-on-brand);
+    box-shadow:
+      0 1px 2px rgb(var(--color-ink-rgb) / 18%),
+      0 4px 12px rgb(var(--color-focus-ring-rgb) / 32%);
+  }
+
+  &--brand &__item--active:hover {
+    color: var(--color-on-brand);
+  }
+
+  // Sizes
+  &--sm &__item {
+    @apply h-8 px-2.5;
+
+    font-size: var(--text-caption);
+  }
+
+  &--sm &__icon {
+    font-size: var(--text-body);
+  }
+
+  &--md &__item {
+    @apply h-10 px-4;
+
+    font-size: var(--text-body-sm);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ui-segmented__item {
+    transition: none;
+  }
+}

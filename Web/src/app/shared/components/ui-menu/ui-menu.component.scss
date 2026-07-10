@@ -1,0 +1,273 @@
+.ui-menu {
+  @apply relative inline-block;
+}
+
+.ui-menu__trigger {
+  @apply inline-flex;
+}
+
+.ui-menu__panel {
+  @apply absolute left-0 flex min-w-52 max-w-72 flex-col gap-0.5 border p-1.5;
+
+  // v2: softer, more modern silhouette — large radius + layered elevation + glass blur.
+  border-radius: var(--radius-xl);
+  inset-block-start: calc(100% + 0.5rem);
+  z-index: var(--z-dropdown);
+  border-color: var(--color-border);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-xl);
+  backdrop-filter: blur(16px);
+
+  // A18 / motion §10 retune: fade + 2px rise, 120ms enter (close stays an instant unmount).
+  animation: ui-menu-in var(--motion-fast) var(--motion-ease-enter) both;
+
+  &--end {
+    inset-inline: auto 0;
+  }
+
+  &--up {
+    inset-block: auto calc(100% + 0.5rem);
+  }
+
+  // A18: fixed ~304px card; hosts may narrow it via --ui-menu-profile-w (sidebar rail).
+  &--profile {
+    width: var(--ui-menu-profile-w, 19rem);
+    max-width: min(21rem, calc(100vw - 2rem));
+    padding: var(--space-6);
+    gap: var(--space-1);
+  }
+}
+
+.ui-menu__summary {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+  margin-bottom: var(--space-2);
+  padding: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-2);
+}
+
+.ui-menu__summary-icon {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-pill);
+  background: var(--gradient-brand);
+  color: var(--color-on-brand);
+  font-size: var(--text-h4);
+  line-height: 1;
+  box-shadow: var(--shadow-sm);
+}
+
+.ui-menu__summary-text {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.ui-menu__summary-title,
+.ui-menu__summary-subtitle {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ui-menu__summary-title {
+  color: var(--color-text-strong);
+  font-size: var(--text-body-sm);
+  font-weight: var(--font-weight-semibold);
+}
+
+.ui-menu__summary-subtitle {
+  color: var(--color-text-muted);
+  font-size: var(--text-caption);
+}
+
+/* Profile menu (A18): the identity block sits on a calm soft-primary tint; the 44px
+   avatar circle keeps the brand gradient (name/email use the regular text tokens). */
+.ui-menu__panel--profile .ui-menu__summary {
+  margin-bottom: var(--space-4);
+  padding: var(--space-6);
+  border-color: transparent;
+  border-radius: var(--radius-lg);
+  background: var(--color-primary-soft);
+}
+
+.ui-menu__panel--profile .ui-menu__summary-icon {
+  width: 44px;
+  height: 44px;
+  box-shadow: none;
+}
+
+.ui-menu__panel--profile .ui-menu__summary-title {
+  font-size: var(--text-body);
+}
+
+.ui-menu__panel--profile .ui-menu__summary-subtitle {
+  font-size: 12.5px;
+}
+
+.ui-menu__section {
+  @apply px-2 py-1.5;
+
+  font-size: var(--font-size-xxs);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-muted);
+}
+
+.ui-menu__divider {
+  @apply -mx-1.5 my-1 h-px;
+
+  background: var(--color-border);
+}
+
+.ui-menu__item {
+  @apply flex cursor-pointer items-center border border-transparent bg-transparent text-start text-sm;
+
+  min-height: 44px;
+  gap: var(--space-4);
+  padding-inline: var(--space-4);
+  border-radius: var(--radius-field);
+  background: transparent;
+  color: var(--color-text-strong);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-base);
+  transition:
+    background-color var(--motion-duration-fast) var(--motion-ease-standard),
+    border-color var(--motion-duration-fast) var(--motion-ease-standard),
+    color var(--motion-duration-fast) var(--motion-ease-standard),
+    transform var(--motion-duration-fast) var(--motion-ease-standard);
+
+  &:hover:not(:disabled),
+  &.is-active:not(:disabled) {
+    background: var(--color-primary-soft);
+    border-color: transparent;
+    color: var(--color-primary-soft-text);
+    transform: translateX(3px);
+  }
+
+  &:focus-visible {
+    @apply outline-none;
+
+    box-shadow: var(--shadow-focus);
+  }
+
+  &:disabled {
+    @apply cursor-not-allowed;
+
+    color: var(--color-text-soft);
+  }
+
+  &--danger {
+    color: var(--color-danger-strong);
+
+    &:hover:not(:disabled),
+    &.is-active:not(:disabled) {
+      background: var(--color-danger-bg);
+      border-color: transparent;
+      color: var(--color-danger-strong);
+    }
+  }
+}
+
+.ui-menu__item:hover:not(:disabled) .ui-menu__icon,
+.ui-menu__item.is-active:not(:disabled) .ui-menu__icon {
+  color: var(--color-primary-soft-text);
+}
+
+.ui-menu__item--danger:hover:not(:disabled) .ui-menu__icon,
+.ui-menu__item--danger.is-active:not(:disabled) .ui-menu__icon {
+  color: var(--color-danger-strong);
+}
+
+.ui-menu__panel--profile .ui-menu__item {
+  min-height: 44px;
+  border-radius: var(--radius-field);
+  padding-inline: var(--space-6);
+
+  // A18: profile rows tint without the lateral shift.
+  &:hover:not(:disabled),
+  &.is-active:not(:disabled) {
+    transform: none;
+  }
+}
+
+/* A18: the logout row separates with a full-bleed rule + breathing space. */
+.ui-menu__panel--profile .ui-menu__divider {
+  margin: var(--space-3) calc(-1 * var(--space-6));
+}
+
+.ui-menu__icon {
+  @apply flex-none leading-none;
+
+  width: 1rem;
+  height: 1rem;
+  font-size: 1rem;
+  transition: color var(--motion-duration-fast) var(--motion-ease-standard);
+}
+
+.ui-menu__panel--profile .ui-menu__icon {
+  width: 20px;
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+.ui-menu__label {
+  @apply flex-1 overflow-hidden text-ellipsis whitespace-nowrap;
+}
+
+.ui-menu__shortcut {
+  @apply flex-none text-xs;
+
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+/* Rows cascade in as the panel opens — opacity only, so it never fights the hover translateX. */
+.ui-menu__panel > * {
+  animation: ui-menu-row-in var(--motion-fast) var(--motion-ease-standard) both;
+}
+
+.ui-menu__panel > *:nth-child(2) { animation-delay: 28ms; }
+.ui-menu__panel > *:nth-child(3) { animation-delay: 52ms; }
+.ui-menu__panel > *:nth-child(4) { animation-delay: 76ms; }
+.ui-menu__panel > *:nth-child(5) { animation-delay: 100ms; }
+.ui-menu__panel > *:nth-child(6) { animation-delay: 124ms; }
+.ui-menu__panel > *:nth-child(n + 7) { animation-delay: 148ms; }
+
+@keyframes ui-menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(var(--motion-distance-xs));
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes ui-menu-row-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ui-menu__panel,
+  .ui-menu__panel > * {
+    animation: none;
+  }
+
+  .ui-menu__item,
+  .ui-menu__icon {
+    transition: none;
+  }
+}

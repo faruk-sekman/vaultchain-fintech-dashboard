@@ -1,0 +1,18 @@
+# Normalize everything Git detects as text to LF in the repository and on checkout.
+* text=auto eol=lf
+
+# Binary assets — never normalize or diff as text.
+# (SVG is XML text and intentionally stays under the default text handling.)
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+
+# Language-statistics hints (GitHub Linguist).
+docs/assets/** linguist-documentation
+Api/openapi.json linguist-generated
+Api/src/generated/** linguist-generated

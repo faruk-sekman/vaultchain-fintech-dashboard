@@ -1,0 +1,17 @@
+<div class="ui-select__wrap">
+  <select
+    class="ui-select"
+    [ngClass]="inputClass"
+    [attr.id]="id || null"
+    [attr.readonly]="readOnly ? '' : null"
+    [attr.disabled]="disabled ? '' : null"
+    [formControl]="control"
+    [attr.aria-invalid]="ariaInvalid"
+    [attr.aria-describedby]="ariaDescribedBy"
+  >
+    @for (o of options; track o.value) {
+      <option [ngValue]="o.value">{{ o.labelKey | translate }}</option>
+    }
+  </select>
+  <i class="ri-arrow-down-s-line ui-select__icon" aria-hidden="true"></i>
+</div>

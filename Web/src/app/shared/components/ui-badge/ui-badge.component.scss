@@ -1,0 +1,41 @@
+@use "sass:list";
+
+$badge-variants: (
+  "gray": (var(--badge-gray-bg), var(--badge-gray-text), var(--badge-gray-ring)),
+  "red": (var(--badge-red-bg), var(--badge-red-text), var(--badge-red-ring)),
+  "yellow": (var(--badge-yellow-bg), var(--badge-yellow-text), var(--badge-yellow-ring)),
+  "green": (var(--badge-green-bg), var(--badge-green-text), var(--badge-green-ring)),
+  "blue": (var(--badge-blue-bg), var(--badge-blue-text), var(--badge-blue-ring)),
+  "indigo": (var(--badge-indigo-bg), var(--badge-indigo-text), var(--badge-indigo-ring)),
+  "purple": (var(--badge-purple-bg), var(--badge-purple-text), var(--badge-purple-ring)),
+  "pink": (var(--badge-pink-bg), var(--badge-pink-text), var(--badge-pink-ring)),
+  "teal": (var(--badge-teal-bg), var(--badge-teal-text), var(--badge-teal-ring)),
+  "cyan": (var(--badge-cyan-bg), var(--badge-cyan-text), var(--badge-cyan-ring)),
+  "fuchsia": (var(--badge-fuchsia-bg), var(--badge-fuchsia-text), var(--badge-fuchsia-ring)),
+  "zinc": (var(--badge-zinc-bg), var(--badge-zinc-text), var(--badge-zinc-ring))
+);
+
+:host {
+  display: inline-block;
+}
+
+.ui-badge {
+  box-shadow: inset 0 0 0 1px var(--badge-ring);
+  transition: box-shadow var(--motion-duration-base) var(--motion-ease-standard);
+}
+
+@each $name, $values in $badge-variants {
+  .ui-badge--#{$name} {
+    --badge-bg: #{list.nth($values, 1)};
+    --badge-text: #{list.nth($values, 2)};
+    --badge-ring: #{list.nth($values, 3)};
+
+    background: var(--badge-bg);
+    color: var(--badge-text);
+  }
+}
+
+// A14 (bugfix-backlog-2026-07): the former dark-theme glow (0 0 10px + 0 0 16px ring halo) made
+// every badge read as NEON on dark surfaces. Dark now keeps the same subtle 1px inset ring as
+// light (the dark ring token alphas were desaturated to 38% alongside), matching the calm
+// notif-badge reference — flat tint + text, no halo.

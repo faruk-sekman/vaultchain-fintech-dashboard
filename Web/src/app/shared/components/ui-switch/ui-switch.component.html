@@ -1,0 +1,19 @@
+<button
+  type="button"
+  class="ui-switch"
+  role="switch"
+  [class.ui-switch--on]="isOn()"
+  [attr.id]="id() || null"
+  [attr.aria-checked]="isOn()"
+  [attr.aria-label]="label() ? null : ariaLabel()"
+  [attr.aria-labelledby]="labelId()"
+  [disabled]="isDisabled()"
+  (click)="toggle()"
+>
+  <span class="ui-switch__track" aria-hidden="true">
+    <span class="ui-switch__knob"></span>
+  </span>
+  @if (label()) {
+    <span class="ui-switch__label" [attr.id]="labelId()">{{ label() }}</span>
+  }
+</button>

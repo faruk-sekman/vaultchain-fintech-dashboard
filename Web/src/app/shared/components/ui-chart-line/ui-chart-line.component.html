@@ -1,0 +1,175 @@
+<!--
+###### UI Line / Area Chart ######
+Usage (single filled hero series):
+<app-ui-chart-line
+  [data]="[{label:'Jan', values:[12]}, {label:'Feb', values:[18]}]"
+  [ariaLabel]="'analytics.volume.summary' | translate"
+  [tableCaption]="'analytics.volume.title' | translate">
+</app-ui-chart-line>
+
+Usage (multi series — fill only the hero):
+<app-ui-chart-line
+  [data]="points"
+  [series]="[{name:'Revenue', area:true}, {name:'Refunds'}]">
+</app-ui-chart-line>
+
+Pure SVG, no dependency. Vertical gradient fill via <linearGradient> (no color-mix).
+SVG aria-hidden; data carried by the visually-hidden table (§6.9).
+States: loading (skeleton) · empty ("No data") · populated.
+#################################
+-->
+
+<div class="chart-line" [attr.id]="id || null">
+  @if (loading) {
+    <div class="chart-line__skeleton" [style.height.px]="height" aria-hidden="true"></div>
+  } @else if (isEmpty) {
+    <!-- v2.1 §3.3/§5: honest-empty is COMPACT + centred in whatever space the
+         consumer's card gives it — never a `height`-input tall void. -->
+    <div class="chart-line__empty" role="img" [attr.aria-label]="ariaLabel">
+      <i class="ri-line-chart-line chart-line__empty-icon" aria-hidden="true"></i>
+      <span class="chart-line__empty-text">{{ noDataLabel }}</span>
+    </div>
+  } @else {
+    @if (hasLegend) {
+      <ul class="chart-line__legend">
+        @for (item of legendItems; track trackByLegend($index, item)) {
+          <li class="chart-line__legend-item">
+            <span
+              class="chart-line__swatch"
+              [style.background]="item.color"
+              aria-hidden="true"
+            ></span>
+            <span class="chart-line__legend-label">{{ item.name }}</span>
+          </li>
+        }
+      </ul>
+    }
+
+    <svg
+      class="chart-line__svg"
+      [attr.viewBox]="'0 0 ' + viewBoxW + ' ' + viewBoxH"
+      [style.height.px]="height"
+      preserveAspectRatio="none"
+      focusable="false"
+      aria-hidden="true"
+      (mousemove)="onMove($event)"
+      (mouseleave)="onLeave()"
+    >
+      @if (ariaLabel) {
+        <title>{{ ariaLabel }}</title>
+      }
+      <defs>
+        <!-- v2 §4: richer area gradient = hue 36% → 12% mid → transparent (deeper hero fill). -->
+        @for (path of paths; track trackByPath($index, path)) {
+          @if (path.areaPath) {
+            <linearGradient [attr.id]="path.gradientId" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" [attr.stop-color]="path.areaColor" stop-opacity="0.36" />
+              <stop offset="55%" [attr.stop-color]="path.areaColor" stop-opacity="0.12" />
+              <stop offset="100%" [attr.stop-color]="path.areaColor" stop-opacity="0" />
+            </linearGradient>
+          }
+        }
+      </defs>
+
+      <!-- Quiet horizontal grid (§6.3). -->
+      @for (line of gridLines; track trackByGrid($index, line)) {
+        <line
+          class="chart-line__grid"
+          [attr.x1]="0"
+          [attr.y1]="line.y"
+          [attr.x2]="viewBoxW"
+          [attr.y2]="line.y"
+        />
+      }
+
+      <!-- Area fills (under the lines). -->
+      @for (path of paths; track trackByPath($index, path)) {
+        @if (path.areaPath) {
+          <path
+            class="chart-line__area"
+            [attr.d]="path.areaPath"
+            [attr.fill]="'url(#' + path.gradientId + ')'"
+          />
+        }
+      }
+
+      <!-- Series lines (over the fills). pathLength normalizes the dash
+           space so the §7 stroke-dashoffset draw works at any size. -->
+      @for (path of paths; track trackByPath($index, path)) {
+        <path
+          class="chart-line__stroke"
+          pathLength="1"
+          [attr.d]="path.linePath"
+          [attr.stroke]="path.color"
+        />
+      }
+
+      <!-- v2 §4 point dots: surface-filled core inside a series-coloured ring. -->
+      @for (path of paths; track trackByPath($index, path)) {
+        <path class="chart-line__dot-ring" [attr.d]="path.dotsPath" [attr.stroke]="path.color" />
+        <path class="chart-line__dot-core" [attr.d]="path.dotsPath" />
+      }
+
+      <!-- Hover highlight: an enlarged dot on the nearest point. -->
+      @if (hoverPoint; as hp) {
+        <path
+          class="chart-line__hover-ring"
+          [attr.d]="'M ' + hp.x + ',' + hp.y + ' h0.01'"
+          [attr.stroke]="paths[0].color"
+        />
+        <path class="chart-line__hover-core" [attr.d]="'M ' + hp.x + ',' + hp.y + ' h0.01'" />
+      }
+    </svg>
+
+    <app-ui-chart-tip
+      [visible]="tip.visible"
+      [x]="tip.x"
+      [y]="tip.y"
+      [color]="tip.color"
+      [title]="tip.title"
+      [rows]="tip.rows"
+    ></app-ui-chart-tip>
+
+    <!-- x-axis labels. -->
+    <div class="chart-line__ticks">
+      @for (tick of ticks; track trackByTick($index, tick)) {
+        <span class="chart-line__tick" [style.inset-inline-start.%]="(tick.x / viewBoxW) * 100">{{
+          tick.label
+        }}</span>
+      }
+    </div>
+
+    <!-- Visually-hidden accessible data table (§6.9). -->
+    <table class="chart-line__sr-table">
+      @if (tableCaption) {
+        <caption>
+          {{
+            tableCaption
+          }}
+        </caption>
+      }
+      <thead>
+        <tr>
+          <th scope="col">{{ categoryLabel }}</th>
+          @if (hasLegend) {
+            @for (item of legendItems; track trackByLegend($index, item)) {
+              <th scope="col">{{ item.name }}</th>
+            }
+          } @else {
+            <th scope="col">{{ valueLabel }}</th>
+          }
+        </tr>
+      </thead>
+      <tbody>
+        @for (point of data; track point.label) {
+          <tr>
+            <th scope="row">{{ point.label }}</th>
+            @for (value of point.values; track $index) {
+              <td>{{ formatVal(value) }}</td>
+            }
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</div>

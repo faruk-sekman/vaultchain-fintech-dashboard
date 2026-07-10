@@ -1,0 +1,138 @@
+<aside
+  class="sidebar"
+  [class.sidebar--compact]="!showBrand"
+  [class.sidebar--collapsed]="railCollapsed()"
+>
+  @if (showBrand) {
+    <div class="sidebar__brand">
+      <app-ui-logo class="sidebar__logo" [showWordmark]="!sidebar.collapsed()"></app-ui-logo>
+      <button
+        type="button"
+        class="sidebar__toggle"
+        (click)="sidebar.toggle()"
+        [appUiTooltip]="
+          (sidebar.collapsed() ? 'common.expandSidebar' : 'common.collapseSidebar') | translate
+        "
+        [attr.aria-label]="
+          (sidebar.collapsed() ? 'common.expandSidebar' : 'common.collapseSidebar') | translate
+        "
+        [attr.aria-pressed]="sidebar.collapsed()"
+      >
+        <i
+          [ngClass]="sidebar.collapsed() ? 'ri-menu-unfold-line' : 'ri-menu-fold-line'"
+          aria-hidden="true"
+        ></i>
+      </button>
+    </div>
+  }
+
+  <!-- A18: grouped nav — uppercase micro-label headers (aria-hidden visual text; the group carries
+       the accessible name). Permission gates are unchanged from the pre-A18 flat list. -->
+  <nav class="sidebar__nav" [attr.aria-label]="'common.menu' | translate">
+    @for (group of navGroups; track group.id) {
+      <div class="sidebar__group" role="group" [attr.aria-label]="group.labelKey | translate">
+        <span class="sidebar__cap" aria-hidden="true">{{ group.labelKey | translate }}</span>
+        @for (item of group.items; track item.id) {
+          @if (item.permission) {
+            <ng-container *appHasPermission="item.permission">
+              <ng-container
+                [ngTemplateOutlet]="navLink"
+                [ngTemplateOutletContext]="{ $implicit: item }"
+              ></ng-container>
+            </ng-container>
+          } @else {
+            <ng-container
+              [ngTemplateOutlet]="navLink"
+              [ngTemplateOutletContext]="{ $implicit: item }"
+            ></ng-container>
+          }
+        }
+      </div>
+    }
+  </nav>
+
+  <ng-template #navLink let-item>
+    <!-- Unread-counted rows: the link's aria-label carries the textual count (same key as the
+         header bell); the pill + rail dot are purely visual. -->
+    <a
+      [routerLink]="item.route"
+      routerLinkActive="active"
+      #rla="routerLinkActive"
+      [class.has-note]="item.counter && unreadCount() > 0"
+      [attr.aria-current]="rla.isActive ? 'page' : null"
+      [attr.aria-label]="
+        item.counter && unreadCount() > 0
+          ? ('header.notificationsWithCount' | translate: { count: unreadCount() })
+          : null
+      "
+      (click)="navigate.emit()"
+    >
+      <i
+        class="sidebar__icon"
+        [ngClass]="rla.isActive && item.iconActive ? item.iconActive : item.icon"
+        aria-hidden="true"
+      ></i>
+      <span class="sidebar__label">
+        {{ item.labelKey | translate }}
+        <!-- Collapsed rail: the count joins the flyout label (the pill below is hidden there). -->
+        @if (item.counter && unreadCount() > 0 && railCollapsed()) {
+          <span>· {{ unreadBadge() }}</span>
+        }
+      </span>
+      @if (item.counter && unreadCount() > 0 && !railCollapsed()) {
+        <span class="sidebar__count" aria-hidden="true">{{ unreadBadge() }}</span>
+      }
+    </a>
+  </ng-template>
+
+  <!-- A18: pinned user card — own identity (FULL email, B9) + the account menu. The "…" trigger
+       becomes the avatar itself on the collapsed rail; the popover flips up at the viewport edge. -->
+  <div class="sidebar__user">
+    @if (!railCollapsed()) {
+      <app-ui-avatar
+        class="sidebar__user-avatar"
+        size="md"
+        shape="circle"
+        icon="ri-user-3-line"
+        [name]="currentUser.name || null"
+      />
+      <span class="sidebar__user-meta">
+        <span class="sidebar__user-name">{{ currentUser.name }}</span>
+        @if (currentUser.email) {
+          <span class="sidebar__user-mail">{{ currentUser.email }}</span>
+        }
+      </span>
+    }
+    <app-ui-menu
+      class="sidebar__user-menu"
+      panelVariant="profile"
+      summaryIcon="ri-user-3-line"
+      [align]="railCollapsed() ? 'start' : 'end'"
+      [summaryTitle]="currentUser.name || ('header.account' | translate)"
+      [summarySubtitle]="currentUser.email"
+      [entries]="userMenuEntries"
+      [menuLabelKey]="'header.userMenu'"
+      (select)="onUserMenuSelect($event)"
+    >
+      <button
+        trigger
+        type="button"
+        data-ui-menu-trigger
+        class="sidebar__user-more"
+        [class.sidebar__user-more--avatar]="railCollapsed()"
+        [attr.aria-label]="'header.userMenu' | translate"
+      >
+        @if (railCollapsed()) {
+          <app-ui-avatar
+            size="md"
+            shape="circle"
+            icon="ri-user-3-line"
+            [name]="currentUser.name || null"
+          />
+        } @else {
+          <i class="ri-more-2-fill" aria-hidden="true"></i>
+        }
+      </button>
+    </app-ui-menu>
+  </div>
+</aside>

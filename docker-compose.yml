@@ -1,0 +1,91 @@
+# COMBINED stack (monorepo orchestration ONLY): postgres + api + web, one command:
+#   docker compose up --build
+# This is the only file that references both Api/ and Web/. When the projects are split into
+# separate repos, simply drop this file — each folder's own Dockerfile + docker-compose.yml stand alone.
+#
+# Browser -> web (nginx :8080) -> serves the SPA and proxies /api/ -> api (:3000) -> db (:5432).
+# The SPA talks to nginx same-origin, so CORS is not exercised in this stack.
+name: fintech-dashboard
+
+services:
+  db:
+    image: postgres:16-alpine@sha256:e013e867e712fec275706a6c51c966f0bb0c93cfa8f51000f85a15f9865a28cb
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-fintech_dev}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    # Internal only by default (decision #1). Uncomment to inspect from the host (avoid 55440; ftd-local-pg):
+    # ports:
+    #   - "127.0.0.1:55441:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build:
+      context: ./Api
+      target: runtime
+    environment:
+      # development => the PII encryptor uses the clearly-labeled DEV-ONLY fallback key (no master key
+      # needed). production would refuse to boot without FTD_PII_MASTER_KEY (the app's security gate).
+      # Keep this matched with the db-setup seed so national_id encrypt/decrypt use the same key.
+      NODE_ENV: development
+      PORT: 3000
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-fintech_dev}?schema=public
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-change-me-local-dev-only-min-16}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-change-me-local-dev-only-min-16}
+      # Allowed browser origins. In the all-in-Docker flow the browser hits the web proxy same-origin
+      # (CORS not triggered); these cover direct API access AND the hybrid flow where Angular runs via
+      # `ng serve` (:4200/:4201) against this Dockerized API.
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:4200,http://localhost:4201,http://localhost:8080}
+    # F8 (CWE-1188): bind the API to loopback by DEFAULT — reachable from localhost (curl / the `ng serve`
+    # hybrid), NOT from the network, so the dev fallback JWT secrets above can't be reached off-host.
+    # web→api still talks over the internal compose network. To expose on the network, EXPLICITLY set
+    # API_BIND=0.0.0.0 — and only with REAL JWT_ACCESS_SECRET / JWT_REFRESH_SECRET, never the fallback.
+    ports:
+      - "${API_BIND:-127.0.0.1}:${API_HOST_PORT:-3000}:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  web:
+    build:
+      context: ./Web
+      target: runtime
+      args:
+        # stage = relative /api/v1, no prod SCSS-budget gate. Set to `production` once budgets pass.
+        NG_CONFIGURATION: ${NG_CONFIGURATION:-stage}
+    environment:
+      API_UPSTREAM: http://api:3000
+    ports:
+      - "${WEB_HOST_PORT:-8080}:80"
+    depends_on:
+      - api
+    restart: unless-stopped
+
+  # Gated, opt-in DB initialization (schema push + dev seed). NEVER runs on `up` (profile-gated).
+  # Run explicitly when you choose to populate the database:
+  #   docker compose --profile setup run --rm db-setup
+  db-setup:
+    build:
+      context: ./Api
+      target: builder
+    profiles: ["setup"]
+    # Share the db container's network namespace so `localhost:5432` reaches Postgres. This satisfies
+    # seed-dev.ts's safety guard (it refuses any DATABASE_URL whose host isn't localhost/127.0.0.1) —
+    # without weakening that guard, and while keeping the db unpublished to the host.
+    network_mode: "service:db"
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@localhost:5432/${POSTGRES_DB:-fintech_dev}?schema=public
+    command: sh -c "node scripts/db-deploy.mjs && npx ts-node scripts/seed-dev.ts"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  pgdata:

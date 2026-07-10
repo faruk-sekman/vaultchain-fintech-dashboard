@@ -1,0 +1,255 @@
+<form
+  class="ui-form"
+  [ngClass]="formClass"
+  [formGroup]="form"
+  (ngSubmit)="onSubmit($event)"
+  [attr.id]="id || null"
+>
+  @if (usesSections) {
+    @for (sv of sectionsView; track $index; let si = $index) {
+      <section
+        class="ui-form__section"
+        [ngClass]="sv.section.sectionClass ?? null"
+        [attr.role]="sv.section.titleKey ? 'group' : null"
+        [attr.aria-labelledby]="sv.section.titleKey ? sectionTitleId(si) : null"
+        [attr.aria-describedby]="
+          sv.section.titleKey && sv.section.descriptionKey ? sectionDescId(si) : null
+        "
+      >
+        @if (sv.section.titleKey || sv.section.descriptionKey || sv.section.icon) {
+          <header class="ui-form__section-header">
+            @if (sv.section.icon) {
+              <span class="ui-form__section-icon" aria-hidden="true">
+                <i [class]="sv.section.icon"></i>
+              </span>
+            }
+            <div class="ui-form__section-heading">
+              @if (sv.section.titleKey) {
+                <h3 class="ui-form__section-title" [id]="sectionTitleId(si)">
+                  {{ sv.section.titleKey | translate }}
+                </h3>
+              }
+              @if (sv.section.descriptionKey) {
+                <p class="ui-form__section-desc" [id]="sectionDescId(si)">
+                  {{ sv.section.descriptionKey | translate }}
+                </p>
+              }
+            </div>
+          </header>
+        }
+        <div class="ui-form__grid" [class.ui-form__grid--cols-2]="sv.columns === 2">
+          @for (item of sv.fields; track item.field.name) {
+            <ng-container
+              [ngTemplateOutlet]="fieldTpl"
+              [ngTemplateOutletContext]="{ field: item.field, index: item.index }"
+            ></ng-container>
+          }
+        </div>
+      </section>
+    }
+  } @else {
+    @for (f of fields; track f.name; let i = $index) {
+      <ng-container
+        [ngTemplateOutlet]="fieldTpl"
+        [ngTemplateOutletContext]="{ field: f, index: i }"
+      ></ng-container>
+    }
+  }
+
+  @if (showSubmit) {
+    <app-ui-button type="submit" [disabled]="loading || form.invalid || !hasChanges">
+      @if (!loading) {
+        <i class="ri-save-3-line ui-button__icon" aria-hidden="true"></i>
+        <span>{{ submitLabelKey | translate }}</span>
+      } @else {
+        <i class="ri-loader-4-line ui-button__icon ui-form__submit-spin" aria-hidden="true"></i>
+        <span>{{ 'common.saving' | translate }}</span>
+      }
+    </app-ui-button>
+  }
+</form>
+
+<ng-template #fieldTpl let-f="field" let-i="index">
+  <div class="ui-form__field" [ngClass]="fieldClasses(f)">
+    <label class="ui-form__label" [attr.for]="fieldId(f.name, i)">
+      {{ f.labelKey | translate }}
+    </label>
+
+    @switch (f.type) {
+      @case ('text') {
+        <div class="ui-form__control-row">
+          <app-ui-input
+            [id]="fieldId(f.name, i)"
+            [control]="control(f.name)"
+            [inputClass]="controlClass(f.name, f.controlClass)"
+            [placeholder]="
+              f.placeholder ?? (f.placeholderKey ? (f.placeholderKey | translate) : null)
+            "
+            [mask]="f.inputMask ?? null"
+            [stripPattern]="f.stripPattern ?? null"
+            [maxLength]="f.maxLength ?? null"
+            [readOnly]="!!f.readOnly"
+            [disabled]="!!f.disabled"
+            [ariaInvalid]="isInvalid(f.name)"
+            [ariaDescribedBy]="describedBy(f.name, i)"
+          />
+          <i
+            class="ui-form__status-icon"
+            [class.ui-form__status-icon--hidden]="!showStatus(f.name)"
+            [class.ui-form__status-icon--invalid]="isInvalid(f.name)"
+            [class.ui-form__status-icon--valid]="isValid(f.name)"
+            [class.ri-error-warning-line]="isInvalid(f.name)"
+            [class.ri-checkbox-circle-line]="isValid(f.name)"
+            aria-hidden="true"
+          ></i>
+        </div>
+      }
+      @case ('email') {
+        <div class="ui-form__control-row">
+          <app-ui-input
+            type="email"
+            [id]="fieldId(f.name, i)"
+            [control]="control(f.name)"
+            [inputClass]="controlClass(f.name, f.controlClass)"
+            [placeholder]="
+              f.placeholder ?? (f.placeholderKey ? (f.placeholderKey | translate) : null)
+            "
+            [mask]="f.inputMask ?? null"
+            [readOnly]="!!f.readOnly"
+            [disabled]="!!f.disabled"
+            [ariaInvalid]="isInvalid(f.name)"
+            [ariaDescribedBy]="describedBy(f.name, i)"
+          />
+          <i
+            class="ui-form__status-icon"
+            [class.ui-form__status-icon--hidden]="!showStatus(f.name)"
+            [class.ui-form__status-icon--invalid]="isInvalid(f.name)"
+            [class.ui-form__status-icon--valid]="isValid(f.name)"
+            [class.ri-error-warning-line]="isInvalid(f.name)"
+            [class.ri-checkbox-circle-line]="isValid(f.name)"
+            aria-hidden="true"
+          ></i>
+        </div>
+      }
+      @case ('number') {
+        <div class="ui-form__control-row">
+          <app-ui-input
+            type="number"
+            [id]="fieldId(f.name, i)"
+            [control]="control(f.name)"
+            [inputClass]="controlClass(f.name, f.controlClass)"
+            [mask]="f.inputMask ?? null"
+            [readOnly]="!!f.readOnly"
+            [disabled]="!!f.disabled"
+            [ariaInvalid]="isInvalid(f.name)"
+            [ariaDescribedBy]="describedBy(f.name, i)"
+          />
+          <i
+            class="ui-form__status-icon"
+            [class.ui-form__status-icon--hidden]="!showStatus(f.name)"
+            [class.ui-form__status-icon--invalid]="isInvalid(f.name)"
+            [class.ui-form__status-icon--valid]="isValid(f.name)"
+            [class.ri-error-warning-line]="isInvalid(f.name)"
+            [class.ri-checkbox-circle-line]="isValid(f.name)"
+            aria-hidden="true"
+          ></i>
+        </div>
+      }
+      @case ('date') {
+        <div class="ui-form__control-row">
+          <app-ui-input
+            type="date"
+            [id]="fieldId(f.name, i)"
+            [control]="control(f.name)"
+            [lang]="dateInputLang()"
+            [inputClass]="controlClass(f.name, f.controlClass)"
+            [mask]="f.inputMask ?? null"
+            [readOnly]="!!f.readOnly"
+            [disabled]="!!f.disabled"
+            [ariaInvalid]="isInvalid(f.name)"
+            [ariaDescribedBy]="describedBy(f.name, i)"
+          />
+          <i
+            class="ui-form__status-icon"
+            [class.ui-form__status-icon--hidden]="!showStatus(f.name)"
+            [class.ui-form__status-icon--invalid]="isInvalid(f.name)"
+            [class.ui-form__status-icon--valid]="isValid(f.name)"
+            [class.ri-error-warning-line]="isInvalid(f.name)"
+            [class.ri-checkbox-circle-line]="isValid(f.name)"
+            aria-hidden="true"
+          ></i>
+        </div>
+      }
+      @case ('datetime-local') {
+        <div class="ui-form__control-row">
+          <app-ui-input
+            type="datetime-local"
+            [id]="fieldId(f.name, i)"
+            [control]="control(f.name)"
+            [inputClass]="controlClass(f.name, f.controlClass)"
+            [mask]="f.inputMask ?? null"
+            [readOnly]="!!f.readOnly"
+            [disabled]="!!f.disabled"
+            [ariaInvalid]="isInvalid(f.name)"
+            [ariaDescribedBy]="describedBy(f.name, i)"
+          />
+          <i
+            class="ui-form__status-icon"
+            [class.ui-form__status-icon--hidden]="!showStatus(f.name)"
+            [class.ui-form__status-icon--invalid]="isInvalid(f.name)"
+            [class.ui-form__status-icon--valid]="isValid(f.name)"
+            [class.ri-error-warning-line]="isInvalid(f.name)"
+            [class.ri-checkbox-circle-line]="isValid(f.name)"
+            aria-hidden="true"
+          ></i>
+        </div>
+      }
+      @case ('select') {
+        <div class="ui-form__control-row">
+          <app-ui-select
+            [id]="fieldId(f.name, i)"
+            [control]="control(f.name)"
+            [options]="f.options ?? []"
+            [inputClass]="controlClass(f.name, f.controlClass)"
+            [readOnly]="!!f.readOnly"
+            [disabled]="!!f.disabled"
+            [ariaInvalid]="isInvalid(f.name)"
+            [ariaDescribedBy]="describedBy(f.name, i)"
+          />
+          <i
+            class="ui-form__status-icon"
+            [class.ui-form__status-icon--hidden]="!showStatus(f.name)"
+            [class.ui-form__status-icon--invalid]="isInvalid(f.name)"
+            [class.ui-form__status-icon--valid]="isValid(f.name)"
+            [class.ri-error-warning-line]="isInvalid(f.name)"
+            [class.ri-checkbox-circle-line]="isValid(f.name)"
+            aria-hidden="true"
+          ></i>
+        </div>
+      }
+      @case ('checkbox') {
+        <div class="ui-form__control-row">
+          <app-ui-checkbox
+            [id]="fieldId(f.name, i)"
+            [control]="control(f.name)"
+            [inputClass]="controlClass(f.name, f.controlClass)"
+            [label]="f.hintKey ? (f.hintKey | translate) : (f.labelKey | translate)"
+            [readOnly]="!!f.readOnly"
+            [disabled]="!!f.disabled"
+          />
+        </div>
+      }
+    }
+
+    <div
+      class="ui-form__error"
+      [id]="errorId(f.name, i)"
+      role="alert"
+      [class.ui-form__error--hidden]="!hasDisplayError(f.name)"
+    >
+      @if (displayError(f.name); as err) {
+        {{ err.key | translate: err.params }}
+      }
+    </div>
+  </div>
+</ng-template>

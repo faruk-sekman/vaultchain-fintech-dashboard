@@ -1,0 +1,252 @@
+:host {
+  display: block;
+}
+
+.chart-bar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+
+  // v2.1 G5: the plot stretches to the host height (consumers size the card);
+  // 100% of an auto-height host collapses to content, so unsized usages keep
+  // the `height`-input minimum.
+  height: 100%;
+
+  // ── Legend — v2 §4: 12px dots + 13px muted labels, top-right ──────────────
+  &__legend {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: var(--space-7);
+    margin: 0 0 var(--space-2);
+    padding: 0;
+    list-style: none;
+  }
+
+  &__legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-3);
+    font-size: var(--text-body-sm);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text-muted);
+  }
+
+  &__swatch {
+    flex: none;
+    width: 12px;
+    height: 12px;
+    border-radius: var(--radius-pill);
+  }
+
+  // ── Plot ──────────────────────────────────────────────────────────────────
+  // The relative box the SVG fills; flexes vertically, min-height = `height`.
+  &__plot {
+    position: relative;
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+
+  &__svg {
+    position: absolute;
+    inset-block: 0;
+    inset-inline-start: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  // v2.1 G5: a 38px y-axis gutter (30px right-aligned labels + 8px gap —
+  // contract geometry); the SVG and the x-tick row shift right together.
+  &--furniture &__svg {
+    inset-inline-start: 38px;
+    width: calc(100% - 38px);
+  }
+
+  &--furniture &__ticks {
+    margin-inline-start: 38px;
+  }
+
+  &__y-axis {
+    position: absolute;
+    inset-block: 0;
+    inset-inline-start: 0;
+    width: 30px;
+  }
+
+  // 13px muted scale labels, vertically centred on their gridline.
+  &__y-label {
+    position: absolute;
+    inset-inline-end: 0;
+    transform: translateY(-50%);
+    font-size: var(--text-body-sm);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text-muted);
+    white-space: nowrap;
+  }
+
+  // v2.1 G5: horizontal gridlines only — --color-border mixed to 50%.
+  &__grid {
+    stroke: color-mix(in srgb, var(--color-border) 50%, transparent);
+    stroke-width: 1;
+    vector-effect: non-scaling-stroke;
+  }
+
+  // §7: bars grow from the baseline (scaleY, origin bottom) over
+  // --motion-slow, staggered 40ms and capped at 8 bars; data updates
+  // transition height/y on the persistent elements instead of regrowing.
+  &__rect {
+    transform-box: fill-box;
+    transform-origin: center bottom;
+    transition: height var(--motion-duration-base) var(--motion-ease-standard),
+      y var(--motion-duration-base) var(--motion-ease-standard),
+      filter var(--motion-fast) var(--motion-ease-standard);
+    animation: ui-grow-y var(--motion-slow) var(--motion-ease-enter) both;
+  }
+
+  // Hovered category's bar deepens a touch (matches the line/area hover).
+  &__rect--active {
+    filter: brightness(0.9);
+  }
+
+  // ── Value labels above each bar (opt-in HTML overlay) ─────────────────────
+  // HTML (not SVG text) so the non-uniform viewBox never stretches the numbers;
+  // the overlay mirrors the SVG's box so % positions line up with the bars.
+  &__values {
+    position: absolute;
+    inset-block: 0;
+    inset-inline-start: 0;
+    width: 100%;
+    pointer-events: none;
+  }
+
+  &--furniture &__values {
+    inset-inline-start: 38px;
+    width: calc(100% - 38px);
+  }
+
+  &__value-label {
+    position: absolute;
+    transform: translate(-50%, calc(-100% - 5px));
+    font-size: var(--text-body-sm);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-strong);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+
+    // Fade in after the bars finish growing (no bounce; ≤480ms budget).
+    animation: ui-backdrop-in var(--motion-fast) var(--motion-ease-enter) both;
+    animation-delay: var(--motion-slow);
+
+    :host-context([dir='rtl']) & {
+      transform: translate(50%, calc(-100% - 5px));
+    }
+  }
+
+  @for $i from 1 through 8 {
+    &__rect:nth-of-type(#{$i}) {
+      animation-delay: calc(#{$i - 1} * var(--stagger-step, 40ms));
+    }
+  }
+
+  &__rect:nth-of-type(n + 9) {
+    animation-delay: calc(7 * var(--stagger-step, 40ms));
+  }
+
+  // ── Category labels (positioned under each group centre) ───────────────────
+  // Two text lines fit without clipping; named categories (e.g. KYC statuses)
+  // wrap here at narrow widths rather than overrun their neighbours.
+  &__ticks {
+    position: relative;
+    height: var(--space-13);
+  }
+
+  // v2 §4: 13px muted axis labels. Each label is boxed to one category slot
+  // (`--tick-slot`, set per-instance from the tick count) and centred over its
+  // bar, so long names wrap to ~2 lines instead of colliding (finding #8).
+  &__tick {
+    position: absolute;
+    top: 0;
+    inline-size: var(--tick-slot, 100%);
+    margin-inline-start: calc(var(--tick-slot, 0%) / -2);
+    font-size: var(--text-body-sm);
+    font-weight: var(--font-weight-medium);
+    line-height: 1.2;
+    color: var(--color-text-muted);
+    text-align: center;
+    overflow-wrap: break-word;
+    hyphens: auto;
+  }
+
+  // Narrow layouts (chart in a half-width column) get a small font step for
+  // extra headroom; ≥1280px keeps the 13px single-line look unchanged.
+  @media (width < 1280px) {
+    &__tick {
+      font-size: var(--text-caption);
+    }
+  }
+
+  // ── Empty state (§6.8) ────────────────────────────────────────────────────
+  &__empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-4);
+  }
+
+  &__empty-icon {
+    font-size: var(--text-display);
+    color: var(--color-text-soft);
+  }
+
+  &__empty-text {
+    font-size: var(--text-body-sm);
+    color: var(--color-text-muted);
+  }
+
+  // ── Loading skeleton (bars of varied height) ──────────────────────────────
+  &__skeleton {
+    display: flex;
+    align-items: flex-end;
+    gap: var(--space-7);
+    padding: var(--space-6) var(--space-8);
+  }
+
+  &__sk-bar {
+    flex: 1;
+    border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+    background: linear-gradient(180deg, var(--color-skeleton-from), var(--color-skeleton-to));
+    background-size: 100% 200%;
+    animation: ui-shimmer 1200ms linear infinite;
+  }
+
+  // ── Visually-hidden accessible data table ─────────────────────────────────
+  &__sr-table {
+    // display:block so the 1px sr-only clip applies to the <table> (it ignores 1px under
+    // display:table and would otherwise inflate the scroll area). See ui-chart-line for detail.
+    display: block;
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+  }
+}
+
+// §12: bars appear at full height instantly.
+@media (prefers-reduced-motion: reduce) {
+  .chart-bar__rect {
+    transition: none;
+    animation: none;
+    transform: none;
+  }
+
+  .chart-bar__sk-bar {
+    animation: none;
+  }
+}

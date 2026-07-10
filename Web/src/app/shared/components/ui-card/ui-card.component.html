@@ -1,0 +1,64 @@
+<!--
+###### UI Card Component ######
+Usage:
+<app-ui-card title="Revenue" subtitle="Last 30 days" [hasActions]="true" [hasFooter]="true" interactive>
+  <button card-actions class="...">…</button>
+  <p>Body content…</p>
+  <div card-footer>Footer content…</div>
+</app-ui-card>
+
+variant: 'default' | 'muted' | 'gradient'
+padding: 'sm' | 'md' | 'lg'
+A11y: do not nest interactive controls inside a clickable card; project a real
+link/button with an accessible name if the whole card must be actionable.
+#################################
+-->
+
+<div
+  class="ui-card"
+  [class.ui-card--interactive]="interactive()"
+  [class.ui-card--muted]="variant() === 'muted'"
+  [class.ui-card--gradient]="variant() === 'gradient'"
+  [class.ui-card--pad-sm]="padding() === 'sm'"
+  [class.ui-card--pad-md]="padding() === 'md'"
+  [class.ui-card--pad-lg]="padding() === 'lg'"
+  [attr.id]="id() || null"
+>
+  @if (hasHeader) {
+    <div class="ui-card__header">
+      <div class="ui-card__heading">
+        @if (title() !== null) {
+          @switch (headingLevel()) {
+            @case (2) {
+              <h2 class="ui-card__title">{{ title() }}</h2>
+            }
+            @case (4) {
+              <h4 class="ui-card__title">{{ title() }}</h4>
+            }
+            @default {
+              <h3 class="ui-card__title">{{ title() }}</h3>
+            }
+          }
+        }
+        @if (subtitle() !== null) {
+          <p class="ui-card__subtitle">{{ subtitle() }}</p>
+        }
+      </div>
+      @if (hasActions()) {
+        <div class="ui-card__actions">
+          <ng-content select="[card-actions]"></ng-content>
+        </div>
+      }
+    </div>
+  }
+
+  <div class="ui-card__body">
+    <ng-content></ng-content>
+  </div>
+
+  @if (hasFooter()) {
+    <div class="ui-card__footer">
+      <ng-content select="[card-footer]"></ng-content>
+    </div>
+  }
+</div>

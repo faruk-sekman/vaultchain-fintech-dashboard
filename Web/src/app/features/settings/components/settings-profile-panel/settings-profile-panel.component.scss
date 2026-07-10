@@ -1,0 +1,143 @@
+/*
+ * Copyright (c) 2026 Fintech Dashboard contributors.
+ * Profile panel (redesign v3 — profile fields per reference 1a): two-column field grid,
+ * pixel-tuned ui-input chrome via the ::ng-deep seams below, the SSO affix pill, and the
+ * hairline-topped save footer.
+ */
+@use '../settings-panel.shared' as *;
+
+/* The panel host is transparent: the section participates directly in the shell's panel area. */
+:host {
+  display: contents;
+}
+
+/* Two-column profile field grid (reference: 20px gutters); single column below tablet width.
+   `align-items:start` is load-bearing: without it the grid STRETCHES each cell to its row partner
+   (a hint under one field tallens the neighbour's app-ui-input host), which is exactly the "shifted
+   rows / floating icon" artefact — cells now keep their natural height. */
+.settings-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+  gap: var(--space-5) var(--space-5);
+}
+
+@media (width >= 768px) {
+  .settings-form {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.settings-form .form-field {
+  gap: 7px;
+}
+
+/* Strong-navy field labels — the same ink as the shared .settings-row__label. */
+.settings-form .form-field label {
+  font-size: var(--text-body-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-strong);
+}
+
+/* The icon overlay's anchor. The host is OUR template element (no ::ng-deep needed) — pinning its
+   position/display here means the absolute icon can never re-anchor to a distant ancestor. */
+.settings-form app-ui-input {
+  position: relative;
+  display: block;
+  min-width: 0;
+}
+
+/* Pixel-perfect fields (reference 1a), tuned INSIDE settings only — the same ::ng-deep seam
+   customer-form uses on the shared controls: 14px radius, hairline border, 14px type in strong
+   navy, and the 16px leading icon at 14px inset. Deliberately SELF-SUFFICIENT (repeats the shared
+   control's height/padding/absolute-overlay basics): if the child stylesheet ever hiccups in a dev
+   HMR swap, the icon must never fall out of the field into its own line ("missing icon" + shifted
+   rows). Read-only chrome stays with the shared control. */
+/* stylelint-disable selector-pseudo-element-no-unknown */
+.settings-form ::ng-deep .ui-input {
+  height: 44px;
+  border-radius: 14px;
+  border-color: var(--color-border);
+  font-size: 14px;
+  color: var(--color-text-strong);
+}
+
+.settings-form ::ng-deep .ui-input--with-icon {
+  padding-inline-start: 40px;
+}
+
+.settings-form ::ng-deep .ui-input__icon {
+  position: absolute;
+  top: 22px;
+  left: 14px;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  font-size: 16px;
+  line-height: 1;
+  color: var(--color-text-muted);
+  pointer-events: none;
+}
+/* stylelint-enable selector-pseudo-element-no-unknown */
+
+/* In-field affix (reference 1a: the email field's bordered "SSO" tag). The read-only value is
+   server-short, so no input padding reservation is needed; the pill is decorative-informative. */
+.settings-affix {
+  position: relative;
+  min-width: 0;
+}
+
+.settings-affix__pill {
+  position: absolute;
+  inset-inline-end: 12px;
+  inset-block-start: 22px;
+  transform: translateY(-50%);
+  padding: 3px 8px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  font-size: 10px;
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-muted);
+  pointer-events: none;
+}
+
+/* Profile form footer (reference): a hairline-topped split row — the server-backed note left, the
+   ghost Cancel + primary Save right. `margin-block-start:auto` settles it at the panel foot. */
+.settings-form-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  margin-block-start: auto;
+  padding-block-start: 20px;
+  border-block-start: 1px solid var(--color-border);
+}
+
+.settings-form-footer__note {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  font-size: 12px;
+  color: var(--color-text-muted);
+
+  i {
+    flex-shrink: 0;
+    font-size: 14px;
+    color: var(--color-text-subtle);
+  }
+}
+
+.settings-form-footer__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.settings-field-hint {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}

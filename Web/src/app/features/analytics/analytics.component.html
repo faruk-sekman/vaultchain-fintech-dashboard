@@ -1,0 +1,302 @@
+<div class="page-shell analytics">
+  @let loading = loading$ | async;
+  @let error = error$ | async;
+  @let summary = summary$ | async;
+  @let kyc = kyc$ | async;
+  @let volume = volumeState$ | async;
+
+  @if (error && !loading && !summary && !kyc) {
+    <!-- Whole-page load error → single retry (other regions can't render without data). -->
+    <div class="card analytics__region-error" role="alert">
+      <i class="ri-error-warning-line analytics__region-error-icon" aria-hidden="true"></i>
+      <p class="analytics__region-error-text">{{ 'common.loadError' | translate }}</p>
+      <button type="button" class="analytics__retry motion-pressable" (click)="reload()">
+        <i class="ri-refresh-line" aria-hidden="true"></i>
+        {{ 'common.retry' | translate }}
+      </button>
+    </div>
+  } @else if (!loading && (allEmpty$ | async)) {
+    <!-- No real data at all → one honest empty state for the whole screen. -->
+    <app-ui-card>
+      <app-ui-empty
+        icon="ri-bar-chart-grouped-line"
+        [title]="'analytics.empty.title' | translate"
+        [message]="'analytics.empty.message' | translate"
+      ></app-ui-empty>
+    </app-ui-card>
+  } @else {
+    <!-- ── Page head (mirrors the customer-detail enterprise header): identity strip + actions ── -->
+    <header class="analytics-pagehead motion-fade-up">
+      <div class="analytics-pagehead__id">
+        <span class="analytics-pagehead__medallion" aria-hidden="true">
+          <i class="ri-line-chart-line"></i>
+        </span>
+        <div class="analytics-pagehead__text">
+          <h2 class="analytics-pagehead__title">{{ 'analytics.pagehead' | translate }}</h2>
+          <p class="analytics-pagehead__sub">{{ 'analytics.subtitle' | translate }}</p>
+        </div>
+      </div>
+
+      <div class="analytics-pagehead__actions">
+        @if (volume && !volume.loading && formatAsOf(volume.asOf); as asOf) {
+          <!-- B11: the freshness pill explains ITSELF — analytics reads the daily metric ROLLUP
+               (cron-backed), which is why its stamp can trail the dashboard's live "as of now". -->
+          <span
+            class="analytics__freshness"
+            [title]="'analytics.updatedHint' | translate"
+            [attr.aria-label]="
+              ('analytics.updated' | translate: { date: asOf }) +
+              ' — ' +
+              ('analytics.updatedHint' | translate)
+            "
+          >
+            <span class="analytics__freshness-dot" aria-hidden="true"></span>
+            {{ 'analytics.updated' | translate: { date: asOf } }}
+          </span>
+        } @else if (!volume || volume.loading) {
+          <app-ui-skeleton
+            variant="line"
+            width="128px"
+            height="14px"
+            radius="999px"
+          ></app-ui-skeleton>
+        }
+
+        <button
+          type="button"
+          appIconPop
+          class="analytics__refresh motion-pressable"
+          (click)="reload(); reloadMetrics()"
+          [attr.aria-label]="'analytics.refresh' | translate"
+        >
+          <i class="ri-refresh-line" aria-hidden="true"></i>
+          <span>{{ 'analytics.refresh' | translate }}</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- ── Row 1: transaction-volume hero (full width) ── -->
+    <section class="v2-section analytics__hero motion-fade-up">
+      <div class="v2-section__head analytics__head">
+        <div class="analytics__head-text">
+          <h2 class="v2-section__title">{{ 'analytics.volume.title' | translate }}</h2>
+          <p class="analytics__head-sub">
+            {{ 'analytics.volume.subtitle' | translate: { range: rangeLabel } }}
+          </p>
+        </div>
+        <app-ui-segmented
+          size="sm"
+          [items]="rangeOptions"
+          [value]="range"
+          [ariaLabel]="'analytics.range.label' | translate"
+          (valueChange)="onRangeChange($event)"
+        ></app-ui-segmented>
+      </div>
+      <app-ui-card>
+        <div class="analytics__volume">
+          @if (volume) {
+            <app-ui-chart-line
+              class="analytics__volume-chart"
+              [data]="volume.data"
+              [loading]="volume.loading"
+              [formatVal]="formatCount"
+              [height]="300"
+              [ariaLabel]="'analytics.volume.summary' | translate"
+              [tableCaption]="'analytics.volume.title' | translate"
+              [noDataLabel]="'common.noData' | translate"
+              [categoryLabel]="'analytics.table.category' | translate"
+              [valueLabel]="'analytics.table.value' | translate"
+            ></app-ui-chart-line>
+
+            @if (!volume.loading && volume.error) {
+              <div class="analytics__volume-note">
+                <button
+                  type="button"
+                  class="analytics__retry motion-pressable"
+                  (click)="reloadMetrics()"
+                >
+                  <i class="ri-refresh-line" aria-hidden="true"></i>
+                  {{ 'common.retry' | translate }}
+                </button>
+              </div>
+            } @else if (!volume.loading && volume.data.length === 0) {
+              <p class="analytics__note">
+                <i class="ri-information-line" aria-hidden="true"></i>
+                {{ 'analytics.volume.noDataForRange' | translate }}
+              </p>
+            }
+          } @else {
+            <app-ui-skeleton
+              variant="block"
+              width="100%"
+              height="300px"
+              radius="16px"
+            ></app-ui-skeleton>
+          }
+        </div>
+      </app-ui-card>
+    </section>
+
+    <!-- ── Row 2: customer-status split + full KYC breakdown ── -->
+    <div class="analytics__row motion-stagger motion-stagger--rise">
+      <section class="v2-section analytics__col-4">
+        <div class="v2-section__head">
+          <h2 class="v2-section__title">{{ 'analytics.status.title' | translate }}</h2>
+        </div>
+        <app-ui-card>
+          @if (loading) {
+            <div class="analytics__status-sk" aria-hidden="true">
+              <app-ui-skeleton
+                variant="line"
+                width="100%"
+                height="20px"
+                radius="999px"
+              ></app-ui-skeleton>
+              <app-ui-skeleton variant="line" width="70%" height="14px"></app-ui-skeleton>
+              <app-ui-skeleton variant="line" width="55%" height="14px"></app-ui-skeleton>
+            </div>
+          } @else if (statusSplit$ | async; as s) {
+            <div class="analytics__status">
+              <div
+                class="analytics__status-bar"
+                role="img"
+                [attr.aria-label]="'analytics.status.summary' | translate"
+              >
+                <span
+                  class="analytics__status-seg analytics__status-seg--active"
+                  [style.width.%]="s.activePercent"
+                  (mousemove)="showStatusTip($event, 'active', s)"
+                  (mouseleave)="hideTip()"
+                ></span>
+                <span
+                  class="analytics__status-seg analytics__status-seg--inactive"
+                  [style.width.%]="s.inactivePercent"
+                  (mousemove)="showStatusTip($event, 'inactive', s)"
+                  (mouseleave)="hideTip()"
+                ></span>
+              </div>
+              <ul class="analytics__status-legend">
+                <li
+                  class="analytics__status-row"
+                  (mousemove)="showStatusTip($event, 'active', s)"
+                  (mouseleave)="hideTip()"
+                >
+                  <span
+                    class="analytics__status-dot analytics__status-dot--active"
+                    aria-hidden="true"
+                  ></span>
+                  <span class="analytics__status-label">{{
+                    'dashboard.labels.active' | translate
+                  }}</span>
+                  <span class="analytics__status-value"
+                    >{{ formatCount(s.active)
+                    }}<span class="analytics__status-pct">{{ s.activePercent }}%</span></span
+                  >
+                </li>
+                <li
+                  class="analytics__status-row"
+                  (mousemove)="showStatusTip($event, 'inactive', s)"
+                  (mouseleave)="hideTip()"
+                >
+                  <span
+                    class="analytics__status-dot analytics__status-dot--inactive"
+                    aria-hidden="true"
+                  ></span>
+                  <span class="analytics__status-label">{{
+                    'dashboard.labels.inactive' | translate
+                  }}</span>
+                  <span class="analytics__status-value"
+                    >{{ formatCount(s.inactive)
+                    }}<span class="analytics__status-pct">{{ s.inactivePercent }}%</span></span
+                  >
+                </li>
+              </ul>
+            </div>
+          } @else {
+            <app-ui-empty
+              icon="ri-group-line"
+              [title]="'analytics.empty.title' | translate"
+              [message]="'analytics.empty.message' | translate"
+            ></app-ui-empty>
+          }
+        </app-ui-card>
+      </section>
+
+      <section class="v2-section analytics__col-8 analytics__breakdown-section">
+        <div class="v2-section__head">
+          <h2 class="v2-section__title">{{ 'analytics.breakdown.title' | translate }}</h2>
+          <p class="analytics__head-sub">{{ 'analytics.breakdown.subtitle' | translate }}</p>
+        </div>
+        <app-ui-card>
+          @if (loading) {
+            <div class="analytics__breakdown" aria-hidden="true">
+              @for (row of [1, 2, 3, 4]; track row) {
+                <div class="analytics__breakdown-row">
+                  <div class="analytics__breakdown-head">
+                    <app-ui-skeleton variant="line" width="110px" height="13px"></app-ui-skeleton>
+                    <app-ui-skeleton variant="line" width="64px" height="13px"></app-ui-skeleton>
+                  </div>
+                  <app-ui-skeleton
+                    variant="line"
+                    width="100%"
+                    height="10px"
+                    radius="999px"
+                  ></app-ui-skeleton>
+                </div>
+              }
+            </div>
+          } @else if (breakdown$ | async; as rows) {
+            @if (rows.length) {
+              <ul class="analytics__breakdown analytics__breakdown--reveal">
+                @for (row of rows; track trackByBreakdown($index, row)) {
+                  <li
+                    class="analytics__breakdown-row"
+                    (mousemove)="showBreakdownTip($event, row)"
+                    (mouseleave)="hideTip()"
+                  >
+                    <span class="analytics__breakdown-head">
+                      <span class="analytics__breakdown-label">
+                        <span
+                          class="analytics__breakdown-dot"
+                          [style.background]="row.color"
+                          aria-hidden="true"
+                        ></span>
+                        {{ row.label }}
+                      </span>
+                      <span class="analytics__breakdown-value">
+                        {{ formatCount(row.count) }}
+                        <span class="analytics__breakdown-percent">{{ row.percent }}%</span>
+                      </span>
+                    </span>
+                    <span class="analytics__breakdown-track">
+                      <span
+                        class="analytics__breakdown-fill"
+                        [style.--fill-to]="row.percent + '%'"
+                        [style.background]="row.bar"
+                      ></span>
+                    </span>
+                  </li>
+                }
+              </ul>
+            } @else {
+              <app-ui-empty
+                icon="ri-shield-check-line"
+                [title]="'analytics.breakdown.emptyTitle' | translate"
+                [message]="'analytics.breakdown.emptyMessage' | translate"
+              ></app-ui-empty>
+            }
+          }
+        </app-ui-card>
+      </section>
+    </div>
+  }
+
+  <app-ui-chart-tip
+    [visible]="tip.visible"
+    [x]="tip.x"
+    [y]="tip.y"
+    [color]="tip.color"
+    [title]="tip.title"
+    [rows]="tip.rows"
+  ></app-ui-chart-tip>
+</div>

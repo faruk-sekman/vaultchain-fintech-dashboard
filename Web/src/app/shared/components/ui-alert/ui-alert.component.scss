@@ -1,0 +1,130 @@
+:host {
+  @apply block;
+}
+
+.ui-alert {
+  @apply flex items-start gap-3 border border-l-4 border-transparent px-4 py-3;
+
+  // v2: banner re-based onto the field radius of the card language.
+  border-radius: var(--radius-field);
+  color: var(--color-text);
+
+  // §11: region-scoped alert fades + rises 4px once on entry — no shake.
+  --motion-rise-distance: var(--motion-distance-sm);
+
+  animation: ui-rise-in var(--motion-normal) var(--motion-ease-enter) both;
+
+  &__icon {
+    @apply mt-0.5 flex-none leading-none;
+
+    font-size: var(--font-size-xl);
+  }
+
+  &__content {
+    @apply min-w-0 flex-1;
+  }
+
+  &__title {
+    @apply m-0 block;
+
+    font-size: var(--text-body);
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--line-height-relaxed);
+
+    &:empty {
+      display: none;
+    }
+  }
+
+  &__message {
+    @apply mt-0.5 mb-0;
+
+    font-size: var(--text-body-sm);
+    line-height: var(--line-height-relaxed);
+    color: var(--color-text-subtle);
+
+    &:empty {
+      display: none;
+    }
+  }
+
+  &__actions {
+    @apply mt-3;
+
+    &:empty {
+      display: none;
+    }
+  }
+
+  &__dismiss {
+    @apply -mr-2 -mt-2 inline-flex h-11 w-11 flex-none cursor-pointer items-center justify-center border border-transparent p-0 leading-none;
+
+    border-radius: var(--radius-field);
+    background: rgb(var(--color-ink-rgb) / 4%);
+    color: inherit;
+    font-size: 1rem;
+    opacity: 0.75;
+    transition:
+      opacity var(--motion-duration-fast) var(--motion-ease-standard),
+      background-color var(--motion-duration-fast) var(--motion-ease-standard),
+      border-color var(--motion-duration-fast) var(--motion-ease-standard),
+      box-shadow var(--motion-duration-fast) var(--motion-ease-standard),
+      transform var(--motion-duration-fast) var(--motion-ease-standard);
+
+    &:hover {
+      opacity: 1;
+      background: rgb(var(--color-ink-rgb) / 8%);
+      border-color: rgb(var(--color-ink-rgb) / 12%);
+      transform: translateY(-1px);
+    }
+
+    &:focus-visible {
+      @apply outline-none;
+
+      opacity: 1;
+      box-shadow: var(--shadow-focus);
+    }
+  }
+
+  &--success {
+    border-color: var(--color-success);
+    background: var(--color-success-bg);
+
+    .ui-alert__icon {
+      color: var(--color-success);
+    }
+  }
+
+  &--warning {
+    border-color: var(--color-warning);
+    background: var(--color-warning-bg);
+
+    .ui-alert__icon {
+      color: var(--color-warning);
+    }
+  }
+
+  &--danger {
+    border-color: var(--color-danger);
+    background: var(--color-danger-bg);
+
+    .ui-alert__icon {
+      color: var(--color-danger);
+    }
+  }
+
+  &--info {
+    border-color: var(--color-info);
+    background: var(--color-info-bg);
+
+    .ui-alert__icon {
+      color: var(--color-info);
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ui-alert__dismiss {
+    transition: none;
+  }
+}

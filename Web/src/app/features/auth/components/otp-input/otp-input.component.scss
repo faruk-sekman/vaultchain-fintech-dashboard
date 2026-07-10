@@ -1,0 +1,46 @@
+:host {
+  display: block;
+}
+
+.otp {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: clamp(7px, 1.6vw, 11px);
+  border-radius: 13px;
+}
+
+.otp.is-complete {
+  animation: reset-otp-done 0.6s ease-out;
+}
+
+.otp.is-error {
+  animation: reset-shake 0.4s ease both;
+}
+
+.otp__box {
+  width: 100%;
+  height: 58px;
+  padding: 0;
+  text-align: center;
+  font: inherit;
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--ld-text);
+  background: var(--ld-field-bg);
+  border: 1.5px solid var(--ld-field-border);
+  border-radius: 12px;
+  outline: none;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.otp__box:focus-visible {
+  border-color: var(--ld-primary);
+  box-shadow: 0 0 0 4px var(--ld-ring);
+}
+
+.otp__box[data-filled] {
+  border-color: var(--ld-primary);
+  animation: login-pop 0.26s cubic-bezier(0.34, 1.56, 0.64, 1);
+}

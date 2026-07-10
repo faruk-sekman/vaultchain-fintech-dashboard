@@ -1,0 +1,259 @@
+<div class="page-shell notifications-page" data-testid="notifications-page">
+  <app-ui-card padding="lg" class="notifications-page__card">
+    <!-- Summary head (v2 §3.3 G1, mirrors settings-panel__head): a bell medallion + a text stack whose
+         line 1 is the LIVE unread summary (role=status) and line 2 the muted subtitle. The H1 page title
+         ("Bildirimler") is rendered by the route header from data.titleKey — NOT duplicated here. -->
+    <header class="notifications-page__head motion-fade-up">
+      <span class="notifications-page__medallion" aria-hidden="true">
+        <i class="ri-notification-3-line"></i>
+      </span>
+      <div class="notifications-page__heading">
+        <span
+          class="notifications-page__summary"
+          role="status"
+          aria-live="polite"
+          [attr.aria-label]="
+            unreadCount() > 0
+              ? ('notifications.page.unreadAria' | translate: { count: unreadCount() })
+              : ('notifications.page.allRead' | translate)
+          "
+        >
+          @if (unreadCount() > 0) {
+            <span class="notifications-page__summary--unread">
+              {{ 'notifications.page.unreadSummary' | translate: { count: unreadCount() } }}
+            </span>
+          } @else {
+            <span class="notifications-page__summary--clear">
+              {{ 'notifications.page.allRead' | translate }}
+            </span>
+          }
+        </span>
+        <p class="notifications-page__sub">{{ 'notifications.page.subtitle' | translate }}</p>
+      </div>
+      <button
+        type="button"
+        class="notifications-page__mark-all"
+        data-testid="notifications-mark-all"
+        [disabled]="loading() || unreadCount() === 0"
+        (click)="markAll()"
+      >
+        {{ 'notifications.markAllRead' | translate }}
+      </button>
+    </header>
+
+    <!-- Toolbar: read-state (segmented) + type + severity (selects with static i18n option keys). Wraps
+         to a single column below 600px. -->
+    <div class="notifications-page__toolbar">
+      <app-ui-segmented
+        [items]="readSegments"
+        [value]="readControl.value"
+        [ariaLabel]="'notifications.filter.readState' | translate"
+        (valueChange)="onReadChange($event)"
+      ></app-ui-segmented>
+
+      <div class="notifications-page__filter-field">
+        <label class="sr-only" for="notif-filter-type">
+          {{ 'notifications.filter.type' | translate }}
+        </label>
+        <app-ui-select
+          id="notif-filter-type"
+          data-testid="notifications-filter-type"
+          [control]="$any(typeControl)"
+          [options]="typeOptions"
+        ></app-ui-select>
+      </div>
+
+      <div class="notifications-page__filter-field">
+        <label class="sr-only" for="notif-filter-severity">
+          {{ 'notifications.filter.severity' | translate }}
+        </label>
+        <app-ui-select
+          id="notif-filter-severity"
+          [control]="$any(severityControl)"
+          [options]="severityOptions"
+        ></app-ui-select>
+      </div>
+    </div>
+
+    @if (loading()) {
+      <!-- ===================== Loading ===================== -->
+      <!-- Skeleton mirrors the final G3 row: tile + two short text lines. -->
+      <ul
+        class="notifications-page__list"
+        role="status"
+        [attr.aria-label]="'notifications.page.loading' | translate"
+      >
+        @for (row of skeletonRows; track row) {
+          <li class="notif-row notif-row--sk" aria-hidden="true">
+            <app-ui-skeleton
+              variant="block"
+              width="48px"
+              height="48px"
+              radius="14px"
+            ></app-ui-skeleton>
+            <div class="notif-row__sk-text">
+              <app-ui-skeleton variant="line" width="60%" height="14px"></app-ui-skeleton>
+              <app-ui-skeleton variant="line" width="85%" height="12px"></app-ui-skeleton>
+            </div>
+          </li>
+        }
+      </ul>
+    } @else if (errored()) {
+      <!-- ===================== Error ===================== -->
+      <app-ui-alert
+        type="danger"
+        icon="ri-error-warning-line"
+        [title]="'notifications.page.errorTitle' | translate"
+        [message]="'notifications.page.errorBody' | translate"
+      ></app-ui-alert>
+      <div class="notifications-page__retry">
+        <app-ui-button variant="ghost" type="button" (click)="load()">
+          <i class="ri-refresh-line ui-button__icon" aria-hidden="true"></i>
+          {{ 'notifications.page.retry' | translate }}
+        </app-ui-button>
+      </div>
+    } @else if (items().length === 0) {
+      <!-- ===================== Empty ===================== -->
+      <app-ui-empty
+        icon="ri-inbox-line"
+        [title]="
+          (hasActiveFilter()
+            ? 'notifications.page.emptyFilteredTitle'
+            : 'notifications.page.emptyTitle'
+          ) | translate
+        "
+        [message]="
+          (hasActiveFilter()
+            ? 'notifications.page.emptyFilteredBody'
+            : 'notifications.page.emptyBody'
+          ) | translate
+        "
+        [actionLabel]="hasActiveFilter() ? ('notifications.filter.clear' | translate) : null"
+        actionIcon="ri-filter-off-line"
+        (actionClick)="clearFilters()"
+      ></app-ui-empty>
+    } @else {
+      <!-- ===================== Populated ===================== -->
+      <!-- A true v2 G3 list: date-bucketed (only non-empty buckets render); each bucket = a muted group
+           label over a row list. Server order is preserved within each bucket. -->
+      @for (group of groups(); track group.key) {
+        <p class="notifications-page__group-label">{{ group.labelKey | translate }}</p>
+        <ul class="notifications-page__list motion-stagger" role="list">
+          @for (item of group.items; track item.id) {
+            @let t = time(item.createdAt);
+            <li
+              class="notif-row"
+              [class.notif-row--unread]="!item.readAt"
+              [attr.data-testid]="'notification-row-' + item.id"
+            >
+              @if (!item.readAt) {
+                <span class="notif-row__rail" aria-hidden="true"></span>
+              }
+              <button
+                type="button"
+                class="notif-row__main"
+                [attr.data-testid]="'notification-open-' + item.id"
+                (click)="onRowClick(item)"
+              >
+                <span class="notif-row__tile" [class]="typeTile(item.type)" aria-hidden="true">
+                  <i [class]="typeIcon(item.type)"></i>
+                </span>
+                <span class="notif-row__text">
+                  <span class="notif-row__title">{{ title(item) }}</span>
+                  <span class="notif-row__body">{{ body(item) }}</span>
+                </span>
+              </button>
+              <span class="notif-badge" [class]="'notif-badge--' + item.severity">
+                <i
+                  class="notif-badge__icon"
+                  [class]="severityIcon(item.severity)"
+                  aria-hidden="true"
+                ></i>
+                {{ severityKey(item.severity) | translate }}
+              </span>
+              <span class="notif-row__time">
+                @if (t.absolute) {
+                  {{ item.createdAt | date: 'mediumDate' : undefined : locale() }}
+                } @else {
+                  {{ t.key | translate: t.params }}
+                }
+              </span>
+              @if (!item.readAt) {
+                <button
+                  type="button"
+                  class="notif-row__action notif-row__action--check"
+                  [attr.data-testid]="'notification-mark-read-' + item.id"
+                  [disabled]="markingId() === item.id"
+                  [attr.aria-label]="'notifications.markReadAria' | translate"
+                  (click)="markRead(item, true, $event)"
+                >
+                  <i class="ri-check-line" aria-hidden="true"></i>
+                </button>
+              } @else if (hasRoute(item)) {
+                <button
+                  type="button"
+                  class="notif-row__action notif-row__action--go"
+                  [attr.aria-label]="'notifications.openRecordAria' | translate"
+                  (click)="openRecord(item, $event)"
+                >
+                  <i class="ri-arrow-right-line" aria-hidden="true"></i>
+                </button>
+              }
+            </li>
+          }
+        </ul>
+      }
+
+      <!-- ===================== A13: infinite scroll tail ===================== -->
+      @if (!allLoaded()) {
+        <div class="notifications-page__more">
+          @if (loadingMore()) {
+            <ul
+              class="notifications-page__list"
+              role="status"
+              [attr.aria-label]="'notifications.page.loadingMore' | translate"
+            >
+              @for (row of loadMoreSkeletonRows; track row) {
+                <li class="notif-row notif-row--sk" aria-hidden="true">
+                  <app-ui-skeleton
+                    variant="block"
+                    width="48px"
+                    height="48px"
+                    radius="14px"
+                  ></app-ui-skeleton>
+                  <div class="notif-row__sk-text">
+                    <app-ui-skeleton variant="line" width="60%" height="14px"></app-ui-skeleton>
+                    <app-ui-skeleton variant="line" width="85%" height="12px"></app-ui-skeleton>
+                  </div>
+                </li>
+              }
+            </ul>
+          }
+          <!-- The observer target: nearing it auto-appends the next page… -->
+          <div #loadMoreSentinel class="notifications-page__sentinel" aria-hidden="true"></div>
+          <!-- …and the visible button is the keyboard / assistive-tech / no-IO fallback. -->
+          <app-ui-button
+            variant="ghost"
+            type="button"
+            [disabled]="loadingMore()"
+            (click)="loadMore()"
+          >
+            <i class="ri-arrow-down-line ui-button__icon" aria-hidden="true"></i>
+            {{ (loadingMore() ? 'common.loading' : 'notifications.page.loadMore') | translate }}
+          </app-ui-button>
+        </div>
+      } @else {
+        <p class="notifications-page__all-loaded" role="status">
+          <i class="ri-check-double-line" aria-hidden="true"></i>
+          {{ 'notifications.page.allLoaded' | translate }}
+        </p>
+      }
+      <!-- Polite progress announcement for screen readers as pages append (A13). -->
+      <p class="sr-only" role="status" aria-live="polite">
+        {{
+          'notifications.page.loadedStatus' | translate: { count: items().length, total: total() }
+        }}
+      </p>
+    }
+  </app-ui-card>
+</div>

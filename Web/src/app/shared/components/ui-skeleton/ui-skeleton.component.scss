@@ -1,0 +1,24 @@
+:host {
+  display: block;
+}
+
+.ui-skeleton {
+  width: var(--skeleton-w, 100%);
+  height: var(--skeleton-h, var(--space-7));
+  border-radius: var(--skeleton-r, var(--radius-sm));
+  background: linear-gradient(90deg, var(--color-skeleton-from) 0%, var(--color-skeleton-to) 50%, var(--color-skeleton-from) 100%);
+  background-size: 200% 100%;
+
+  &--block {
+    height: var(--skeleton-h, 100%);
+  }
+
+  &--circle {
+    border-radius: 999px;
+  }
+
+  &--animate {
+    // §2/§4: the one sanctioned loop — 1200ms, linear sweep.
+    animation: ui-shimmer 1200ms linear infinite;
+  }
+}

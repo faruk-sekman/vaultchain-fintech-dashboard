@@ -1,0 +1,10 @@
+# Api/ (NestJS) — see the repo-root .gitignore for the shared patterns.
+/dist
+/node_modules
+# Prisma generated client (when generated into the default location)
+/prisma/generated
+# Local env (only .env.example / .env.docker.example are committed)
+.env
+.env.*
+!.env.example
+!.env.docker.example

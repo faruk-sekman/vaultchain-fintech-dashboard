@@ -1,0 +1,191 @@
+/* v2.1 §5 /customers: G1 title row (status tabs + create) on the global
+ * `.v2-section` utilities, then ONE white card = toolbar row · chips · table · pagination.
+ * The header owns the H1. */
+.customer-list__topbar {
+  @apply flex-wrap gap-3;
+}
+
+.customer-list__tabs {
+  @apply min-w-0 max-w-full overflow-x-auto;
+}
+
+.customer-list__actions {
+  @apply flex flex-wrap items-center gap-1.5;
+
+  app-ui-button {
+    @apply flex-none;
+  }
+}
+
+/* The single v2 card surface (§4 card chrome: borderless white, --radius-card, --shadow-card;
+ * dark re-introduces the 1px hairline). */
+.customer-list__card {
+  @apply flex flex-col gap-3;
+
+  border: 1px solid transparent;
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-card);
+  padding: 22px;
+}
+
+:host-context(html[data-theme='dark']) .customer-list__card {
+  border-color: var(--color-border);
+}
+
+/* Toolbar row INSIDE the card: search pill grows, KYC select, density segmented right-aligned. */
+.toolbar {
+  @apply flex flex-wrap items-center gap-2.5;
+
+  --stagger-step: 55ms;
+
+  &__search {
+    @apply min-w-44 flex-1;
+  }
+
+  &__kyc {
+    @apply w-48 flex-none;
+  }
+
+  &__density {
+    @apply ml-auto flex-none;
+  }
+}
+
+/* The Filters button is a mobile-only affordance; the in-card toolbar carries the controls ≥md. */
+.toolbar__filters-trigger {
+  @apply hidden;
+}
+
+.toolbar__filters-count {
+  @apply ml-1.5 inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1 leading-none;
+
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+  font-size: var(--font-size-xxs);
+  font-weight: var(--font-weight-bold);
+}
+
+.active-filters {
+  @apply flex flex-wrap items-center gap-2;
+}
+
+/* Strip the embedded table's own card chrome so the page reads as ONE card (§5 /customers).
+ * `app-ui-table` keeps its chrome for standalone use; ::ng-deep is scoped under
+ * `.customer-list__card` so nothing leaks. The -16px inline pull cancels the table's own
+ * 16px cell padding so column text aligns with the card's 25px gutter; the footer keeps the
+ * pagination bottom-right INSIDE this card. */
+/* stylelint-disable-next-line selector-pseudo-element-no-unknown */
+.customer-list__card ::ng-deep .ui-table {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.customer-list__table {
+  margin-inline: -16px;
+  margin-bottom: -10px; /* cancels the footer's own bottom padding so pagination rests on the card gutter */
+}
+
+/* In-card empty state: the card already provides the surface, so no extra chrome ≥861px. */
+.customer-list__empty {
+  @apply block;
+}
+
+.row-actions {
+  @apply flex max-w-full flex-wrap items-center gap-1.5;
+
+  width: max-content;
+
+  app-ui-button {
+    @apply flex-none;
+  }
+}
+
+/* First-column identity cell (§7.3): avatar + name/email stack. */
+.customer-cell {
+  @apply flex min-w-0 items-center gap-2.5;
+
+  &__avatar {
+    @apply shrink-0;
+  }
+
+  &__text {
+    @apply flex min-w-0 flex-col;
+  }
+
+  &__name {
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-strong);
+  }
+
+  &__email {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
+  }
+}
+
+.filters-drawer {
+  @apply grid gap-4;
+
+  &__footer {
+    @apply flex flex-wrap items-center justify-end gap-1.5;
+  }
+}
+
+/* Compact density (§4.5): tighten the toolbar one step. */
+.customer-list[data-density='compact'] .toolbar {
+  @apply gap-2.5;
+}
+
+/* ≤860px the embedded ui-table switches to stacked row-cards on the canvas; the wrapper card
+ * dissolves with it so row-cards never float inside a giant white shell. The toolbar keeps its
+ * own small card surface (mirrors the retired filters card) until the drawer takes over <768. */
+@media (width <= 860px) {
+  .customer-list__card {
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    padding: 0;
+  }
+
+  .toolbar {
+    border-radius: var(--radius-card);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-card);
+    padding: var(--space-8);
+  }
+
+  :host-context(html[data-theme='dark']) .toolbar {
+    border: 1px solid var(--color-border);
+  }
+
+  .customer-list__table {
+    margin-inline: 0;
+    margin-bottom: 0;
+  }
+
+  /* Standalone surface for the empty state once the wrapper card has dissolved. */
+  .customer-list__empty {
+    border-radius: var(--radius-card);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-card);
+  }
+
+  :host-context(html[data-theme='dark']) .customer-list__empty {
+    border: 1px solid var(--color-border);
+  }
+}
+
+/* Below md: filters collapse into the drawer; show the Filters trigger, hide the toolbar. */
+@media (width <= 767px) {
+  .toolbar {
+    @apply hidden;
+  }
+
+  .toolbar__filters-trigger {
+    @apply inline-flex;
+  }
+}

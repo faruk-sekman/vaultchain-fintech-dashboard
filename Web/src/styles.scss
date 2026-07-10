@@ -1,0 +1,15 @@
+@use "./styles/tokens";
+@use "./styles/spacing";
+@use "./styles/typography";
+@use "./styles/fonts";
+@use "./styles/base";
+@use "./styles/utilities";
+@use "./styles/customer-detail";
+@use "./styles/web3-risk";
+@use "./styles/animations";
+@use "ngx-toastr/toastr" as ngx-toastr;
+@use "./styles/toastr" as app-toastr;
+@use "./styles/remixicon-subset";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;

@@ -1,0 +1,180 @@
+<!--
+###### UI Bar Chart ######
+Usage (single series):
+<app-ui-chart-bar
+  [data]="[{label:'Active', values:[820]}, {label:'Inactive', values:[140]}]"
+  [ariaLabel]="'analytics.status.summary' | translate"
+  [tableCaption]="'analytics.status.title' | translate"
+  [legend]="false">
+</app-ui-chart-bar>
+
+Usage (grouped — target vs reality):
+<app-ui-chart-bar
+  [data]="[{label:'Q1', values:[120, 95]}]"
+  [series]="[{name:'Target'}, {name:'Reality'}]">
+</app-ui-chart-bar>
+
+Pure SVG, no dependency. SVG aria-hidden; data carried by the visually-hidden
+table (§6.9). States: loading (skeleton) · empty ("No data") · populated.
+#################################
+-->
+
+<div class="chart-bar" [class.chart-bar--furniture]="furniture" [attr.id]="id || null">
+  @if (loading) {
+    <div class="chart-bar__skeleton" [style.height.px]="height" aria-hidden="true">
+      @for (bar of [60, 80, 45, 72, 55]; track $index) {
+        <span class="chart-bar__sk-bar" [style.height.%]="bar"></span>
+      }
+    </div>
+  } @else if (isEmpty) {
+    <div
+      class="chart-bar__empty"
+      [style.height.px]="height"
+      role="img"
+      [attr.aria-label]="ariaLabel"
+    >
+      <i class="ri-bar-chart-2-line chart-bar__empty-icon" aria-hidden="true"></i>
+      <span class="chart-bar__empty-text">{{ noDataLabel }}</span>
+    </div>
+  } @else {
+    @if (hasLegend) {
+      <ul class="chart-bar__legend">
+        @for (item of legendItems; track trackByLegend($index, item)) {
+          <li class="chart-bar__legend-item">
+            <span
+              class="chart-bar__swatch"
+              [style.background]="item.color"
+              aria-hidden="true"
+            ></span>
+            <span class="chart-bar__legend-label">{{ item.name }}</span>
+          </li>
+        }
+      </ul>
+    }
+
+    <!-- v2.1 G5: the plot flexes to the host height; `height` is its minimum. -->
+    <div class="chart-bar__plot" [style.min-height.px]="height">
+      @if (furniture) {
+        <!-- Numeric y scale (0..nice max). aria-hidden: the sr-table carries the data. -->
+        <div class="chart-bar__y-axis" aria-hidden="true">
+          @for (line of gridLines; track trackByGrid($index, line)) {
+            <span class="chart-bar__y-label" [style.top.%]="(line.y / viewBoxH) * 100">{{
+              line.label
+            }}</span>
+          }
+        </div>
+      }
+
+      <svg
+        class="chart-bar__svg"
+        [attr.viewBox]="'0 0 ' + viewBoxW + ' ' + viewBoxH"
+        preserveAspectRatio="none"
+        focusable="false"
+        aria-hidden="true"
+        (mousemove)="onMove($event)"
+        (mouseleave)="onLeave()"
+      >
+        @if (ariaLabel) {
+          <title>{{ ariaLabel }}</title>
+        }
+        @if (gradient) {
+          <defs>
+            @for (g of gradientDefs; track g.id) {
+              <linearGradient [attr.id]="g.id" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" [attr.stop-color]="g.from" />
+                <stop offset="100%" [attr.stop-color]="g.to" />
+              </linearGradient>
+            }
+          </defs>
+        }
+        <!-- Horizontal gridlines (§6.5 / v2.1 G5). -->
+        @for (line of gridLines; track trackByGrid($index, line)) {
+          <line
+            class="chart-bar__grid"
+            [attr.x1]="0"
+            [attr.y1]="line.y"
+            [attr.x2]="viewBoxW"
+            [attr.y2]="line.y"
+          />
+        }
+        <!-- Bars: rounded top, flat base on the axis. -->
+        @for (rect of bars; track trackByBar($index, rect)) {
+          @if (rect.height > 0) {
+            <path
+              class="chart-bar__rect"
+              [class.chart-bar__rect--active]="rect.categoryLabel === hoverLabel"
+              [attr.d]="barPath(rect)"
+              [attr.fill]="barFill(rect)"
+            />
+          }
+        }
+      </svg>
+
+      @if (valueLabels && !loading && !isEmpty) {
+        <div class="chart-bar__values" aria-hidden="true">
+          @for (v of valueLabelItems; track $index) {
+            <span
+              class="chart-bar__value-label"
+              [style.inset-inline-start.%]="v.xPct"
+              [style.top.%]="v.yPct"
+              >{{ v.label }}</span
+            >
+          }
+        </div>
+      }
+    </div>
+
+    <app-ui-chart-tip
+      [visible]="tip.visible"
+      [x]="tip.x"
+      [y]="tip.y"
+      [color]="tip.color"
+      [title]="tip.title"
+      [rows]="tip.rows"
+    ></app-ui-chart-tip>
+
+    <!-- Category labels under the axis. Each tick is boxed to one category slot
+         so long names (e.g. "Not started"/"In review") wrap to ~2 lines and stay
+         under their bar at narrow widths instead of overrunning their neighbours. -->
+    <div class="chart-bar__ticks" [style.--tick-slot.%]="100 / ticks.length">
+      @for (tick of ticks; track trackByTick($index, tick)) {
+        <span class="chart-bar__tick" [style.inset-inline-start.%]="(tick.x / viewBoxW) * 100">{{
+          tick.label
+        }}</span>
+      }
+    </div>
+
+    <!-- Visually-hidden accessible data table (§6.9). -->
+    <table class="chart-bar__sr-table">
+      @if (tableCaption) {
+        <caption>
+          {{
+            tableCaption
+          }}
+        </caption>
+      }
+      <thead>
+        <tr>
+          <th scope="col">{{ categoryLabel }}</th>
+          @if (hasLegend) {
+            @for (item of legendItems; track trackByLegend($index, item)) {
+              <th scope="col">{{ item.name }}</th>
+            }
+          } @else {
+            <th scope="col">{{ valueLabel }}</th>
+          }
+        </tr>
+      </thead>
+      <tbody>
+        @for (cat of data; track cat.label) {
+          <tr>
+            <th scope="row">{{ cat.label }}</th>
+            @for (value of cat.values; track $index) {
+              <td>{{ formatVal(value) }}</td>
+            }
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</div>

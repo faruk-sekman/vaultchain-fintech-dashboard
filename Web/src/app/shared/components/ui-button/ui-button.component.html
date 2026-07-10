@@ -1,0 +1,23 @@
+<button
+  class="ui-button motion-pressable {{ class() }}"
+  [class.ui-button--primary]="variant() === 'primary'"
+  [class.ui-button--ghost]="variant() === 'ghost'"
+  [class.ui-button--danger]="variant() === 'danger'"
+  [class.ui-button--pill]="variant() === 'pill'"
+  [class.ui-button--sm]="size() === 'sm'"
+  [class.ui-button--md]="size() === 'md'"
+  [class.ui-button--lg]="size() === 'lg'"
+  [class.ui-button--icon-only]="iconOnly()"
+  [class.ui-button--full]="fullWidth()"
+  [class.ui-button--loading]="loading()"
+  [type]="type()"
+  [disabled]="disabled() || loading()"
+  [attr.id]="id() || null"
+  [attr.aria-label]="ariaLabel() || null"
+  [attr.aria-busy]="loading() ? 'true' : null"
+>
+  @if (loading()) {
+    <span class="ui-button__spinner" aria-hidden="true"></span>
+  }
+  <ng-content></ng-content>
+</button>

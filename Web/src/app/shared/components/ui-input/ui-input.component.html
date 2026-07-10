@@ -1,0 +1,22 @@
+<input
+  class="ui-input"
+  [class.ui-input--with-icon]="iconStart"
+  [ngClass]="inputClass"
+  [type]="type"
+  [attr.lang]="lang"
+  [attr.readonly]="readOnly ? '' : null"
+  [attr.disabled]="disabled ? '' : null"
+  [attr.min]="min"
+  [attr.max]="max"
+  [attr.maxlength]="maxLength"
+  [formControl]="control"
+  [attr.placeholder]="placeholder"
+  [attr.autocomplete]="autocomplete"
+  [attr.aria-invalid]="ariaInvalid"
+  [attr.aria-describedby]="ariaDescribedBy"
+  [attr.aria-label]="ariaLabel"
+  [attr.id]="id || null"
+/>
+@if (iconStart) {
+  <i class="ui-input__icon" [ngClass]="iconStart" aria-hidden="true"></i>
+}

@@ -1,0 +1,141 @@
+:host {
+  @apply block;
+}
+
+.ui-form {
+  /* v2.1 §5: 30px form-grid gutters (was gap-x-4 = 16px). */
+  @apply grid gap-y-0;
+
+  column-gap: 30px;
+
+  &.filters-grid {
+    @apply grid-cols-2;
+
+    .ui-form__field.wide {
+      @apply col-span-full;
+    }
+  }
+
+  @media (width <= 980px) {
+    &.filters-grid {
+      @apply grid-cols-1;
+
+      .ui-form__field.wide {
+        grid-column: auto;
+      }
+    }
+  }
+}
+
+.ui-form__field {
+  @apply grid;
+
+  // v2 §4: 10px gap between the 16px label and its 50px field.
+  gap: 5px;
+}
+
+.ui-form__control-row {
+  @apply relative grid items-center;
+
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.ui-form__status-icon {
+  @apply absolute right-4 inline-flex h-5 w-5 items-center justify-center leading-none;
+
+  font-size: var(--font-size-xl);
+}
+
+.ui-form__status-icon--hidden {
+  visibility: hidden;
+}
+
+.ui-form__status-icon--invalid {
+  color: var(--color-danger);
+}
+
+.ui-form__status-icon--valid {
+  color: var(--color-success);
+}
+
+.ui-form__label {
+  // v2 §4: field labels are 16px in the body text colour.
+  font-size: var(--text-body-lg);
+  line-height: var(--text-h4-lh);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text);
+}
+
+.ui-form__error {
+  @apply text-xs;
+
+  font-weight: var(--font-weight-medium);
+  color: var(--color-danger-deep);
+}
+
+.ui-form__error--hidden {
+  visibility: hidden;
+}
+
+.ui-form__submit-spin {
+  animation: ui-spin 900ms linear infinite;
+}
+
+// --- Form sections (opt-in grouped layout) ---------------------------------
+.ui-form__section {
+  @apply grid gap-3;
+}
+
+.ui-form__section + .ui-form__section {
+  @apply mt-4 border-t pt-4;
+
+  border-top-color: var(--color-border);
+}
+
+.ui-form__section-header {
+  @apply flex items-center gap-3;
+}
+
+.ui-form__section-heading {
+  @apply grid min-w-0 gap-1;
+}
+
+.ui-form__section-icon {
+  @apply inline-flex flex-none items-center justify-center;
+
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--color-primary) 12%, transparent);
+  color: var(--color-primary);
+  font-size: var(--text-h4);
+}
+
+.ui-form__section-title {
+  @apply m-0 text-sm;
+
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
+}
+
+.ui-form__section-desc {
+  @apply m-0 text-xs;
+
+  color: var(--color-text-muted);
+}
+
+.ui-form__grid {
+  @apply grid grid-cols-1 gap-x-2 gap-y-2.5;
+}
+
+.ui-form__grid--cols-2 {
+  // Full-width opt-in only spans inside a 2-column section grid, so the modifier is scoped here and
+  // is inert in the flat layout (which has no .ui-form__grid parent).
+  .ui-form__field--full {
+    grid-column: 1 / -1;
+  }
+
+  @media (width >= 768px) {
+    @apply grid-cols-2;
+  }
+}

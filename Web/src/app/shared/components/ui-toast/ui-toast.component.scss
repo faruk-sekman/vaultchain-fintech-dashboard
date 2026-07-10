@@ -1,0 +1,18 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
+:host.toast-in {
+  animation: ui-toast-fade var(--animation-duration, 300ms) var(--animation-easing, ease-in);
+}
+
+@keyframes ui-toast-fade {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}

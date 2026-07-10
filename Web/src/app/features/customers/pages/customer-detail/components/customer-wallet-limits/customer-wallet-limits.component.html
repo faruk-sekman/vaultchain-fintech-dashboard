@@ -1,0 +1,95 @@
+<!--
+  ~ Copyright (c) 2026 Fintech Dashboard contributors.
+  -->
+
+<div class="enterprise-panel__header">
+  <h3 class="enterprise-panel__title">{{ 'wallet.title' | translate }}</h3>
+  <app-ui-badge [color]="walletStatusColor()" [text]="walletStatusDisplay()"></app-ui-badge>
+</div>
+
+<div class="enterprise-panel__body">
+  @if (wallet) {
+    <div
+      id="customer-detail-wallet-limit-meter"
+      class="enterprise-limit-meter"
+      data-testid="wallet-limit-meter"
+    >
+      <div class="meter-labels">
+        <span class="meter-label">{{ 'customerDetail.limitUsage' | translate }}</span>
+        <span class="meter-value">{{ limitRatioDisplay() }}</span>
+      </div>
+      <div class="meter-track">
+        <div
+          class="meter-bar"
+          [ngClass]="limitRatioBarClass()"
+          [style.width.%]="limitRatioPercent()"
+        ></div>
+      </div>
+    </div>
+
+    <div
+      id="customer-detail-wallet-limit-editor"
+      class="enterprise-limit-form"
+      data-testid="wallet-limit-editor"
+    >
+      <app-ui-form
+        #limitsFormRef
+        id="customer-detail-wallet-limits-form"
+        [fields]="limitFields"
+        [initialValue]="limitsInitialValue()"
+        [formValidators]="limitFormValidators"
+        [preventSubmit]="true"
+        [showSubmit]="false"
+        formClass="compact-form-col"
+      ></app-ui-form>
+
+      @if (
+        limitsFormRef?.form?.errors?.['limitMismatch'] &&
+        (limitsFormRef.form.dirty || limitsFormRef.form.touched)
+      ) {
+        <div class="enterprise-error-block">
+          {{ 'validation.limitMismatch' | translate }}
+        </div>
+      }
+
+      <!-- A7: WITHOUT wallets.manage-limits there is NO edit affordance at all — the inputs render
+           read-only and Save/Reset never enter the DOM (a grey disabled Save advertised an action
+           the operator could never take). The BE PATCH guard remains the authority (403). -->
+      @if (canManageLimits) {
+        <div class="enterprise-form-actions">
+          @if (limitsFormRef?.form && !limitsFormRef.form.pristine) {
+            <app-ui-button
+              variant="ghost"
+              size="sm"
+              type="button"
+              [disabled]="savingLimits()"
+              (click)="resetLimits()"
+            >
+              <i class="ri-refresh-line ui-button__icon" aria-hidden="true"></i>
+              {{ 'common.reset' | translate }}
+            </app-ui-button>
+          }
+          <app-ui-button
+            size="sm"
+            type="button"
+            [disabled]="
+              savingLimits() ||
+              !limitsFormRef?.form ||
+              limitsFormRef.form.pristine ||
+              limitsFormRef.form.invalid
+            "
+            (click)="saveLimits()"
+          >
+            <i class="ri-save-3-line ui-button__icon" aria-hidden="true"></i>
+            {{ savingLimits() ? ('common.saving' | translate) : ('common.save' | translate) }}
+          </app-ui-button>
+        </div>
+      }
+    </div>
+  } @else {
+    <div class="p-4">
+      <app-ui-skeleton width="100%" height="40px" class="mb-3"></app-ui-skeleton>
+      <app-ui-skeleton width="100%" height="40px"></app-ui-skeleton>
+    </div>
+  }
+</div>

@@ -1,0 +1,69 @@
+<div class="ui-menu">
+  <!-- Layout-only wrapper. The projected `[trigger] [data-ui-menu-trigger]` element is the real
+       focusable control, so the menu-button ARIA (haspopup/expanded/controls) is synced onto IT
+       (see `syncTriggerAria`) — `aria-expanded`/`aria-haspopup` are not allowed on a bare span. -->
+  <span class="ui-menu__trigger" (click)="toggle()">
+    <ng-content select="[trigger]"></ng-content>
+  </span>
+
+  @if (open) {
+    <div
+      class="ui-menu__panel"
+      [class.ui-menu__panel--up]="flipUp"
+      [class.ui-menu__panel--end]="flipEnd"
+      [class.ui-menu__panel--profile]="panelVariant === 'profile'"
+      role="menu"
+      [id]="menuId"
+      [attr.aria-labelledby]="menuLabelKey ? null : triggerId"
+      [attr.aria-label]="menuLabelKey ? (menuLabelKey | translate) : null"
+    >
+      @if (hasSummary) {
+        <div class="ui-menu__summary" role="presentation">
+          <span class="ui-menu__summary-icon" aria-hidden="true">
+            <i [class]="summaryIcon || 'ri-user-3-line'"></i>
+          </span>
+          <span class="ui-menu__summary-text">
+            @if (summaryTitle) {
+              <span class="ui-menu__summary-title">{{ summaryTitle }}</span>
+            }
+            @if (summarySubtitle) {
+              <span class="ui-menu__summary-subtitle">{{ summarySubtitle }}</span>
+            }
+          </span>
+        </div>
+      }
+
+      @for (entry of entries; track trackEntry($index, entry); let i = $index) {
+        @if (isSection(entry)) {
+          <div class="ui-menu__section" role="presentation">
+            {{ entry.labelKey | translate }}
+          </div>
+        } @else if (isDivider(entry)) {
+          <div class="ui-menu__divider" role="separator"></div>
+        } @else if (isItem(entry)) {
+          <button
+            type="button"
+            class="ui-menu__item"
+            [class.ui-menu__item--danger]="entry.danger"
+            [class.is-active]="i === activeIndex"
+            role="menuitem"
+            [id]="menuId + '-item-' + i"
+            [attr.tabindex]="i === activeIndex ? 0 : -1"
+            [disabled]="entry.disabled"
+            [attr.aria-disabled]="entry.disabled ? true : null"
+            (click)="onItemClick(entry)"
+            (mouseenter)="activeIndex = i"
+          >
+            @if (entry.icon) {
+              <i class="ui-menu__icon" [class]="entry.icon" aria-hidden="true"></i>
+            }
+            <span class="ui-menu__label">{{ entry.labelKey | translate }}</span>
+            @if (entry.shortcut) {
+              <span class="ui-menu__shortcut">{{ entry.shortcut }}</span>
+            }
+          </button>
+        }
+      }
+    </div>
+  }
+</div>

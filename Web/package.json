@@ -1,0 +1,84 @@
+{
+  "name": "fintech-dashboard",
+  "version": "1.0.0",
+  "description": "Vaultchain fintech operations dashboard — Angular web UI",
+  "license": "MIT",
+  "author": "Faruk Sekman",
+  "scripts": {
+    "ng": "ng",
+    "start": "ng serve",
+    "build": "ng build",
+    "watch": "ng build --watch --configuration development",
+    "test": "vitest --run --coverage",
+    "start:stage": "ng serve --configuration stage",
+    "build:stage": "ng build --configuration stage",
+    "lint:styles": "stylelint \"src/**/*.scss\"",
+    "lint:styles:fix": "npm run lint:styles -- --fix",
+    "format": "prettier --write \"src/**/*.{ts,html,json}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,html,json}\"",
+    "e2e": "npm run e2e:chrome",
+    "e2e:open": "cypress open --project .",
+    "e2e:audit": "cypress run --project . --browser chrome --spec cypress/e2e/browser-ux-smoke.cy.ts --expose CAPTURE_VISUAL_ARTIFACTS=1 --config screenshotOnRunFailure=true,video=false",
+    "e2e:chrome": "cypress run --project . --browser chrome",
+    "e2e:electron": "cypress run --project . --browser electron",
+    "e2e:cross-browser": "node ../scripts/e2e-cross-browser.mjs",
+    "e2e:quality": "cypress run --project . --browser chrome --spec cypress/e2e/quality-smoke.cy.ts",
+    "e2e:live-contract": "cypress run --project . --spec cypress/live-contract/live-api-contract.cy.ts",
+    "e2e:docs-shots": "cypress run --project . --browser chrome --config-file cypress.docs.config.ts"
+  },
+  "prettier": {
+    "printWidth": 100,
+    "singleQuote": true,
+    "trailingComma": "all",
+    "arrowParens": "avoid",
+    "overrides": [
+      {
+        "files": "*.html",
+        "options": {
+          "parser": "angular"
+        }
+      }
+    ]
+  },
+  "private": true,
+  "packageManager": "npm@10.8.2",
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "@angular/animations": "^21.2.17",
+    "@angular/common": "^21.2.17",
+    "@angular/compiler": "^21.2.17",
+    "@angular/core": "^21.2.17",
+    "@angular/forms": "^21.2.17",
+    "@angular/platform-browser": "^21.2.17",
+    "@angular/router": "^21.2.17",
+    "@ngrx/effects": "^21.0.1",
+    "@ngrx/store": "^21.0.1",
+    "@ngrx/store-devtools": "^21.0.1",
+    "@ngx-translate/core": "^17.0.0",
+    "@ngx-translate/http-loader": "^17.0.0",
+    "@tailwindcss/vite": "^4.1.18",
+    "ngx-toastr": "^20.0.4",
+    "remixicon": "^4.9.1",
+    "rxjs": "~7.8.0",
+    "tslib": "^2.3.0"
+  },
+  "devDependencies": {
+    "@analogjs/vite-plugin-angular": "^2.6.2",
+    "@angular/build": "^21.2.17",
+    "@angular/cli": "^21.2.17",
+    "@angular/compiler-cli": "^21.2.17",
+    "@vitest/coverage-v8": "^4.0.8",
+    "autoprefixer": "^10.4.24",
+    "cypress": "^15.18.0",
+    "jsdom": "^27.1.0",
+    "postcss": "^8.5.6",
+    "prettier": "^3.8.3",
+    "stylelint": "^16.14.1",
+    "stylelint-config-standard-scss": "^14.0.0",
+    "tailwindcss": "^3.4.19",
+    "typescript": "~5.9.2",
+    "vitest": "^4.0.8"
+  }
+}

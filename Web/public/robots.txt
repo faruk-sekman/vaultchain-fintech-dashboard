@@ -1,0 +1,4 @@
+# Fintech operations dashboard — an internal operator tool, not a public site.
+# Disallow all crawling/indexing (audit: /robots.txt previously fell through to the SPA index.html).
+User-agent: *
+Disallow: /

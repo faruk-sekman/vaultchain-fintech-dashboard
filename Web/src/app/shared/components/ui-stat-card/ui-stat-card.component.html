@@ -1,0 +1,115 @@
+<!--
+###### UI Stat / KPI Card Component ######
+Usage:
+<app-ui-stat-card
+  label="Total customers" [value]="'1,248'" icon="ri-group-line" accent="indigo"
+  [delta]="{ value: 8, direction: 'up', label: 'vs last week' }"
+  [trend]="[3,5,4,6,7,6,9]" trendLabel="Up over the last 7 days"
+  deltaLabel="increased 8 percent">
+</app-ui-stat-card>
+
+accent: indigo | blue | teal | green | amber | red | violet
+States: default · loading (skeleton) · empty (— value) · link (href set)
+A11y: value+label carry meaning; delta has a text alternative; sparkline aria-hidden.
+#################################
+-->
+
+<ng-template #content>
+  @if (loading()) {
+    <div class="stat-card__skeleton" aria-hidden="true">
+      <span class="stat-card__sk stat-card__sk--chip"></span>
+      <span class="stat-card__sk stat-card__sk--line stat-card__sk--label"></span>
+      <span class="stat-card__sk stat-card__sk--line stat-card__sk--value"></span>
+      <span class="stat-card__sk stat-card__sk--bar"></span>
+    </div>
+    <span class="stat-card__sr">{{ label() }}</span>
+  } @else {
+    <div class="stat-card__top">
+      <span class="stat-card__chip">
+        <i class="stat-card__chip-icon {{ icon() }}" aria-hidden="true"></i>
+      </span>
+    </div>
+
+    <p class="stat-card__label">{{ label() }}</p>
+
+    @if (isEmpty) {
+      <p class="stat-card__value stat-card__value--empty" aria-hidden="true">—</p>
+      <span class="stat-card__sr">{{ label() }}: —</span>
+    } @else {
+      <!-- §5 KPI value update: one-shot swap on change (no count-up). -->
+      <p class="stat-card__value" [appValueSwap]="value()">{{ value() }}</p>
+    }
+
+    @if (delta() && !isEmpty) {
+      <p
+        class="stat-card__delta"
+        [class.stat-card__delta--up]="delta()!.direction === 'up'"
+        [class.stat-card__delta--down]="delta()!.direction === 'down'"
+      >
+        <i
+          class="stat-card__delta-icon"
+          [class.ri-arrow-up-line]="delta()!.direction === 'up'"
+          [class.ri-arrow-down-line]="delta()!.direction === 'down'"
+          aria-hidden="true"
+        ></i>
+        <span class="stat-card__delta-value">{{ deltaDisplay }}</span>
+        @if (delta()!.label) {
+          <span class="stat-card__delta-note">{{ delta()!.label }}</span>
+        }
+        <span class="stat-card__sr">{{ deltaAccessibleText }}</span>
+      </p>
+    }
+
+    @if (hasTrend && !isEmpty) {
+      <svg
+        class="stat-card__spark"
+        [attr.viewBox]="'0 0 ' + sparkWidth + ' ' + sparkHeight"
+        [attr.width]="sparkWidth"
+        [attr.height]="sparkHeight"
+        preserveAspectRatio="none"
+        focusable="false"
+        aria-hidden="true"
+      >
+        @if (trendLabel()) {
+          <title>{{ trendLabel() }}</title>
+        }
+        <path class="stat-card__spark-area" [attr.d]="sparkAreaPath" />
+        <polyline class="stat-card__spark-line" [attr.points]="sparkPoints" />
+        @if (sparkLastPoint) {
+          <circle
+            class="stat-card__spark-dot"
+            [attr.cx]="sparkLastPoint.x"
+            [attr.cy]="sparkLastPoint.y"
+            r="2"
+          />
+        }
+      </svg>
+    }
+  }
+</ng-template>
+
+@if (href()) {
+  <a
+    class="stat-card stat-card--link"
+    [class.stat-card--loading]="loading()"
+    [class.stat-card--pill]="layout() === 'pill'"
+    [ngStyle]="accentStyles"
+    [href]="href()"
+    [attr.id]="id() || null"
+    [attr.aria-label]="linkAccessibleName"
+    [attr.aria-busy]="loading() ? 'true' : null"
+  >
+    <ng-container [ngTemplateOutlet]="content"></ng-container>
+  </a>
+} @else {
+  <div
+    class="stat-card"
+    [class.stat-card--loading]="loading()"
+    [class.stat-card--pill]="layout() === 'pill'"
+    [ngStyle]="accentStyles"
+    [attr.id]="id() || null"
+    [attr.aria-busy]="loading() ? 'true' : null"
+  >
+    <ng-container [ngTemplateOutlet]="content"></ng-container>
+  </div>
+}

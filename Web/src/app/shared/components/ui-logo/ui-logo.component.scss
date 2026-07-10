@@ -1,0 +1,149 @@
+/*
+ * Brand logo: inlined directly from assets/img/Vaultchain_Logo.svg (connected-blocks mark +
+ * "Vaultchain" wordmark + "FINTECH OPERATIONS" tagline). Geometry + colours are 1:1 with the
+ * source file; this stylesheet only supplies what a standalone .svg can't carry — the Space
+ * Grotesk font + sizing, a dark-theme wordmark colour (the navy is invisible on dark), and the
+ * layer-by-layer entrance the file's vc-* classes are built for. Base (no-animation) state is the
+ * finished logo, so SSR + prefers-reduced-motion render it complete.
+ */
+:host {
+  display: block;
+}
+
+.ui-logo {
+  display: inline-flex;
+  align-items: center;
+  min-width: 0;
+  max-width: 100%;
+  text-decoration: none;
+  border-radius: var(--radius-md);
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: var(--shadow-focus);
+  }
+}
+
+.ui-logo__svg {
+  display: block;
+  height: 44px;
+  width: auto;
+  max-width: 100%;
+  overflow: visible;
+  transition: transform var(--motion-normal) var(--motion-ease-emphasized);
+}
+
+.ui-logo:hover .ui-logo__svg,
+.ui-logo:focus-visible .ui-logo__svg {
+  transform: translateY(-1px);
+}
+
+/* The .svg file omits font sizing — supply the Space Grotesk lockup here. */
+.vc-name {
+  font-family: "Space Grotesk", var(--font-family-base);
+  font-weight: 700;
+  font-size: 42px;
+  letter-spacing: -1px;
+
+  /* First word in: a quick fade + tiny rise (transform is safe on a <text> element). */
+  animation: ui-logo-word var(--motion-normal) var(--motion-ease-enter) 470ms both;
+}
+
+.vc-tag {
+  font-family: "Space Grotesk", var(--font-family-base);
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: 3px;
+}
+
+/*
+ * Tagline reveals its two words in turn, right after the wordmark. <tspan>s can't take a reliable
+ * CSS transform, so these fade via fill-opacity (no rise) — still a clean word-by-word read.
+ */
+.vc-tag-w1,
+.vc-tag-w2 {
+  animation: ui-logo-word-fade var(--motion-fast) var(--motion-ease-enter) both;
+}
+
+.vc-tag-w1 { animation-delay: 600ms; }
+.vc-tag-w2 { animation-delay: 700ms; }
+
+/*
+ * Dark theme: the navy wordmark and the mid-blue mark both read too dark on the dark sidebar
+ * surface, so lift them toward near-white. Light theme is untouched (navy wordmark + blue mark).
+ */
+:host-context(html[data-theme="dark"]) .vc-name {
+  fill: #f4f7ff;
+}
+
+:host-context(html[data-theme="dark"]) .vc-tag {
+  fill: #e9edfb;
+}
+
+/*
+ * Mark glyph in dark: the source file hardcodes #1E66F5 on each line/rect, so override those fills
+ * + strokes to a very light brand tint. The inline .74/.5 block opacities are preserved (they only
+ * scale alpha), keeping the same depth read but at a legible, near-white brightness on dark.
+ */
+:host-context(html[data-theme="dark"]) {
+  .vc-draw {
+    stroke: #e9edfb;
+  }
+
+  .vc-pop {
+    fill: #e9edfb;
+  }
+}
+
+/* ── Layer-by-layer entrance (the source file's vc-* hooks) ──────────────── */
+
+/* Blocks pop from their own centre (scale only, so the inline .74/.5 opacity is preserved). */
+.vc-pop {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: ui-logo-pop var(--motion-slow) cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.vc-b1 { animation-delay: 100ms; }
+.vc-b2 { animation-delay: 420ms; }
+.vc-b3 { animation-delay: 680ms; }
+
+/* Chain links draw in between the blocks. */
+.vc-draw {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+  animation: ui-logo-draw var(--motion-normal) cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+
+.vc-l1 { animation-delay: 300ms; }
+.vc-l2 { animation-delay: 550ms; }
+
+@keyframes ui-logo-pop {
+  0% { transform: scale(0); }
+  68% { transform: scale(1.18); }
+  100% { transform: scale(1); }
+}
+
+@keyframes ui-logo-draw {
+  from { stroke-dashoffset: 1; }
+  to { stroke-dashoffset: 0; }
+}
+
+/* Wordmark: fade up a touch. */
+@keyframes ui-logo-word {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Tagline words: fade only (fill-opacity is the tspan-safe channel). */
+@keyframes ui-logo-word-fade {
+  from { fill-opacity: 0; }
+  to { fill-opacity: 1; }
+}

@@ -1,0 +1,596 @@
+<div class="page-shell web3-risk">
+  <!-- The shell header owns the H1; this command card explains the workflow boundary. -->
+  <div class="web3-toolbar web3-card">
+    <div class="web3-toolbar__main">
+      <span class="web3-ico web3-ico--blue" aria-hidden="true">
+        <i class="ri-shield-user-line"></i>
+      </span>
+      <div class="web3-toolbar__copy">
+        <span class="web3-label">{{ 'web3.command.flow' | translate }}</span>
+        <p>{{ 'web3.subtitle' | translate }}</p>
+      </div>
+    </div>
+
+    <div class="web3-toolbar__meta">
+      @if (loadingCustomer()) {
+        <app-ui-skeleton width="132px" height="30px" radius="999px"></app-ui-skeleton>
+      } @else if (customer(); as c) {
+        <app-ui-badge color="blue" icon="ri-user-search-line" [text]="c.name"></app-ui-badge>
+      }
+      @if (network(); as n) {
+        <app-ui-badge
+          color="green"
+          icon="ri-link"
+          [text]="chain.chainName + ' #' + n.blockNumber"
+        ></app-ui-badge>
+      } @else {
+        <app-ui-badge
+          color="gray"
+          icon="ri-link-unlink"
+          [text]="'web3.network.unavailable' | translate"
+        ></app-ui-badge>
+      }
+      <app-ui-badge
+        color="teal"
+        icon="ri-eye-line"
+        [text]="'web3.command.readOnly' | translate"
+      ></app-ui-badge>
+      <app-ui-button variant="ghost" size="sm" type="button" (click)="back()">
+        <i class="ri-arrow-left-line ui-button__icon" aria-hidden="true"></i>
+        {{ 'web3.back' | translate }}
+      </app-ui-button>
+    </div>
+  </div>
+
+  <!-- ── Row 1 (v2.1 §5, split A ≈730/350): [730] screening input + REAL facts panel · [350] decision card ──
+       (Data-dedup §7: the live balance / nonce / account-type / block facts render ONCE — inside the
+       REAL-labelled "On-chain data" panel below — so the earlier duplicate KPI pill row is dropped.) -->
+  <div class="web3-main motion-stagger">
+    <div class="web3-main__primary">
+      <!-- Screening input -->
+      <div class="card web3-card">
+        <div class="web3-card-head">
+          <div class="web3-head-titles">
+            <span class="web3-ico web3-ico--slate" aria-hidden="true"
+              ><i class="ri-search-eye-line"></i
+            ></span>
+            <div>
+              <div class="card-title">{{ 'web3.screen.title' | translate }}</div>
+              <div class="card-sub">{{ 'web3.screen.subtitle' | translate }}</div>
+            </div>
+          </div>
+        </div>
+        <div class="web3-screen">
+          <div class="web3-screen__input">
+            <label class="sr-only" for="web3-address">{{ 'web3.screen.title' | translate }}</label>
+            <app-ui-input
+              [id]="'web3-address'"
+              [control]="addressControl"
+              [placeholder]="'web3.screen.placeholder' | translate"
+              [ariaInvalid]="addressInvalid()"
+              [ariaDescribedBy]="addressInvalid() ? 'web3-address-error' : null"
+            ></app-ui-input>
+            @if (addressInvalid()) {
+              <p id="web3-address-error" class="web3-error">
+                {{ 'web3.screen.invalid' | translate }}
+              </p>
+            }
+          </div>
+          <app-ui-button size="sm" type="button" [disabled]="screening()" (click)="screen()">
+            <i class="ri-search-eye-line ui-button__icon" aria-hidden="true"></i>
+            {{ 'web3.screen.action' | translate }}
+          </app-ui-button>
+        </div>
+        <p class="web3-hint">{{ 'web3.screen.checksumNote' | translate }}</p>
+      </div>
+
+      <!-- On-chain facts: REAL -->
+      <div class="card web3-card web3-real">
+        <div class="web3-card-head">
+          <div class="web3-head-titles">
+            <span class="web3-ico web3-ico--green" aria-hidden="true"><i class="ri-link"></i></span>
+            <div>
+              <div class="card-title">{{ 'web3.facts.title' | translate }}</div>
+              <div class="card-sub">{{ 'web3.facts.subtitle' | translate }}</div>
+            </div>
+          </div>
+          <span class="web3-live">
+            <span class="web3-live-dot" aria-hidden="true"></span>
+            <app-ui-badge
+              color="green"
+              icon="ri-link"
+              [text]="'web3.facts.real' | translate"
+            ></app-ui-badge>
+            @if (screeningIsDerived()) {
+              <app-ui-badge
+                color="gray"
+                icon="ri-flask-line"
+                [text]="'web3.facts.derivedChip' | translate"
+              ></app-ui-badge>
+            }
+          </span>
+        </div>
+
+        @if (screening()) {
+          <div class="web3-facts">
+            @for (i of [1, 2, 3]; track i) {
+              <div class="web3-fact">
+                <app-ui-skeleton width="90px" height="11px"></app-ui-skeleton>
+                <app-ui-skeleton width="120px" height="20px"></app-ui-skeleton>
+              </div>
+            }
+          </div>
+        } @else if (facts(); as f) {
+          <div class="web3-facts motion-stagger motion-stagger--rise">
+            <div class="web3-fact">
+              <div class="web3-label">{{ 'web3.facts.balance' | translate }}</div>
+              <div class="web3-value web3-fact-strong">
+                {{ f.balanceEth !== null ? f.balanceEth + ' ETH' : '—' }}
+              </div>
+            </div>
+            <div class="web3-fact">
+              <div class="web3-label">{{ 'web3.facts.txCount' | translate }}</div>
+              <div class="web3-value web3-fact-strong">
+                @if (f.txCount !== null) {
+                  <!-- §5: plain value (count-up removed by the motion contract). -->
+                  <span>{{ f.txCount | number: '1.0-3' : locale() }}</span>
+                } @else {
+                  —
+                }
+              </div>
+            </div>
+            <div class="web3-fact">
+              <div class="web3-label">{{ 'web3.facts.type' | translate }}</div>
+              @if (f.isContract !== null) {
+                <app-ui-badge
+                  [color]="f.isContract ? 'blue' : 'teal'"
+                  [icon]="f.isContract ? 'ri-file-code-line' : 'ri-wallet-line'"
+                  [text]="(f.isContract ? 'web3.facts.contract' : 'web3.facts.eoa') | translate"
+                ></app-ui-badge>
+              } @else {
+                <span class="web3-value">—</span>
+              }
+            </div>
+          </div>
+          <a
+            class="web3-link"
+            [href]="addressExplorerUrl()"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <i class="ri-external-link-line" aria-hidden="true"></i>
+            {{ 'web3.facts.explorer' | translate }}
+          </a>
+        } @else if (factsError()) {
+          <p class="web3-error">{{ 'web3.facts.error' | translate }}</p>
+        } @else {
+          <div class="web3-empty-state">
+            <i class="ri-search-eye-line" aria-hidden="true"></i>
+            <div>
+              <div class="web3-value">{{ 'web3.facts.emptyTitle' | translate }}</div>
+              <p class="web3-muted">{{ 'web3.facts.emptyDesc' | translate }}</p>
+            </div>
+          </div>
+        }
+
+        @if (network(); as n) {
+          <div class="web3-network">
+            <span
+              ><span class="web3-label">{{ 'web3.network.chainId' | translate }}:</span>
+              {{ n.chainId }} ({{ chain.chainName }})</span
+            >
+            <span
+              ><span class="web3-label">{{ 'web3.network.block' | translate }}:</span> #<span>{{
+                n.blockNumber | number: '1.0-3' : locale()
+              }}</span></span
+            >
+            <span
+              ><span class="web3-label">{{ 'web3.network.gas' | translate }}:</span>
+              {{ n.gasPriceGwei }} Gwei</span
+            >
+          </div>
+        } @else {
+          <div class="web3-network web3-network--empty">
+            <span>
+              <span class="web3-label">{{ 'web3.network.title' | translate }}:</span>
+              {{ 'web3.network.unavailable' | translate }}
+            </span>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Compliance decision (the [350] decision/status card) -->
+    <div class="card web3-card web3-main__side">
+      <div class="web3-card-head">
+        <div class="web3-head-titles">
+          <span class="web3-ico web3-ico--slate" aria-hidden="true"
+            ><i class="ri-government-line"></i
+          ></span>
+          <div>
+            <div class="card-title">{{ 'web3.record.title' | translate }}</div>
+            <div class="card-sub">{{ 'web3.record.subtitle' | translate }}</div>
+          </div>
+        </div>
+      </div>
+
+      @if (auth.hasPermission('kyc.manage')) {
+        <div class="web3-actions web3-decision-actions">
+          <app-ui-button
+            size="sm"
+            type="button"
+            variant="primary"
+            [disabled]="!canRecord()"
+            (click)="record('ALLOW')"
+          >
+            <i class="ri-check-line ui-button__icon" aria-hidden="true"></i>
+            {{ 'web3.record.allow' | translate }}
+          </app-ui-button>
+          <app-ui-button
+            size="sm"
+            type="button"
+            variant="ghost"
+            [disabled]="!canRecord()"
+            (click)="record('REVIEW')"
+          >
+            <i class="ri-eye-line ui-button__icon" aria-hidden="true"></i>
+            {{ 'web3.record.review' | translate }}
+          </app-ui-button>
+          <app-ui-button
+            size="sm"
+            type="button"
+            variant="danger"
+            [disabled]="!canRecord()"
+            (click)="record('BLOCK')"
+          >
+            <i class="ri-forbid-line ui-button__icon" aria-hidden="true"></i>
+            {{ 'web3.record.block' | translate }}
+          </app-ui-button>
+        </div>
+      }
+
+      @if (recommendation(); as rec) {
+        <div
+          class="web3-verdict motion-rise"
+          [class.web3-verdict--allow]="rec === 'ALLOW'"
+          [class.web3-verdict--review]="rec === 'REVIEW'"
+          [class.web3-verdict--block]="rec === 'BLOCK'"
+        >
+          <span class="web3-verdict__icon" aria-hidden="true">
+            <i
+              [class]="
+                rec === 'BLOCK'
+                  ? 'ri-forbid-line'
+                  : rec === 'REVIEW'
+                    ? 'ri-eye-line'
+                    : 'ri-checkbox-circle-line'
+              "
+            ></i>
+          </span>
+          <app-ui-badge
+            [color]="decisionColor(rec)"
+            icon="ri-bookmark-line"
+            [text]="
+              'web3.record.recorded' | translate: { decision: ('web3.decision.' + rec | translate) }
+            "
+          ></app-ui-badge>
+        </div>
+      }
+      <p class="web3-hint">{{ 'web3.record.demoNote' | translate }}</p>
+      @if (!assessment()) {
+        <p class="web3-hint web3-hint--action">{{ 'web3.record.waitForScreen' | translate }}</p>
+      }
+    </div>
+  </div>
+
+  <!-- ── Risk intelligence: rule-based — full-width below the live on-chain row (labels/badges verbatim) ── -->
+  <div class="card web3-card web3-sim">
+    <div class="web3-card-head">
+      <div class="web3-head-titles">
+        <span class="web3-ico web3-ico--amber" aria-hidden="true"
+          ><i class="ri-radar-line"></i
+        ></span>
+        <div>
+          <div class="card-title">{{ 'web3.risk.title' | translate }}</div>
+          <div class="card-sub">{{ 'web3.risk.subtitle' | translate }}</div>
+        </div>
+      </div>
+      <div class="web3-risk-head-right">
+        @if (assessment(); as a) {
+          <!-- Risk-score badge (§7.6): the recommendation maps success/amber/danger by threshold. -->
+          <app-ui-badge
+            [color]="decisionColor(a.decision)"
+            [icon]="riskLevelIcon()"
+            [text]="'web3.decision.' + a.decision | translate"
+          ></app-ui-badge>
+        }
+        <span class="web3-sim-tag">
+          <app-ui-badge
+            color="yellow"
+            icon="ri-flow-chart"
+            [text]="'web3.risk.simulated' | translate"
+          ></app-ui-badge>
+          <button
+            type="button"
+            class="web3-info"
+            [attr.aria-label]="'web3.sim.providers' | translate"
+            aria-describedby="web3-sim-providers-note"
+          >
+            <i class="ri-question-line" aria-hidden="true"></i>
+          </button>
+          <span id="web3-sim-providers-note" class="sr-only">
+            {{ 'web3.sim.providers' | translate }}
+          </span>
+        </span>
+      </div>
+    </div>
+
+    @if (assessment(); as a) {
+      <!-- "Flagged" banner (§7.6) — only when the rule-based engine fired ≥1 signal. -->
+      @if (hasFlags()) {
+        <app-ui-alert
+          class="web3-flagged"
+          [type]="a.level === 'high' ? 'danger' : 'warning'"
+          [icon]="riskLevelIcon()"
+          [title]="'web3.signalState.flagged' | translate"
+          [message]="'web3.record.demoNote' | translate"
+        ></app-ui-alert>
+      }
+
+      <!-- Risk-summary: rule-based score progress + the derived last-seen tx reference
+           (the decision badge lives once in the card head above — §7 dedup). -->
+      <div class="web3-summary">
+        <app-ui-progress
+          [value]="levelPercent()"
+          [color]="riskProgressColor()"
+          [label]="'web3.risk.title' | translate"
+          [ariaLabel]="'web3.risk.title' | translate"
+        ></app-ui-progress>
+        @if (lastTxHash(); as tx) {
+          <!-- (§7 dedup) The engine recommendation is shown ONCE — in the card head badge above;
+               this meta row carries only the derived last-tx reference. -->
+          <div class="web3-summary__meta">
+            <div>
+              <div class="web3-label">{{ 'web3.risk.lastTx' | translate }}</div>
+              <!-- (W3-02) Derived reference, NOT a real tx: plain mono text, no explorer link. -->
+              <span class="web3-mono web3-truncate web3-chip-mono">{{ tx }}</span>
+              <p class="web3-hint">{{ 'web3.risk.lastTxNote' | translate }}</p>
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- Signal checklist (§7.6 + dedup): one compact row per rule-based signal instead of four
+           identical full-width "clear" alert cards. Status stays icon + label + word (never colour-only);
+           a flagged signal is escalated to a full alert via the banner above. -->
+      <div class="web3-checklist motion-stagger motion-stagger--rise">
+        <div class="web3-label">{{ 'web3.risk.signalsLabel' | translate }}</div>
+        <ul class="web3-checklist__list">
+          @for (s of a.signals; track s.key) {
+            <li class="web3-check" [class.web3-check--hit]="s.hit">
+              <span
+                class="web3-check__icon"
+                [class.web3-check__icon--hit]="s.hit"
+                aria-hidden="true"
+              >
+                <i [class]="s.hit ? 'ri-error-warning-line' : 'ri-checkbox-circle-line'"></i>
+              </span>
+              <span class="web3-check__label">{{ 'web3.signals.' + s.key | translate }}</span>
+              <span
+                class="web3-check__state"
+                [class.web3-check__state--hit]="s.hit"
+                [class.web3-check__state--clear]="!s.hit"
+              >
+                {{ (s.hit ? 'web3.signalState.flagged' : 'web3.signalState.clear') | translate }}
+              </span>
+            </li>
+          }
+        </ul>
+      </div>
+
+      <div class="web3-explanation">
+        <span class="web3-label">{{ 'web3.risk.explanationLabel' | translate }}</span>
+        <p>{{ explanation() }}</p>
+      </div>
+    } @else if (screening()) {
+      <!-- Loading skeleton mirrors the summary + compact checklist layout while a screen is in flight. -->
+      <div class="web3-summary">
+        <app-ui-skeleton width="100%" height="8px" radius="999px"></app-ui-skeleton>
+        <div class="web3-checklist">
+          @for (i of [1, 2, 3, 4]; track i) {
+            <app-ui-skeleton width="100%" height="36px" radius="var(--radius-md)"></app-ui-skeleton>
+          }
+        </div>
+      </div>
+    } @else {
+      <div class="web3-empty-state web3-empty-state--sim">
+        <i class="ri-radar-line" aria-hidden="true"></i>
+        <div>
+          <div class="web3-value">{{ 'web3.risk.emptyTitle' | translate }}</div>
+          <p class="web3-muted">{{ 'web3.risk.emptyDesc' | translate }}</p>
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- ── Supporting context row: customer context · operator wallet ── -->
+  <div class="web3-split motion-stagger">
+    <!-- Customer context -->
+    <div class="card web3-card">
+      <div class="web3-card-head">
+        <div class="web3-head-titles">
+          <span class="web3-ico web3-ico--blue" aria-hidden="true"
+            ><i class="ri-user-search-line"></i
+          ></span>
+          <div>
+            <div class="card-title">{{ 'web3.context.title' | translate }}</div>
+            <div class="card-sub">{{ 'web3.context.subtitle' | translate }}</div>
+          </div>
+        </div>
+      </div>
+
+      @if (loadingCustomer()) {
+        <div class="web3-kv">
+          <app-ui-skeleton width="160px" height="18px"></app-ui-skeleton>
+          <app-ui-skeleton width="120px" height="24px" radius="999px"></app-ui-skeleton>
+        </div>
+      } @else if (customer(); as c) {
+        <div class="web3-kv">
+          <div>
+            <div class="web3-label">{{ 'customers.name' | translate }}</div>
+            <div class="web3-value">{{ c.name }}</div>
+          </div>
+          <div>
+            <div class="web3-label">{{ 'web3.context.kyc' | translate }}</div>
+            <app-customer-status-badge [status]="c.kycStatus"></app-customer-status-badge>
+          </div>
+          <div>
+            <div class="web3-label">{{ 'customers.walletNumber' | translate }}</div>
+            <div class="web3-value web3-mono web3-chip-mono">{{ c.walletNumber }}</div>
+            <p class="web3-hint">{{ 'web3.context.walletNote' | translate }}</p>
+          </div>
+        </div>
+      } @else {
+        <p class="web3-muted">{{ 'errors.notFound' | translate }}</p>
+      }
+    </div>
+
+    <!-- Operator wallet -->
+    <div class="card web3-card">
+      <div class="web3-card-head">
+        <div class="web3-head-titles">
+          <span class="web3-ico web3-ico--slate" aria-hidden="true"
+            ><i class="ri-wallet-3-line"></i
+          ></span>
+          <div>
+            <div class="card-title">{{ 'web3.operator.title' | translate }}</div>
+            <div class="card-sub">{{ 'web3.operator.subtitle' | translate }}</div>
+          </div>
+        </div>
+      </div>
+
+      @if (!hasWallet()) {
+        <p class="web3-muted">
+          <app-ui-badge
+            color="yellow"
+            icon="ri-information-line"
+            [text]="'web3.wallet.notFound' | translate"
+          ></app-ui-badge>
+        </p>
+      }
+
+      @if (operator(); as op) {
+        <div class="web3-kv">
+          <div>
+            <div class="web3-label">{{ 'web3.operator.account' | translate }}</div>
+            <div class="web3-value web3-mono web3-truncate web3-chip-mono">{{ op.address }}</div>
+          </div>
+          <div>
+            <div class="web3-label">{{ 'web3.operator.chain' | translate }}</div>
+            <div class="web3-value web3-mono web3-chip-mono">{{ op.chainIdHex }}</div>
+          </div>
+        </div>
+        <div class="web3-actions">
+          <app-ui-button
+            variant="ghost"
+            size="sm"
+            type="button"
+            [disabled]="!canSignAudit()"
+            (click)="signAudit()"
+          >
+            <i class="ri-fingerprint-line ui-button__icon" aria-hidden="true"></i>
+            {{ 'web3.operator.sign' | translate }}
+          </app-ui-button>
+          <app-ui-button variant="ghost" size="sm" type="button" (click)="disconnect()">
+            <i class="ri-logout-box-r-line ui-button__icon" aria-hidden="true"></i>
+            {{ 'web3.operator.disconnect' | translate }}
+          </app-ui-button>
+        </div>
+        @if (signature(); as sig) {
+          <div class="web3-attestation motion-rise">
+            <app-ui-badge
+              color="green"
+              [dot]="true"
+              [text]="'web3.operator.signed' | translate"
+            ></app-ui-badge>
+            <code class="web3-mono web3-truncate">{{ sig }}</code>
+          </div>
+        }
+        <p class="web3-hint">{{ 'web3.operator.signatureHint' | translate }}</p>
+      } @else {
+        <div class="web3-actions">
+          <app-ui-button size="sm" type="button" [disabled]="!hasWallet()" (click)="connect()">
+            <i class="ri-wallet-3-line ui-button__icon" aria-hidden="true"></i>
+            {{ 'web3.operator.connect' | translate }}
+          </app-ui-button>
+        </div>
+      }
+
+      @if (walletError(); as err) {
+        <p class="web3-error">{{ err }}</p>
+      }
+    </div>
+  </div>
+
+  <!-- ── DID / Verifiable Credential: concept preview ── -->
+  <div class="card web3-card web3-sim">
+    <div class="web3-card-head">
+      <div class="web3-head-titles">
+        <span class="web3-ico web3-ico--purple" aria-hidden="true"
+          ><i class="ri-shield-keyhole-line"></i
+        ></span>
+        <div>
+          <div class="card-title">{{ 'web3.vc.title' | translate }}</div>
+          <div class="card-sub">{{ 'web3.vc.subtitle' | translate }}</div>
+        </div>
+      </div>
+      <app-ui-badge
+        color="purple"
+        icon="ri-shield-keyhole-line"
+        [text]="'web3.vc.simulated' | translate"
+      ></app-ui-badge>
+    </div>
+
+    @if (loadingVc()) {
+      <div class="web3-terminal web3-terminal--loading">
+        <div class="web3-terminal__bar" aria-hidden="true">
+          <span class="web3-terminal__dot"></span>
+          <span class="web3-terminal__dot"></span>
+          <span class="web3-terminal__dot"></span>
+          <span class="web3-terminal__name">{{ 'web3.vc.credentialFileName' | translate }}</span>
+        </div>
+        <div class="web3-vc-skeleton">
+          <app-ui-skeleton width="72%" height="14px"></app-ui-skeleton>
+          <app-ui-skeleton width="88%" height="14px"></app-ui-skeleton>
+          <app-ui-skeleton width="54%" height="14px"></app-ui-skeleton>
+        </div>
+      </div>
+    } @else if (vcJson(); as json) {
+      <div class="web3-terminal">
+        <div class="web3-terminal__bar" aria-hidden="true">
+          <span class="web3-terminal__dot"></span>
+          <span class="web3-terminal__dot"></span>
+          <span class="web3-terminal__dot"></span>
+          <span class="web3-terminal__name">{{ 'web3.vc.credentialFileName' | translate }}</span>
+        </div>
+        <pre class="web3-vc-json">{{ json }}</pre>
+      </div>
+      <div class="web3-attestation">
+        <app-ui-badge
+          color="green"
+          icon="ri-verified-badge-line"
+          [text]="'web3.vc.proofValid' | translate"
+        ></app-ui-badge>
+      </div>
+    } @else {
+      <div class="web3-empty-state web3-empty-state--sim">
+        <i class="ri-shield-keyhole-line" aria-hidden="true"></i>
+        <div>
+          <div class="web3-value">{{ 'web3.vc.emptyTitle' | translate }}</div>
+          <p class="web3-muted">{{ 'web3.vc.emptyDesc' | translate }}</p>
+        </div>
+      </div>
+    }
+    <p class="web3-hint">{{ 'web3.vc.flow' | translate }}</p>
+  </div>
+</div>

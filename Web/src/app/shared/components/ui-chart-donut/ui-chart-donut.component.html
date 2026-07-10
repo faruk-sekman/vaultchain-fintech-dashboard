@@ -1,0 +1,194 @@
+<!--
+###### UI Donut Chart ######
+Usage:
+<app-ui-chart-donut
+  [data]="[{label:'Verified', value: 42}, {label:'Pending', value: 18}]"
+  [formatVal]="formatCount"
+  [centerCaption]="'analytics.donut.total' | translate"
+  [ariaLabel]="'analytics.kyc.summary' | translate"
+  [tableCaption]="'analytics.kyc.title' | translate"
+  [height]="200" [loading]="loading">
+</app-ui-chart-donut>
+
+Pure SVG, no dependency. Ring aria-hidden; data carried by the visually-hidden
+table + legend (§6.9). States: loading (skeleton) · empty ("No data") · populated.
+#################################
+-->
+
+<div class="chart-donut" [attr.id]="id || null">
+  @if (loading) {
+    <div class="chart-donut__skeleton" aria-hidden="true">
+      <span class="chart-donut__sk-ring"></span>
+      <div class="chart-donut__sk-legend">
+        <span class="chart-donut__sk-line"></span>
+        <span class="chart-donut__sk-line"></span>
+        <span class="chart-donut__sk-line"></span>
+      </div>
+    </div>
+  } @else if (isEmpty) {
+    <div
+      class="chart-donut__empty"
+      [style.min-height.px]="height"
+      role="img"
+      [attr.aria-label]="ariaLabel"
+    >
+      <svg
+        class="chart-donut__empty-ring"
+        viewBox="0 0 100 100"
+        [attr.width]="height"
+        [attr.height]="height"
+        focusable="false"
+        aria-hidden="true"
+      >
+        <circle
+          [attr.cx]="center"
+          [attr.cy]="center"
+          [attr.r]="radius"
+          [attr.stroke-width]="strokeWidth"
+        />
+      </svg>
+      <span class="chart-donut__empty-text">{{ noDataLabel }}</span>
+    </div>
+  } @else {
+    <div class="chart-donut__plot">
+      <svg
+        class="chart-donut__svg"
+        [attr.viewBox]="'0 0 ' + viewBox + ' ' + viewBox"
+        [attr.width]="height"
+        [attr.height]="height"
+        focusable="false"
+        aria-hidden="true"
+      >
+        @if (ariaLabel) {
+          <title>{{ ariaLabel }}</title>
+        }
+        <defs>
+          @if (gradient) {
+            @for (slice of slices; track trackByLabel($index, slice)) {
+              <linearGradient [attr.id]="slice.gradId" x1="0" y1="0" x2="1" y2="1">
+                <stop
+                  offset="0%"
+                  [attr.stop-color]="'color-mix(in srgb, ' + slice.color + ' 52%, #fff)'"
+                />
+                <stop offset="100%" [attr.stop-color]="slice.color" />
+              </linearGradient>
+            }
+          }
+          <!-- §7 conic-sweep reveal: a white ring that draws on clockwise
+               (stroke-dashoffset 1→0, pathLength normalized) unveils the
+               coloured segments as one sweep. Reduced motion: see SCSS. -->
+          <mask [attr.id]="maskId" maskUnits="userSpaceOnUse">
+            <circle
+              class="chart-donut__sweep"
+              [attr.cx]="center"
+              [attr.cy]="center"
+              [attr.r]="radius"
+              [attr.stroke-width]="maskStrokeWidth"
+              pathLength="1"
+            />
+          </mask>
+        </defs>
+        <!-- Track behind the segments (covers any sub-pixel gaps); stays unmasked
+             so the faint rail is present while the colour sweeps in over it. -->
+        <circle
+          class="chart-donut__track"
+          [attr.cx]="center"
+          [attr.cy]="center"
+          [attr.r]="radius"
+          [attr.stroke-width]="strokeWidth"
+        />
+        <g [attr.mask]="'url(#' + maskId + ')'">
+          @for (slice of slices; track trackByLabel($index, slice)) {
+            <circle
+              class="chart-donut__segment"
+              [class.chart-donut__segment--active]="slice.label === hoverLabel"
+              [attr.cx]="center"
+              [attr.cy]="center"
+              [attr.r]="radius"
+              [attr.stroke]="gradient ? 'url(#' + slice.gradId + ')' : slice.color"
+              [attr.stroke-width]="strokeWidth"
+              [attr.stroke-dasharray]="slice.dashArray"
+              [attr.stroke-dashoffset]="slice.dashOffset"
+              (mousemove)="onSliceMove($event, slice)"
+              (mouseleave)="onLeave()"
+            />
+          }
+        </g>
+        <!-- v2 §4 inline % labels (white 16/600); counter-rotated to stay upright. -->
+        @for (slice of slices; track trackByLabel($index, slice)) {
+          @if (slice.showLabel && sliceLabels) {
+            <text
+              class="chart-donut__slice-label"
+              [attr.x]="slice.labelX"
+              [attr.y]="slice.labelY"
+              [attr.transform]="'rotate(90 ' + slice.labelX + ' ' + slice.labelY + ')'"
+              [attr.font-size]="percentFontSize"
+              text-anchor="middle"
+              dominant-baseline="central"
+            >
+              {{ slice.percentLabel }}
+            </text>
+          }
+        }
+      </svg>
+      <div class="chart-donut__center" aria-hidden="true">
+        <span class="chart-donut__total">{{ formattedTotal }}</span>
+        @if (centerCaption) {
+          <span class="chart-donut__caption">{{ centerCaption }}</span>
+        }
+      </div>
+    </div>
+
+    <app-ui-chart-tip
+      [visible]="tip.visible"
+      [x]="tip.x"
+      [y]="tip.y"
+      [color]="tip.color"
+      [title]="tip.title"
+      [rows]="tip.rows"
+    ></app-ui-chart-tip>
+
+    <!-- Legend: swatch + label + value + % (§6.6). -->
+    <ul class="chart-donut__legend">
+      @for (slice of slices; track trackByLabel($index, slice)) {
+        <li class="chart-donut__legend-item">
+          <span
+            class="chart-donut__swatch"
+            [style.background]="slice.color"
+            aria-hidden="true"
+          ></span>
+          <span class="chart-donut__legend-label">{{ slice.label }}</span>
+          <span class="chart-donut__legend-value">{{ formatVal(slice.value) }}</span>
+          <span class="chart-donut__legend-percent">{{ slice.percent }}%</span>
+        </li>
+      }
+    </ul>
+
+    <!-- Visually-hidden data table = accessible text alternative (§6.9). -->
+    <table class="chart-donut__sr-table">
+      @if (tableCaption) {
+        <caption>
+          {{
+            tableCaption
+          }}
+        </caption>
+      }
+      <thead>
+        <tr>
+          <th scope="col">{{ categoryLabel }}</th>
+          <th scope="col">{{ valueLabel }}</th>
+          <th scope="col">{{ shareLabel }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (slice of slices; track trackByLabel($index, slice)) {
+          <tr>
+            <th scope="row">{{ slice.label }}</th>
+            <td>{{ formatVal(slice.value) }}</td>
+            <td>{{ slice.percent }}%</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</div>

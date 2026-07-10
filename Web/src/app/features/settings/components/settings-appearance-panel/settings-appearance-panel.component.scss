@@ -1,0 +1,10 @@
+/*
+ * Copyright (c) 2026 Fintech Dashboard contributors.
+ * Appearance panel: theme + density rows — entirely built from the shared panel class system.
+ */
+@use '../settings-panel.shared' as *;
+
+/* The panel host is transparent: the section participates directly in the shell's panel area. */
+:host {
+  display: contents;
+}

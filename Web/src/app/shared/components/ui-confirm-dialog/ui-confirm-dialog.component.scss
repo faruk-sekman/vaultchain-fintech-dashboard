@@ -1,0 +1,60 @@
+.confirm-overlay {
+  @apply fixed inset-0 items-center justify-center p-4;
+
+  // Always in the DOM (body-portaled), shown only when open.
+  display: none;
+  z-index: var(--z-modal);
+  background: var(--color-overlay);
+  backdrop-filter: blur(4px);
+}
+
+.confirm-overlay--open {
+  display: flex;
+
+  // §10: backdrop fades over --motion-normal (180ms).
+  animation: ui-backdrop-in var(--motion-normal) var(--motion-ease-enter) both;
+}
+
+.confirm-card {
+  @apply w-full max-w-md border p-5;
+
+  // v2 §4: card-radius panel over the navy --color-overlay scrim.
+  border-radius: var(--radius-card);
+  width: min(420px, 100%);
+  border-color: var(--color-border);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-lg);
+
+  // §10: panel fades + scales 0.98→1, enter-ease — no spring/bounce.
+  animation: ui-scale-in var(--motion-normal) var(--motion-ease-enter) both;
+}
+
+.confirm-icon {
+  @apply mb-3 grid h-12 w-12 place-items-center rounded-md text-xl;
+
+  background: var(--color-danger-bg);
+  color: var(--color-danger-strong);
+
+  // §10: pop/spring retired — calm fade-scale slightly after the panel.
+  animation: ui-scale-in var(--motion-normal) var(--motion-ease-enter) both;
+  animation-delay: var(--motion-instant);
+}
+
+.confirm-title {
+  @apply mb-1.5 mt-0 text-lg;
+
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-extrabold);
+  color: var(--color-text);
+}
+
+.confirm-message {
+  @apply m-0 text-sm;
+
+  font-size: var(--font-size-sm);
+  color: var(--color-text-subtle);
+}
+
+.confirm-actions {
+  @apply mt-5 flex flex-wrap justify-end gap-2;
+}

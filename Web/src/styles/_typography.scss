@@ -1,0 +1,43 @@
+:root {
+  --font-family-base: "Inter", system-ui, -apple-system, "Segoe UI", roboto, helvetica, arial, sans-serif;
+  --font-family-numeric: "Inter", system-ui, sans-serif;
+  --font-feature-numeric: "tnum" 1, "cv01" 1, "ss01" 1;
+
+  /* Role-type tokens (size / line-height) — v2 ramp 28/22/18/16/15 (visual-design-language-v2 §2);
+     --font-size-* kept for back-compat */
+  --text-display: 32px;
+  --text-display-lh: 40px;
+  --text-h1: 28px;
+  --text-h1-lh: 36px;
+  --text-h2: 22px;
+  --text-h2-lh: 30px;
+  --text-h3: 18px;
+  --text-h3-lh: 26px;
+  --text-h4: 16px;
+  --text-h4-lh: 24px;
+  --text-body-lg: 16px;
+  --text-body: 15px;
+  --text-body-sm: 13px;
+  --text-caption: 12px;
+  --text-overline: 11px;
+  --text-metric: 25px;
+  --text-metric-lh: 32px;
+  --font-size-xxs: 11px;
+  --font-size-xs: 12px;
+  --font-size-sm: 13px;
+  --font-size-md: 14px;
+  --font-size-lg: 16px;
+  --font-size-xl: 18px;
+  --font-size-2xl: 20px;
+  --font-size-3xl: 22px;
+  --line-height-tight: 1.1;
+  --line-height-snug: 1.2;
+  --line-height-base: 1.25;
+  --line-height-relaxed: 1.5;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --font-weight-extrabold: 700;
+  --font-weight-black: 700;
+}

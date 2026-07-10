@@ -1,0 +1,23 @@
+# Standalone FRONTEND. Run from Web/ with `docker compose up`.
+# Self-contained — works unchanged if Web/ becomes its own repo.
+# The SPA is fully decoupled: point it at ANY backend via API_UPSTREAM (or none — the UI still loads).
+name: ftd-web
+
+services:
+  web:
+    build:
+      context: .
+      target: runtime
+      args:
+        # stage = relative /api/v1, no prod SCSS-budget gate. Set to `production` once budgets pass.
+        NG_CONFIGURATION: ${NG_CONFIGURATION:-stage}
+    environment:
+      # Where /api/ is proxied. Default = a backend running on the host (e.g. the local API on :3000).
+      # For a remote backend set e.g. API_UPSTREAM=https://api.example.com
+      API_UPSTREAM: ${API_UPSTREAM:-http://host.docker.internal:3000}
+    # Lets the container reach a host-run backend on Linux (already works on Docker Desktop).
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - "${WEB_HOST_PORT:-8080}:80"
+    restart: unless-stopped

@@ -1,0 +1,14 @@
+@if (visible()) {
+  <div class="chart-tip" [ngStyle]="style" role="tooltip" aria-hidden="true">
+    <div class="chart-tip__head">
+      <span class="chart-tip__dot" [style.background]="color()"></span>
+      <span class="chart-tip__title">{{ title() }}</span>
+    </div>
+    @for (row of rows(); track row.label) {
+      <div class="chart-tip__row">
+        <span class="chart-tip__label">{{ row.label }}</span>
+        <span class="chart-tip__value">{{ row.value }}</span>
+      </div>
+    }
+  </div>
+}

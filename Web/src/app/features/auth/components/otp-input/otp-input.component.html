@@ -1,0 +1,27 @@
+<div
+  class="otp"
+  role="group"
+  [attr.aria-label]="groupLabel"
+  [class.is-complete]="complete()"
+  [class.is-error]="errored()"
+  (paste)="onPaste($event)"
+>
+  @for (i of cells; track i) {
+    <input
+      #box
+      class="otp__box"
+      type="text"
+      inputmode="numeric"
+      autocomplete="one-time-code"
+      maxlength="1"
+      spellcheck="false"
+      [value]="digits()[i]"
+      [disabled]="disabled()"
+      [attr.data-filled]="digits()[i] ? '' : null"
+      [attr.aria-label]="digitLabel + ' ' + (i + 1)"
+      (input)="onInput(i, $event)"
+      (keydown)="onKeydown(i, $event)"
+      (focus)="onFocus($event)"
+    />
+  }
+</div>

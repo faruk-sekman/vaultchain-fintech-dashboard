@@ -1,0 +1,308 @@
+<div class="page-shell dashboard">
+  @let loading = loading$ | async;
+  @let statsError = statsError$ | async;
+  @let vm = summary$ | async;
+  <!-- Stats hard-error: nothing renderable for the stats-fed regions (rows 0–2 left/right charts). -->
+  @let statsHardError = !!statsError && !loading && !vm;
+
+  <!-- ── Row 0: honest freshness stamp (right) + 4 compact KPI pills (G2) ────── -->
+  @if (vm && !loading) {
+    <p class="dashboard__as-of">
+      <i class="ri-time-line" aria-hidden="true"></i>
+      {{ 'dashboard.asOf' | translate }}: {{ vm.asOf | date: 'short' : undefined : locale() }}
+    </p>
+  }
+
+  @if (statsHardError) {
+    <app-ui-card>
+      <div class="dashboard__region-error" role="alert">
+        <i class="ri-error-warning-line dashboard__region-error-icon" aria-hidden="true"></i>
+        <p class="dashboard__region-error-text">{{ 'common.loadError' | translate }}</p>
+        <button type="button" class="dashboard__retry motion-pressable" (click)="reloadStats()">
+          <i class="ri-refresh-line" aria-hidden="true"></i>
+          {{ 'common.retry' | translate }}
+        </button>
+      </div>
+    </app-ui-card>
+  } @else {
+    <!-- Total customers is the Row-1 hero headline (rendered ONCE there); the pill strip carries the
+         distinct secondary metrics only, so no datum is printed twice on the overview (G7 dedup). -->
+    <div class="dashboard__kpis motion-stagger">
+      <app-ui-stat-card
+        layout="pill"
+        tone="teal"
+        icon="ri-line-chart-line"
+        [label]="'dashboard.kpi.activeRate' | translate"
+        [value]="loading || !vm ? null : formatPercent(vm.activeRate)"
+        [loading]="!!loading"
+      ></app-ui-stat-card>
+
+      <app-ui-stat-card
+        layout="pill"
+        tone="yellow"
+        icon="ri-user-follow-line"
+        [label]="'dashboard.kpi.activeCustomers' | translate"
+        [value]="loading || !vm ? null : formatCount(vm.activeCount)"
+        [loading]="!!loading"
+      ></app-ui-stat-card>
+
+      <app-ui-stat-card
+        layout="pill"
+        tone="pink"
+        icon="ri-cake-2-line"
+        [label]="'dashboard.kpi.avgAge' | translate"
+        [value]="
+          loading || !vm
+            ? null
+            : formatAverageAge(vm.ageStats?.avg, 'dashboard.labels.years' | translate)
+        "
+        [loading]="!!loading"
+      ></app-ui-stat-card>
+    </div>
+  }
+
+  <!-- ── Row 1 (A, h≈235): [730] "Overview" hero pair · [350] "Recent Customers" ── -->
+  <div class="dashboard__row dashboard__row--r1 motion-stagger">
+    @if (!statsHardError) {
+      <section class="v2-section dashboard__col-8">
+        <div class="v2-section__head">
+          <h2 class="v2-section__title">{{ 'dashboard.sections.overview' | translate }}</h2>
+        </div>
+        <div class="dashboard__hero-pair">
+          @if (loading) {
+            <app-ui-skeleton
+              variant="block"
+              width="100%"
+              height="235px"
+              radius="25px"
+            ></app-ui-skeleton>
+            <app-ui-skeleton
+              variant="block"
+              width="100%"
+              height="235px"
+              radius="25px"
+            ></app-ui-skeleton>
+          } @else {
+            @let overviewHero = overviewHero$ | async;
+            @let kycHero = kycHero$ | async;
+            <!-- Both heroes use the calm `outline` surface (no consumer gradient/credit-card motif).
+                 The overview hero is the SOLE owner of the total + active/pasif split (G7). -->
+            <app-ui-hero-card
+              class="dashboard__hero"
+              variant="outline"
+              labelIcon="ri-group-line"
+              [valueLabel]="'dashboard.kpi.totalCustomers' | translate"
+              [value]="overviewHero?.value ?? null"
+              [segments]="overviewHero?.segments ?? []"
+              [footnote]="overviewHero?.ratioLine ?? null"
+            ></app-ui-hero-card>
+            <!-- KYC headline number only; the full KYC distribution is the Row-2 bar (one KYC chart, G7).
+                 The verified share rides as a meta value, so the % is still stated without a 2nd chart. -->
+            <app-ui-hero-card
+              class="dashboard__hero"
+              variant="outline"
+              labelIcon="ri-shield-check-line"
+              [valueLabel]="'dashboard.hero.verifiedKyc' | translate"
+              [value]="kycHero?.value ?? null"
+              [meta]="kycHero?.meta ?? []"
+            ></app-ui-hero-card>
+          }
+        </div>
+      </section>
+    }
+
+    <!-- Recent customers — independent region; masking preserved (email masked upstream). -->
+    <section class="v2-section dashboard__col-4">
+      <div class="v2-section__head">
+        <h2 class="v2-section__title">{{ 'dashboard.sections.recentCustomers' | translate }}</h2>
+        <a class="v2-section__link" routerLink="/customers">{{ 'common.seeAll' | translate }}</a>
+      </div>
+      <app-ui-card class="dashboard__card">
+        @let recent = recent$ | async;
+        @let recentError = recentError$ | async;
+        @if (recentLoading$ | async) {
+          <ul class="recent-list" aria-hidden="true">
+            @for (row of recentSkeletonRows; track row) {
+              <li class="recent-row">
+                <app-ui-skeleton
+                  variant="block"
+                  width="50px"
+                  height="50px"
+                  radius="22px"
+                ></app-ui-skeleton>
+                <span class="recent-row__main">
+                  <app-ui-skeleton variant="line" width="130px" height="14px"></app-ui-skeleton>
+                  <app-ui-skeleton variant="line" width="170px" height="12px"></app-ui-skeleton>
+                </span>
+                <span class="recent-row__meta">
+                  <app-ui-skeleton
+                    variant="line"
+                    width="72px"
+                    height="18px"
+                    radius="999px"
+                  ></app-ui-skeleton>
+                  <app-ui-skeleton variant="line" width="60px" height="12px"></app-ui-skeleton>
+                </span>
+              </li>
+            }
+          </ul>
+        } @else if (recent && recent.length > 0) {
+          <ul class="recent-list motion-stagger motion-stagger--rise">
+            @for (customer of recent; track customer.id) {
+              <li class="recent-row">
+                <span class="recent-row__tile" aria-hidden="true"
+                  ><i class="ri-user-3-line"></i
+                ></span>
+                <span class="recent-row__main">
+                  <span class="recent-row__name">{{ customer.name }}</span>
+                  <span class="recent-row__email">{{ customer.email }}</span>
+                </span>
+                <span class="recent-row__meta">
+                  <app-ui-badge
+                    [text]="kycLabelKey(customer.kycStatus) | translate"
+                    [color]="kycBadgeColor(customer.kycStatus)"
+                  ></app-ui-badge>
+                  <time class="recent-row__date" [attr.datetime]="customer.updatedAt">
+                    <span class="sr-only">{{ 'dashboard.labels.updatedAt' | translate }}</span>
+                    {{ customer.updatedAt | date: 'mediumDate' : undefined : locale() }}
+                  </time>
+                </span>
+              </li>
+            }
+          </ul>
+        } @else if (recentError) {
+          <div class="dashboard__region-error" role="alert">
+            <i class="ri-error-warning-line dashboard__region-error-icon" aria-hidden="true"></i>
+            <p class="dashboard__region-error-text">{{ 'common.loadError' | translate }}</p>
+            <button
+              type="button"
+              class="dashboard__retry motion-pressable"
+              (click)="reloadRecent()"
+            >
+              <i class="ri-refresh-line" aria-hidden="true"></i>
+              {{ 'common.retry' | translate }}
+            </button>
+          </div>
+        } @else if (recentLoaded$ | async) {
+          <app-ui-empty
+            icon="ri-user-search-line"
+            [title]="'dashboard.empty.latestTitle' | translate"
+            [message]="'dashboard.empty.latestMessage' | translate"
+          ></app-ui-empty>
+        }
+      </app-ui-card>
+    </section>
+  </div>
+
+  <!-- ── Row 2 (A): full-width KYC distribution bar — the ONE KYC chart (G7). The active/pasif split
+       lives in the Row-1 hero, and the grand total only on that hero, so nothing repeats here. ── -->
+  @if (!statsHardError) {
+    <div class="dashboard__row dashboard__row--r2 motion-stagger">
+      <section class="v2-section dashboard__col-12">
+        <div class="v2-section__head">
+          <h2 class="v2-section__title">{{ 'dashboard.kpi.kycStatus' | translate }}</h2>
+        </div>
+        <app-ui-card class="dashboard__card dashboard__card--chart">
+          @let bar = kycBar$ | async;
+          <app-ui-chart-bar
+            [data]="bar?.data ?? []"
+            [series]="bar?.series ?? []"
+            [furniture]="true"
+            [gradient]="true"
+            [legend]="false"
+            [valueLabels]="true"
+            [formatVal]="formatCount"
+            [ariaLabel]="'dashboard.kpi.kycStatusHint' | translate"
+            [tableCaption]="'dashboard.kpi.kycStatus' | translate"
+            [noDataLabel]="'common.noData' | translate"
+            [categoryLabel]="'analytics.table.category' | translate"
+            [valueLabel]="'analytics.table.value' | translate"
+            [loading]="!!loading"
+            [height]="190"
+          ></app-ui-chart-bar>
+        </app-ui-card>
+      </section>
+    </div>
+  }
+
+  <!-- ── Row 3 (B, h≈276): [445] quick-action rows (REAL routes only) · [635] backend trend ── -->
+  <div class="dashboard__row dashboard__row--r3 motion-stagger">
+    <section class="v2-section dashboard__col-5">
+      <div class="v2-section__head">
+        <h2 class="v2-section__title">{{ 'dashboard.quickActions.title' | translate }}</h2>
+      </div>
+      <app-ui-card class="dashboard__card">
+        <div class="dashboard__actions">
+          @if (auth.hasPermission('customers.manage')) {
+            <button
+              type="button"
+              class="action-row motion-pressable"
+              (click)="goToCreateCustomer()"
+            >
+              <span class="action-row__tile action-row__tile--blue" aria-hidden="true">
+                <i class="ri-user-add-line"></i>
+              </span>
+              <span class="action-row__label">{{
+                'dashboard.quickActions.addCustomer' | translate
+              }}</span>
+              <i class="ri-arrow-right-s-line action-row__chevron" aria-hidden="true"></i>
+            </button>
+          }
+          <button type="button" class="action-row motion-pressable" (click)="goToAnalytics()">
+            <span class="action-row__tile action-row__tile--teal" aria-hidden="true">
+              <i class="ri-line-chart-line"></i>
+            </span>
+            <span class="action-row__label">{{
+              'dashboard.quickActions.openAnalytics' | translate
+            }}</span>
+            <i class="ri-arrow-right-s-line action-row__chevron" aria-hidden="true"></i>
+          </button>
+          <button type="button" class="action-row motion-pressable" (click)="goToCustomers()">
+            <span class="action-row__tile action-row__tile--pink" aria-hidden="true">
+              <i class="ri-contacts-book-line"></i>
+            </span>
+            <span class="action-row__label">{{
+              'dashboard.quickActions.viewCustomers' | translate
+            }}</span>
+            <i class="ri-arrow-right-s-line action-row__chevron" aria-hidden="true"></i>
+          </button>
+        </div>
+      </app-ui-card>
+    </section>
+
+    <section class="v2-section dashboard__col-7">
+      <div class="v2-section__head">
+        <h2 class="v2-section__title">{{ 'dashboard.trend.title' | translate }}</h2>
+      </div>
+      <app-ui-card class="dashboard__card">
+        @let trend = trendState$ | async;
+        <div class="dashboard__trend">
+          <app-ui-chart-line
+            [data]="trend?.data ?? []"
+            [series]="trend?.series ?? []"
+            [loading]="!!trend?.loading"
+            [formatVal]="formatCount"
+            [ariaLabel]="'dashboard.trend.summary' | translate"
+            [tableCaption]="'dashboard.trend.title' | translate"
+            [noDataLabel]="'common.noData' | translate"
+            [categoryLabel]="'analytics.table.category' | translate"
+            [valueLabel]="'analytics.table.value' | translate"
+            [legend]="true"
+            [height]="180"
+          ></app-ui-chart-line>
+          @if (trend && !trend.loading && trend.error) {
+            <button type="button" class="dashboard__retry motion-pressable" (click)="reloadTrend()">
+              <i class="ri-refresh-line" aria-hidden="true"></i>
+              {{ 'common.retry' | translate }}
+            </button>
+          } @else if (trend && !trend.loading && trend.data.length === 0) {
+            <p class="dashboard__note">
+              <i class="ri-information-line" aria-hidden="true"></i>
+              {{ 'dashboard.trend.noDataForRange' | translate }}
+            </p>
+          }
+        </div>
+      </app-ui-card>
+    </section>
+  </div>
+</div>

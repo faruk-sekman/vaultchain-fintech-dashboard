@@ -1,0 +1,283 @@
+<div class="page-shell reset-requests">
+  <app-ui-card padding="lg" class="reset-requests__card motion-fade-up">
+    <!-- In-card section header: shared v2 medallion head (admin-reset.shared) with a NEUTRAL (link)
+         colourway — reviewing requests is not destructive; the decision dialogs carry the weight.
+         EK-2: this renders as the BOTTOM section of the admin-password-reset page, whose route owns
+         the page H1 (data.titleKey), so the h2 here is the section heading in that page's outline. -->
+    <header class="admin-reset__head reset-requests__head">
+      <span class="admin-reset__medallion reset-requests__medallion" aria-hidden="true">
+        <i class="ri-user-shared-line"></i>
+      </span>
+      <div class="admin-reset__heading">
+        <h2 class="admin-reset__title">{{ 'password.resetRequests.heading' | translate }}</h2>
+        <!-- HONESTY: the system cannot verify who is asking — the admin does, out-of-band. -->
+        <p class="admin-reset__subtitle">{{ 'password.resetRequests.intro' | translate }}</p>
+      </div>
+      <app-ui-button
+        type="button"
+        variant="ghost"
+        class="reset-requests__refresh"
+        [disabled]="loading()"
+        (click)="refresh()"
+      >
+        <i class="ri-refresh-line ui-button__icon" aria-hidden="true"></i>
+        {{ 'password.resetRequests.refresh' | translate }}
+      </app-ui-button>
+    </header>
+
+    @if (errorKey(); as key) {
+      <app-ui-alert
+        class="admin-reset__alert"
+        type="danger"
+        icon="ri-error-warning-line"
+        [message]="key | translate"
+      ></app-ui-alert>
+    }
+
+    @if (loading() && items().length === 0) {
+      <!-- ===================== Loading (first fill) ===================== -->
+      <p class="reset-requests__state" role="status">
+        {{ 'common.loading' | translate }}
+      </p>
+    } @else if (loadFailed()) {
+      <!-- ===================== List load failed ===================== -->
+      <div class="reset-requests__state" role="alert">
+        <i class="ri-error-warning-line" aria-hidden="true"></i>
+        {{ 'common.loadError' | translate }}
+        <app-ui-button type="button" variant="ghost" (click)="refresh()">
+          {{ 'common.retry' | translate }}
+        </app-ui-button>
+      </div>
+    } @else if (isEmpty()) {
+      <!-- ===================== Empty ===================== -->
+      <div class="reset-requests__state" role="status">
+        <i class="ri-inbox-line" aria-hidden="true"></i>
+        {{ 'password.resetRequests.empty' | translate }}
+      </div>
+    } @else {
+      <div class="reset-requests__grid">
+        <!-- ===== List — the server's PENDING-first order, rendered as-is ===== -->
+        <div class="reset-requests__listwrap">
+          <div class="reset-requests__cols" aria-hidden="true">
+            <span class="reset-requests__col-label reset-requests__col-label--grow">
+              {{ 'password.resetRequests.table.account' | translate }}
+            </span>
+            <span class="reset-requests__col-label">
+              {{ 'password.resetRequests.table.requested' | translate }}
+            </span>
+            <span class="reset-requests__col-label">
+              {{ 'password.resetRequests.table.decided' | translate }}
+            </span>
+            <span class="reset-requests__col-label">
+              {{ 'password.resetRequests.table.status' | translate }}
+            </span>
+          </div>
+          <ul class="reset-requests__list" role="list">
+            @for (item of items(); track item.id) {
+              <li>
+                <!-- data-request-id anchors the ?request= deep-link scroll (EK-2). -->
+                <button
+                  type="button"
+                  class="reset-requests__row"
+                  [class.is-selected]="item.id === selected()?.id"
+                  [attr.data-request-id]="item.id"
+                  (click)="selectRequest(item)"
+                >
+                  <span class="reset-requests__row-id">
+                    <span class="reset-requests__row-name">{{ item.account.displayName }}</span>
+                    <span class="reset-requests__row-mail">{{ item.account.emailMasked }}</span>
+                  </span>
+                  <span class="reset-requests__row-cell">
+                    @let requested = requestedTime(item.createdAt);
+                    @if (requested.absolute) {
+                      {{ item.createdAt | date: 'mediumDate' : undefined : locale() }}
+                    } @else {
+                      {{ requested.key | translate: requested.params }}
+                    }
+                  </span>
+                  <span class="reset-requests__row-cell">
+                    @if (item.decidedByName) {
+                      {{ item.decidedByName }}
+                    }
+                  </span>
+                  <app-ui-badge
+                    [text]="statusKey(item) | translate"
+                    [color]="statusColor(item)"
+                    [icon]="statusIcon(item)"
+                  ></app-ui-badge>
+                </button>
+              </li>
+            }
+          </ul>
+        </div>
+
+        <!-- ===== Detail panel (§5 metadata, honest labels) ===== -->
+        @if (detailLoading()) {
+          <aside class="reset-requests__detail">
+            <p class="reset-requests__state" role="status">
+              {{ 'common.loading' | translate }}
+            </p>
+          </aside>
+        } @else if (selected(); as req) {
+          <aside class="reset-requests__detail">
+            <h3 class="reset-requests__detail-title">
+              {{ 'password.resetRequests.detail.title' | translate }}
+            </h3>
+
+            <div class="reset-requests__meta">
+              <div class="reset-requests__meta-row">
+                <span class="reset-requests__meta-label">
+                  {{ 'password.resetRequests.table.account' | translate }}
+                </span>
+                <span class="reset-requests__meta-value">
+                  {{ req.account.displayName }}
+                  <span class="reset-requests__row-mail">{{ req.account.emailMasked }}</span>
+                </span>
+              </div>
+              <div class="reset-requests__meta-row">
+                <span class="reset-requests__meta-label">
+                  {{ 'password.resetRequests.table.status' | translate }}
+                </span>
+                <app-ui-badge
+                  [text]="statusKey(req) | translate"
+                  [color]="statusColor(req)"
+                  [icon]="statusIcon(req)"
+                ></app-ui-badge>
+              </div>
+              <div class="reset-requests__meta-row">
+                <span class="reset-requests__meta-label">
+                  {{ 'password.resetRequests.detail.requested' | translate }}
+                </span>
+                <span class="reset-requests__meta-value">
+                  {{ req.createdAt | date: 'medium' : undefined : locale() }}
+                </span>
+              </div>
+              <div class="reset-requests__meta-row">
+                <span class="reset-requests__meta-label">
+                  {{ 'password.resetRequests.detail.expires' | translate }}
+                </span>
+                <span class="reset-requests__meta-value">
+                  {{ req.expiresAt | date: 'medium' : undefined : locale() }}
+                </span>
+              </div>
+              @if (req.decidedByName) {
+                <div class="reset-requests__meta-row">
+                  <span class="reset-requests__meta-label">
+                    {{ 'password.resetRequests.detail.decidedBy' | translate }}
+                  </span>
+                  <span class="reset-requests__meta-value">{{ req.decidedByName }}</span>
+                </div>
+              }
+              @if (req.decidedAt) {
+                <div class="reset-requests__meta-row">
+                  <span class="reset-requests__meta-label">
+                    {{ 'password.resetRequests.detail.decidedAt' | translate }}
+                  </span>
+                  <span class="reset-requests__meta-value">
+                    {{ req.decidedAt | date: 'medium' : undefined : locale() }}
+                  </span>
+                </div>
+              }
+              @if (req.completedAt) {
+                <div class="reset-requests__meta-row">
+                  <span class="reset-requests__meta-label">
+                    {{ 'password.resetRequests.detail.completedAt' | translate }}
+                  </span>
+                  <span class="reset-requests__meta-value">
+                    {{ req.completedAt | date: 'medium' : undefined : locale() }}
+                  </span>
+                </div>
+              }
+              <div class="reset-requests__meta-row">
+                <span class="reset-requests__meta-label">
+                  {{ 'password.resetRequests.detail.device' | translate }}
+                </span>
+                <span class="reset-requests__meta-value">{{ req.deviceSummary }}</span>
+              </div>
+              @if (req.userAgent) {
+                <button type="button" class="reset-requests__ua-toggle" (click)="toggleRawUa()">
+                  <i
+                    [class]="showRawUa() ? 'ri-arrow-down-s-line' : 'ri-arrow-right-s-line'"
+                    aria-hidden="true"
+                  ></i>
+                  {{ 'password.resetRequests.detail.deviceRaw' | translate }}
+                </button>
+                @if (showRawUa()) {
+                  <p class="reset-requests__ua">{{ req.userAgent }}</p>
+                }
+              }
+              @if (req.ipPrefix) {
+                <div class="reset-requests__meta-row">
+                  <span class="reset-requests__meta-label">
+                    {{ 'password.resetRequests.detail.ip' | translate }}
+                  </span>
+                  <span class="reset-requests__meta-value reset-requests__meta-value--mono">
+                    {{ req.ipPrefix }}
+                  </span>
+                </div>
+              }
+              <!-- HONESTY: only a coarse prefix is ever stored — say so where it is displayed. -->
+              <p class="admin-reset__note">
+                <i class="ri-information-line" aria-hidden="true"></i>
+                {{ 'password.resetRequests.detail.ipNote' | translate }}
+              </p>
+            </div>
+
+            @if (displayStatus(req) === 'approved') {
+              <!-- HONESTY: approval hands the password step to the REQUESTER — never to the admin. -->
+              <p class="admin-reset__note">
+                <i class="ri-key-2-line" aria-hidden="true"></i>
+                {{ 'password.resetRequests.approvedNext' | translate }}
+              </p>
+            }
+
+            @if (canDecide()) {
+              <div class="reset-requests__actions">
+                <app-ui-button
+                  type="button"
+                  variant="danger"
+                  [disabled]="deciding()"
+                  (click)="askDeny()"
+                >
+                  <i class="ri-close-line ui-button__icon" aria-hidden="true"></i>
+                  {{ 'password.resetRequests.deny' | translate }}
+                </app-ui-button>
+                <app-ui-button type="button" [loading]="deciding()" (click)="askApprove()">
+                  <i class="ri-check-line ui-button__icon" aria-hidden="true"></i>
+                  {{ 'password.resetRequests.approve' | translate }}
+                </app-ui-button>
+              </div>
+            }
+          </aside>
+        }
+      </div>
+    }
+
+    <!-- One dialog serves both decisions; the copy states the out-of-band identity check out loud. -->
+    <app-ui-confirm-dialog
+      [open]="confirmAction() !== null"
+      [titleKey]="
+        confirmAction() === 'deny'
+          ? 'password.resetRequests.confirmDeny.title'
+          : 'password.resetRequests.confirmApprove.title'
+      "
+      [messageKey]="
+        confirmAction() === 'deny'
+          ? 'password.resetRequests.confirmDeny.body'
+          : 'password.resetRequests.confirmApprove.body'
+      "
+      [confirmLabelKey]="
+        confirmAction() === 'deny'
+          ? 'password.resetRequests.confirmDeny.confirm'
+          : 'password.resetRequests.confirmApprove.confirm'
+      "
+      cancelLabelKey="common.cancel"
+      loadingLabelKey="common.saving"
+      icon="ri-error-warning-line"
+      [confirmIcon]="confirmAction() === 'deny' ? 'ri-close-line' : 'ri-check-line'"
+      [loading]="deciding()"
+      (confirm)="confirmDecision()"
+      (cancel)="cancelDecision()"
+    ></app-ui-confirm-dialog>
+  </app-ui-card>
+</div>

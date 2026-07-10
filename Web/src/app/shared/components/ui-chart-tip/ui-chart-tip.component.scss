@@ -1,0 +1,89 @@
+:host {
+  display: contents;
+}
+
+/*
+ * Chic chart tooltip: a surface card with an accent dot + title and right-aligned value rows,
+ * a downward caret, soft shadow, and a fade+rise in. Tokens only → light/dark correct. Fixed to
+ * the viewport and non-interactive so it floats over any chart without stealing the hover.
+ */
+
+/* Positioned (left/top = cursor) + offset via an inline `transform` so the card sits right next
+   to the pointer; the entrance animates opacity only so it never fights that transform. */
+.chart-tip {
+  position: fixed;
+  z-index: var(--z-tooltip);
+  min-width: 140px;
+  max-width: 240px;
+  padding: var(--space-5) var(--space-6);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-lg);
+  pointer-events: none;
+  animation: chart-tip-in var(--motion-fast) var(--motion-ease-enter);
+}
+
+.chart-tip__head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-block-end: var(--space-4);
+}
+
+.chart-tip__dot {
+  flex: none;
+  width: 9px;
+  height: 9px;
+  border-radius: var(--radius-pill);
+}
+
+.chart-tip__title {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: var(--text-caption);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-strong);
+  letter-spacing: 0.01em;
+}
+
+.chart-tip__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-7);
+}
+
+.chart-tip__row + .chart-tip__row {
+  margin-block-start: var(--space-2);
+}
+
+.chart-tip__label {
+  font-size: var(--text-caption);
+  color: var(--color-text-muted);
+}
+
+.chart-tip__value {
+  font-size: var(--text-body-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-strong);
+  font-variant-numeric: tabular-nums;
+}
+
+@keyframes chart-tip-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chart-tip {
+    animation: none;
+  }
+}

@@ -1,0 +1,60 @@
+# Served as /etc/nginx/conf.d/default.conf after the nginx image substitutes ${API_UPSTREAM}.
+# Only ${API_UPSTREAM} is substituted (NGINX_ENVSUBST_FILTER); $host/$uri/etc. are nginx runtime vars.
+
+server {
+    listen       80;
+    server_name  _;
+    root         /usr/share/nginx/html;
+    index        index.html;
+
+    # Compression for text assets.
+    gzip              on;
+    gzip_vary         on;
+    gzip_min_length   1024;
+    gzip_types        text/plain text/css application/json application/javascript
+                      application/xml application/xml+rss text/javascript image/svg+xml;
+
+    # Production security headers (runbook: docs/runbooks/production-security-headers.md).
+    # These are served on the document (the SPA-fallback `location /` below inherits server add_headers);
+    # the dev server (ng serve / Vite) intentionally sets none — they belong on this production edge. The
+    # API also sets its own headers server-side via @fastify/helmet.
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-Frame-Options        "DENY" always;
+    add_header Referrer-Policy        "strict-origin-when-cross-origin" always;
+    add_header Permissions-Policy     "camera=(), microphone=(), geolocation=(), payment=()" always;
+    # HSTS is honoured only over HTTPS (ignored over plain HTTP) — safe behind a TLS terminator.
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+    # CSP allow-list = the app's REAL runtime origins. The API (REST + SSE) is reverse-proxied at /api/
+    # below, so it is same-origin -> 'self'. The only cross-origin connect is the read-only Web3 JSON-RPC
+    # (publicnode). Fonts are self-hosted -> no Google Fonts origins. 'unsafe-inline' on
+    # style-src covers Angular's injected component styles. Roll out as Content-Security-Policy-Report-Only
+    # in staging first (runbook) to catch any missed origin before enforcing.
+    add_header Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'self' https://ethereum-rpc.publicnode.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'" always;
+
+    # Reverse proxy the API. The SPA calls a relative '/api/v1/...', so it is same-origin to the
+    # browser and proxied here to the backend chosen at runtime (${API_UPSTREAM}). No backend URL
+    # is baked into the bundle -> the frontend image stays decoupled from any specific backend.
+    location /api/ {
+        proxy_pass         ${API_UPSTREAM};
+        proxy_http_version 1.1;
+        proxy_set_header   Host              $host;
+        proxy_set_header   X-Real-IP         $remote_addr;
+        proxy_set_header   X-Forwarded-For   $proxy_add_x_forwarded_for;
+        proxy_set_header   X-Forwarded-Proto $scheme;
+        # The API is SSE-first: don't buffer, allow long-lived streams.
+        proxy_buffering    off;
+        proxy_read_timeout 1h;
+    }
+
+    # Long-cache fingerprinted static assets.
+    location ~* \.(?:css|js|woff2?|ttf|eot|svg|png|jpe?g|gif|ico|webp)$ {
+        expires    7d;
+        add_header Cache-Control "public, max-age=604800, immutable";
+        try_files  $uri =404;
+    }
+
+    # SPA fallback — every other route serves index.html (client-side routing).
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+}

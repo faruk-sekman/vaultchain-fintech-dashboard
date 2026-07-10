@@ -1,0 +1,41 @@
+<!--
+  UI Breadcrumb — §5.17
+  <app-ui-breadcrumb [items]="[{ labelKey: 'customers.title', link: '/customers' }, { label: name }]" />
+  items: { labelKey?, label?, link? }[]  — last item = current page (no link, aria-current="page").
+  Collapses the middle to "…" when more than 4 crumbs are supplied.
+-->
+<nav class="ui-breadcrumb" [attr.id]="id() || null" [attr.aria-label]="ariaLabelKey() | translate">
+  <ol class="ui-breadcrumb__list">
+    @for (crumb of rendered; track trackByIndex($index); let first = $first) {
+      <li class="ui-breadcrumb__item">
+        @if (!first) {
+          <i class="ui-breadcrumb__sep ri-arrow-right-s-line" aria-hidden="true"></i>
+        }
+
+        @if (crumb.ellipsis) {
+          <span class="ui-breadcrumb__ellipsis" aria-hidden="true">…</span>
+        } @else if (hasLink(crumb)) {
+          <a class="ui-breadcrumb__link" [routerLink]="crumb.item!.link">
+            @if (crumb.item!.labelKey) {
+              {{ crumb.item!.labelKey | translate }}
+            } @else {
+              {{ crumb.item!.label }}
+            }
+          </a>
+        } @else {
+          <span
+            class="ui-breadcrumb__current"
+            [class.ui-breadcrumb__current--muted]="!crumb.current"
+            [attr.aria-current]="crumb.current ? 'page' : null"
+          >
+            @if (crumb.item!.labelKey) {
+              {{ crumb.item!.labelKey | translate }}
+            } @else {
+              {{ crumb.item!.label }}
+            }
+          </span>
+        }
+      </li>
+    }
+  </ol>
+</nav>

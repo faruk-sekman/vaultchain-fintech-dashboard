@@ -1,0 +1,125 @@
+<main class="mfa-verify" data-testid="mfa-verify-page">
+  <div class="mfa-verify__card">
+    <header class="mfa-verify__head">
+      <span class="mfa-verify__glyph" aria-hidden="true">
+        <i class="ri-shield-keyhole-line"></i>
+      </span>
+      <h1 class="mfa-verify__title">{{ 'mfa.verify.title' | translate }}</h1>
+      <p class="mfa-verify__subtitle">
+        {{ (useBackup() ? 'mfa.verify.backupSubtitle' : 'mfa.verify.subtitle') | translate }}
+      </p>
+    </header>
+
+    @if (errorKey(); as key) {
+      <app-ui-alert
+        class="mfa-verify__alert"
+        type="danger"
+        [id]="errorId"
+        icon="ri-error-warning-line"
+        [message]="key | translate"
+      ></app-ui-alert>
+    }
+
+    @if (!useBackup()) {
+      <!-- ===================== TOTP code path ===================== -->
+      <form class="mfa-verify__form" [formGroup]="totpForm" (ngSubmit)="submit()" novalidate>
+        <div class="mfa-verify__field">
+          <label class="mfa-verify__label" for="mfa-code">
+            {{ 'mfa.verify.codeLabel' | translate }}
+          </label>
+          <input
+            id="mfa-code"
+            class="mfa-verify__input"
+            data-testid="mfa-verify-code"
+            type="text"
+            formControlName="code"
+            inputmode="numeric"
+            autocomplete="one-time-code"
+            maxlength="6"
+            spellcheck="false"
+            [placeholder]="'mfa.verify.codePlaceholder' | translate"
+            [attr.aria-label]="'mfa.verify.codeAria' | translate"
+            [attr.aria-invalid]="totpForm.controls.code.touched && totpForm.controls.code.invalid"
+            [attr.aria-describedby]="errorKey() ? errorId : null"
+          />
+          @if (totpForm.controls.code.touched && totpForm.controls.code.invalid) {
+            <small class="mfa-verify__hint">{{ 'mfa.verify.codeHint' | translate }}</small>
+          }
+        </div>
+
+        <label class="mfa-verify__remember">
+          <input
+            type="checkbox"
+            data-testid="mfa-remember-device"
+            formControlName="rememberDevice"
+            [attr.aria-label]="'mfa.verify.rememberDeviceAria' | translate"
+          />
+          <span class="mfa-verify__remember-text">
+            <span class="mfa-verify__remember-label">
+              {{ 'mfa.verify.rememberDevice' | translate }}
+            </span>
+            <span class="mfa-verify__remember-hint">
+              {{ 'mfa.verify.rememberDeviceHint' | translate }}
+            </span>
+          </span>
+        </label>
+
+        <app-ui-button
+          class="mfa-verify__submit"
+          data-testid="mfa-verify-submit"
+          type="submit"
+          size="lg"
+          [fullWidth]="true"
+          [loading]="submitting()"
+        >
+          {{ (submitting() ? 'mfa.verify.verifying' : 'mfa.verify.submit') | translate }}
+        </app-ui-button>
+      </form>
+    } @else {
+      <!-- ===================== Backup-code path ===================== -->
+      <form class="mfa-verify__form" [formGroup]="backupForm" (ngSubmit)="submit()" novalidate>
+        <div class="mfa-verify__field">
+          <label class="mfa-verify__label" for="mfa-backup-code">
+            {{ 'mfa.verify.backupCodeLabel' | translate }}
+          </label>
+          <input
+            id="mfa-backup-code"
+            class="mfa-verify__input"
+            type="text"
+            formControlName="code"
+            autocomplete="one-time-code"
+            spellcheck="false"
+            [placeholder]="'mfa.verify.backupCodePlaceholder' | translate"
+            [attr.aria-label]="'mfa.verify.backupCodeAria' | translate"
+            [attr.aria-invalid]="
+              backupForm.controls.code.touched && backupForm.controls.code.invalid
+            "
+            [attr.aria-describedby]="errorKey() ? errorId : null"
+          />
+          @if (backupForm.controls.code.touched && backupForm.controls.code.invalid) {
+            <small class="mfa-verify__hint">{{ 'mfa.verify.backupCodeHint' | translate }}</small>
+          }
+        </div>
+
+        <app-ui-button
+          class="mfa-verify__submit"
+          type="submit"
+          size="lg"
+          [fullWidth]="true"
+          [loading]="submitting()"
+        >
+          {{ (submitting() ? 'mfa.verify.verifying' : 'mfa.verify.submit') | translate }}
+        </app-ui-button>
+      </form>
+    }
+
+    <div class="mfa-verify__actions">
+      <button type="button" class="mfa-verify__link" (click)="toggleBackup()">
+        {{ (useBackup() ? 'mfa.verify.useAuthenticator' : 'mfa.verify.useBackup') | translate }}
+      </button>
+      <button type="button" class="mfa-verify__link" (click)="backToLogin()">
+        {{ 'mfa.verify.backToLogin' | translate }}
+      </button>
+    </div>
+  </div>
+</main>

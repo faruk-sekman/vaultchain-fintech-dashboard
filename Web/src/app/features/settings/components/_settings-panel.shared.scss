@@ -1,0 +1,163 @@
+/*
+ * Copyright (c) 2026 Fintech Dashboard contributors.
+ * Shared settings-panel class system (redesign v3 — reference 1b panel scaffold). Split
+ * out of the settings shell stylesheet when the sections became child panel components: under
+ * Emulated encapsulation a rule must ship with the component that OWNS the markup, so every panel
+ * `@use`s this partial and compiles its own scoped copy. Keep it LEAN (it duplicates into each
+ * panel bundle) and limited to classes SEVERAL panels share — panel-specific blocks live in that
+ * panel's own stylesheet, shell chrome in the page stylesheet.
+ */
+
+/* ── Panel scaffold: column layout + head band (all six panels) ─────────────── */
+
+.settings-panel {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  block-size: 100%;
+}
+
+.settings-panel__head {
+  display: flex;
+  align-items: flex-start;
+  gap: 13px;
+  padding-block-end: 18px;
+  border-block-end: 1px solid var(--color-border);
+}
+
+.settings-panel__heading {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.settings-panel__title {
+  margin: 0;
+  font-size: var(--text-h4);
+  line-height: var(--text-h4-lh);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-strong);
+}
+
+.settings-panel__sub {
+  margin: 0;
+  font-size: var(--text-body-sm);
+  color: var(--color-text-muted);
+}
+
+/* Panel-head tile medallion (reference 1a: 42px, 13px radius): one base + 3 colourways. */
+.settings-medallion {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  inline-size: 42px;
+  block-size: 42px;
+  border-radius: 13px;
+  font-size: 20px;
+}
+
+.settings-medallion--blue {
+  background: var(--tile-blue);
+  color: var(--color-link);
+}
+
+.settings-medallion--teal {
+  background: var(--tile-teal);
+  color: var(--color-accent-teal);
+}
+
+.settings-medallion--pink {
+  background: var(--tile-pink);
+  color: var(--color-accent-magenta);
+}
+
+/* ── Setting rows (security / appearance / language / notifications) ────────── */
+
+.settings-rows {
+  display: grid;
+  gap: var(--space-3);
+}
+
+/* The shell's skeleton placeholder rows (.settings-panel-sk__row) mirror this chrome 1:1. */
+.settings-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-5);
+  min-width: 0;
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-2);
+}
+
+.settings-row__text {
+  display: grid;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.settings-row__hint {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+/* Strong-navy row labels (the profile form mirrors this ink on its field labels). */
+.settings-row__label {
+  font-size: var(--text-body-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-strong);
+}
+
+/* Server-backed honesty note (notifications) — the access panel reuses it as its error note. */
+.settings-local-note {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin: 0;
+  padding: var(--space-4) var(--space-5);
+  border-radius: var(--radius-field);
+  border: 1px solid var(--color-border);
+  background: color-mix(in srgb, var(--color-info-bg) 42%, var(--color-surface));
+  font-size: var(--text-caption);
+  color: var(--color-text-muted);
+
+  i {
+    font-size: var(--text-body);
+    color: var(--color-text-subtle);
+  }
+}
+
+/* Trailing action row (security + notifications). */
+.settings-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--space-4);
+}
+
+/* A2 (bugfix-backlog-2026-07): inline field errors for the raw (non-ui-form) settings forms
+   (profile + the security re-auth form). */
+.settings-field-error {
+  margin: 6px 0 0;
+  font-size: 0.75rem;
+  font-weight: var(--font-weight-medium);
+  color: var(--color-danger-deep);
+}
+
+/* ── Responsive ─────────────────────────────────────────────────────────────── */
+
+@media (width <= 768px) {
+  .settings-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-3);
+  }
+}
+
+@media (width <= 520px) {
+  .settings-row {
+    padding: var(--space-4);
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "name": "fintech-dashboard-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Fintech operations dashboard monorepo — Web/ (Angular frontend) and Api/ (NestJS + Fastify + Prisma + PostgreSQL backend).",
+  "author": "Faruk Sekman",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/faruk-sekman/vaultchain-fintech-dashboard.git"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "docs:check": "node scripts/check-docs.mjs",
+    "sensitive:check": "node scripts/check-sensitive-tracking.mjs",
+    "i18n:check": "node scripts/i18n-check.mjs",
+    "i18n:check:strict": "node scripts/i18n-check.mjs --strict-literals",
+    "deps:check": "node scripts/check-dependency-policy.mjs",
+    "verify": "node scripts/verify.mjs",
+    "verify:fast": "node scripts/verify.mjs --fast",
+    "setup": "node scripts/setup.mjs",
+    "dev": "node scripts/dev.mjs",
+    "dev:api": "node scripts/dev.mjs --only=api",
+    "dev:web": "node scripts/dev.mjs --only=web",
+    "db:reset": "node scripts/dev.mjs --db-reset",
+    "demo": "docker compose up --build",
+    "demo:down": "docker compose down",
+    "web:start": "npm --prefix Web run start",
+    "web:build": "npm --prefix Web run build",
+    "web:test": "npm --prefix Web run test",
+    "web:lint:styles": "npm --prefix Web run lint:styles",
+    "api:test": "npm --prefix Api run test",
+    "api:test:cov": "npm --prefix Api run test:cov",
+    "coverage:files:check": "node scripts/check-file-coverage.mjs",
+    "coverage:check": "npm run api:test:cov && npm run web:test && npm run coverage:files:check",
+    "e2e": "npm --prefix Web run e2e",
+    "web:e2e": "npm --prefix Web run e2e",
+    "web:e2e:open": "npm --prefix Web run e2e:open",
+    "web:e2e:audit": "npm --prefix Web run e2e:audit",
+    "web:e2e:chrome": "npm --prefix Web run e2e:chrome",
+    "web:e2e:electron": "npm --prefix Web run e2e:electron",
+    "web:e2e:cross-browser": "npm --prefix Web run e2e:cross-browser",
+    "web:e2e:quality": "npm --prefix Web run e2e:quality",
+    "web:e2e:live-contract": "npm --prefix Web run e2e:live-contract"
+  }
+}

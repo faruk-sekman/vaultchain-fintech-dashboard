@@ -1,0 +1,49 @@
+<!--
+  UI Tabs (underline) — §5.18
+  <app-ui-tabs [items]="tabs" [value]="active" (valueChange)="active = $event" ariaLabel="Sections" />
+  items: { value, labelKey?, label?, icon?, disabled? }[]
+
+  Pair your own tabpanels back to the tabs via a template ref (#tabsRef):
+    <app-ui-tabs #tabsRef [items]="tabs" [value]="active" (valueChange)="active = $event" />
+    <section role="tabpanel"
+             [id]="tabsRef.panelId(value)"                 (matches the tab's aria-controls)
+             [attr.aria-labelledby]="tabsRef.tabId(value)"
+             [hidden]="active !== value"> ... </section>
+-->
+<div
+  class="ui-tabs"
+  [class.ui-tabs--vertical]="orientation() === 'vertical'"
+  [class.ui-tabs--pills]="variant() === 'pills'"
+  [class.ui-tabs--wrap]="wrap()"
+  role="tablist"
+  [attr.id]="id() || null"
+  [attr.aria-label]="ariaLabel() || null"
+  [attr.aria-orientation]="orientation()"
+>
+  @for (item of items(); track trackByValue($index, item)) {
+    <button
+      type="button"
+      class="ui-tabs__tab"
+      role="tab"
+      [class.ui-tabs__tab--active]="isSelected(item)"
+      [attr.id]="tabId(item.value)"
+      [attr.aria-selected]="isSelected(item)"
+      [attr.aria-controls]="panelId(item.value)"
+      [attr.tabindex]="tabIndexFor(item)"
+      [disabled]="item.disabled || null"
+      (click)="select(item)"
+      (keydown)="onKeydown($event, item)"
+    >
+      @if (item.icon) {
+        <i class="ui-tabs__icon {{ item.icon }}" aria-hidden="true"></i>
+      }
+      <span class="ui-tabs__label">
+        @if (item.labelKey) {
+          {{ item.labelKey | translate }}
+        } @else {
+          {{ item.label }}
+        }
+      </span>
+    </button>
+  }
+</div>

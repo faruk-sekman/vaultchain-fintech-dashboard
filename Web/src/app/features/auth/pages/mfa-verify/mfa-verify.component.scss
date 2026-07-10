@@ -1,0 +1,165 @@
+/* Copyright (c) 2026 Fintech Dashboard contributors. */
+
+/* MFA challenge screen. Centered focused card; all colors via --color-* tokens so it is
+   light/dark-correct with no hardcoded hex. Lean by design (well under the 4kB SCSS budget). */
+
+.mfa-verify {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 24px;
+  background: var(--color-bg);
+
+  &__card {
+    width: 100%;
+    max-width: 420px;
+    padding: 32px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
+  }
+
+  &__head {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 24px;
+    text-align: center;
+  }
+
+  &__glyph {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    margin-bottom: 4px;
+    font-size: 28px;
+    color: var(--color-primary);
+    background: var(--color-primary-soft);
+    border-radius: 50%;
+  }
+
+  &__title {
+    margin: 0;
+    font-size: 1.35rem;
+    font-weight: 600;
+    color: var(--color-text);
+  }
+
+  &__subtitle {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+  }
+
+  &__alert {
+    display: block;
+    margin-bottom: 16px;
+  }
+
+  &__form {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  &__field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  &__label {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--color-text);
+  }
+
+  &__input {
+    width: 100%;
+    height: 48px;
+    padding: 0 14px;
+    font-size: 1.05rem;
+    color: var(--color-text);
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md, 10px);
+
+    &:focus-visible {
+      border-color: var(--color-link);
+      outline: 2px solid var(--color-link);
+      outline-offset: 1px;
+    }
+  }
+
+  &__hint {
+    font-size: 0.78rem;
+    color: var(--color-danger);
+  }
+
+  &__remember {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    cursor: pointer;
+
+    input {
+      width: 18px;
+      height: 18px;
+      margin-top: 2px;
+      accent-color: var(--color-link);
+    }
+  }
+
+  &__remember-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  &__remember-label {
+    font-size: 0.88rem;
+    color: var(--color-text);
+  }
+
+  &__remember-hint {
+    font-size: 0.78rem;
+    color: var(--color-text-muted);
+  }
+
+  &__submit {
+    display: block;
+    margin-top: 4px;
+  }
+
+  &__actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
+    margin-top: 22px;
+  }
+
+  &__link {
+    padding: 4px 8px;
+    font-size: 0.85rem;
+    color: var(--color-link);
+    background: none;
+    border: none;
+    border-radius: var(--radius-sm, 6px);
+    cursor: pointer;
+
+    &:hover {
+      text-decoration: underline;
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--color-link);
+      outline-offset: 1px;
+    }
+  }
+}

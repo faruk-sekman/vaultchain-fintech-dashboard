@@ -1,0 +1,127 @@
+<!--
+  ~ Copyright (c) 2026 Fintech Dashboard contributors.
+  -->
+
+<div class="enterprise-panel__header">
+  <h3 class="enterprise-panel__title">{{ 'transactions.title' | translate }}</h3>
+</div>
+
+@if (canCreate) {
+  <div
+    id="customer-detail-transaction-create-panel"
+    class="enterprise-tx-creator transaction-create-composer-card"
+    data-testid="transaction-create-panel"
+  >
+    <div class="tx-creator-top">
+      <div class="tx-creator-info">
+        <span class="tx-creator-icon" aria-hidden="true">
+          <i class="ri-exchange-dollar-line"></i>
+        </span>
+        <div class="tx-creator-copy">
+          <span class="tx-creator-title">
+            {{ 'transactions.create.title' | translate }}
+          </span>
+          <span class="tx-creator-subtitle">
+            {{ 'transactions.create.subtitle' | translate }}
+            @if (wallet; as w) {
+              <span class="tx-creator-currency-chip">{{ w.currency }}</span>
+            }
+          </span>
+        </div>
+      </div>
+      @if (!wallet?.id) {
+        <span class="tx-creator-warning">
+          <i class="ri-error-warning-line"></i>
+          {{ 'transactions.create.walletRequired' | translate }}
+        </span>
+      }
+    </div>
+    <div class="tx-creator-form transaction-create-inline-form">
+      <app-ui-form
+        #txCreateFormRef
+        id="customer-detail-transaction-create-form"
+        [fields]="txCreateFields"
+        [initialValue]="txCreateInitialValue()"
+        [showSubmit]="false"
+        formClass="enterprise-tx-form"
+      ></app-ui-form>
+
+      <app-ui-button
+        size="sm"
+        type="button"
+        data-testid="transaction-create-submit"
+        [disabled]="creatingTransaction() || !wallet?.id || txCreateFormRef.form.invalid"
+        (click)="createTransaction()"
+        class="tx-submit-btn transaction-create-submit-button"
+      >
+        <i class="ri-add-line ui-button__icon" aria-hidden="true"></i>
+        {{
+          creatingTransaction()
+            ? ('common.saving' | translate)
+            : ('transactions.create.submit' | translate)
+        }}
+      </app-ui-button>
+    </div>
+  </div>
+}
+
+<div
+  id="customer-detail-transaction-filter-panel"
+  class="enterprise-tx-filters transaction-filter-toolbar-card"
+  data-testid="transaction-filter-panel"
+>
+  <div class="tx-filter-top">
+    <span class="tx-filter-title">{{ 'transactions.filters' | translate }}</span>
+  </div>
+  @if (showTxSkeleton()) {
+    <div class="transaction-filter-skeleton">
+      @for (i of [1, 2, 3, 4, 5]; track i) {
+        <app-ui-skeleton height="44px" radius="12px"></app-ui-skeleton>
+      }
+      <app-ui-skeleton width="92px" height="44px" radius="12px"></app-ui-skeleton>
+    </div>
+  }
+  <div
+    class="filter-form-wrapper transaction-filter-inline-form"
+    [class.invisible]="showTxSkeleton()"
+  >
+    <app-ui-form
+      #txFiltersFormRef
+      id="customer-detail-transaction-filter-form"
+      [fields]="txFilterFields()"
+      [initialValue]="txFilterInitialValue()"
+      [showSubmit]="false"
+      formClass="enterprise-filter-form"
+    ></app-ui-form>
+
+    <app-ui-button
+      variant="ghost"
+      size="sm"
+      type="button"
+      (click)="clearTxFilters()"
+      [disabled]="txFiltersFormRef.form.pristine"
+      class="filter-clear-btn transaction-filter-clear-button"
+    >
+      <i class="ri-filter-off-line ui-button__icon" aria-hidden="true"></i>
+      {{ 'common.clear' | translate }}
+    </app-ui-button>
+  </div>
+</div>
+
+<div
+  id="customer-detail-transaction-table-panel"
+  class="enterprise-table-wrapper"
+  data-testid="transaction-table"
+>
+  <app-ui-table
+    [columns]="txColumns"
+    [data]="(txData$ | async) ?? []"
+    [loading]="(loadingTx$ | async) ?? false"
+    [page]="txPage()"
+    [pageSize]="txPageSize()"
+    [total]="(txTotal$ | async) ?? 0"
+    [showRowActions]="false"
+    [density]="density()"
+    (pageChange)="onTxPageChange($event)"
+  />
+</div>
