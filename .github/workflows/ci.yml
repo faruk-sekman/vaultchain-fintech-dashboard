@@ -31,7 +31,7 @@ jobs:
           cache-dependency-path: Web/package-lock.json
       # Cypress binary cache (~250MB): setup-node only caches ~/.npm, so without this every job
       # re-downloads the binary during `npm ci` (cypress postinstall skips it on a cache hit).
-      - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ~/.cache/Cypress
           key: cypress-${{ runner.os }}-${{ hashFiles('Web/package-lock.json') }}
@@ -60,7 +60,7 @@ jobs:
           cache: npm
           cache-dependency-path: Web/package-lock.json
       # Cypress binary cache — see the `web` job note.
-      - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ~/.cache/Cypress
           key: cypress-${{ runner.os }}-${{ hashFiles('Web/package-lock.json') }}
@@ -113,7 +113,7 @@ jobs:
           cache: npm
           cache-dependency-path: Web/package-lock.json
       # Cypress binary cache — see the `web` job note.
-      - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ~/.cache/Cypress
           key: cypress-${{ runner.os }}-${{ hashFiles('Web/package-lock.json') }}
