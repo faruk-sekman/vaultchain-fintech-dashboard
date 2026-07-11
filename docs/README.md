@@ -1,6 +1,20 @@
 # Vaultchain Documentation
 
-Vaultchain is the back-office console for fintech operations — an Angular 21 web console and a NestJS 11 (Fastify) API over PostgreSQL 16, built and documented as a portfolio project. This page is the map of the documentation set: pick the reading path that matches your goal, or jump straight to any document from the catalog.
+Vaultchain is the back-office console for fintech operations — an Angular 21 web console and a NestJS 11 (Fastify) API over PostgreSQL 16, packaged as a reproducible Docker Compose demo and documented as a portfolio project. This page is the map of the documentation set: pick the reading path that matches your goal, or jump straight to any document from the catalog.
+
+## 🧰 Technology snapshot
+
+| Layer | Technologies in use |
+| --- | --- |
+| **Operator console** | Angular 21.2, TypeScript 5.9, NgRx 21, RxJS 7.8, Tailwind CSS 3.4 |
+| **API** | Node.js 22, NestJS 11 on Fastify, Prisma 7, code-first OpenAPI, Pino |
+| **Data** | PostgreSQL 16; optional Redis for distributed throttling and realtime fan-out |
+| **Containers & delivery** | Docker, Docker Compose, nginx, GitHub Actions, Trivy |
+| **Quality** | Vitest 4, Jest, Supertest, Cypress 15, real-PostgreSQL integration tests |
+
+The [root technology map](../README.md#-technology-map) explains each layer's responsibility;
+[architecture](architecture.md) shows how the layers communicate, and the [Docker guide](../DOCKER.md)
+documents the container topology.
 
 ## 🧭 Start here by goal
 
